@@ -17,11 +17,10 @@ import sys
 import json
 import argparse
 
-from corpus_config import TEXT_METADATA, ANIMAL_PATTERN, get_animal_keywords
+from corpus_config import TEXT_METADATA, ANIMAL_PATTERN, get_animal_keywords, PATHS
 
-REPO_ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLEAN_DIR  = os.path.join(REPO_ROOT, "Data", "reference_texts", "clean_texts")
-DEFAULT_OUTPUT = os.path.join(REPO_ROOT, "Data", "reference_texts", "passages.csv")
+CLEAN_DIR      = str(PATHS["clean_texts"])
+DEFAULT_OUTPUT = str(PATHS["passages_csv"])
 
 
 # ---------------------------------------------------------------------------

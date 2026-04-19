@@ -42,15 +42,13 @@ import time
 import argparse
 from pathlib import Path
 
+from corpus_config import PATHS
+
 # ---------------------------------------------------------------------------
 # Load .env from repo root
 # ---------------------------------------------------------------------------
-SCRIPTS_DIR = Path(__file__).resolve().parent
-REPO_ROOT   = SCRIPTS_DIR.parent
-_env_path   = REPO_ROOT / ".env"
-
-if _env_path.exists():
-    with open(_env_path) as _f:
+if PATHS["env_file"].exists():
+    with open(PATHS["env_file"]) as _f:
         for _line in _f:
             _line = _line.strip()
             if _line and not _line.startswith("#") and "=" in _line:
@@ -60,8 +58,8 @@ if _env_path.exists():
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-PASSAGES_CSV  = REPO_ROOT / "Data" / "reference_texts" / "sentences.csv"
-PROMISING_CSV = REPO_ROOT / "Data" / "reference_texts" / "promising_passages.csv"
+PASSAGES_CSV  = PATHS["sentences_csv"]
+PROMISING_CSV = PATHS["promising_csv"]
 
 # ---------------------------------------------------------------------------
 # Classification taxonomy — sent to the LLM as instructions

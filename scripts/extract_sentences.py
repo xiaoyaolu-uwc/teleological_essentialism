@@ -26,11 +26,10 @@ import json
 import argparse
 from collections import Counter
 
-from corpus_config import ANIMAL_PATTERN, get_animal_keywords, contains_thematic
+from corpus_config import ANIMAL_PATTERN, get_animal_keywords, contains_thematic, PATHS
 
-REPO_ROOT      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_INPUT  = os.path.join(REPO_ROOT, "Data", "reference_texts", "clean_texts", "passages.csv")
-DEFAULT_OUTPUT = os.path.join(REPO_ROOT, "Data", "reference_texts", "sentences.csv")
+DEFAULT_INPUT  = str(PATHS["passages_csv"])
+DEFAULT_OUTPUT = str(PATHS["sentences_csv"])
 
 
 # ---------------------------------------------------------------------------

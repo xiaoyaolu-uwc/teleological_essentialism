@@ -4,6 +4,7 @@ corpus_config.py
 Shared configuration for the teleological essentialism corpus pipeline.
 
 Provides:
+  - PATHS: all data file/directory locations relative to the repo root
   - TEXT_METADATA: filename stem → author/title/year/camp metadata
   - Animal keyword lists and ANIMAL_PATTERN regex
   - Thematic keyword lists and THEMATIC_PATTERN regex
@@ -11,6 +12,23 @@ Provides:
 """
 
 import re
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Paths — single source of truth for all data locations
+# ---------------------------------------------------------------------------
+# REPO_ROOT is two levels up from this file (scripts/ → repo root)
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+PATHS = {
+    "data_dir":       REPO_ROOT / "Data",
+    "clean_texts":    REPO_ROOT / "Data" / "reference_texts" / "clean_texts",
+    "raw_texts":      REPO_ROOT / "Data" / "reference_texts" / "raw_texts",
+    "passages_csv":   REPO_ROOT / "Data" / "reference_texts" / "passages.csv",
+    "sentences_csv":  REPO_ROOT / "Data" / "reference_texts" / "sentences.csv",
+    "promising_csv":  REPO_ROOT / "Data" / "reference_texts" / "promising_passages.csv",
+    "env_file":       REPO_ROOT / ".env",
+}
 
 # ---------------------------------------------------------------------------
 # Text metadata
