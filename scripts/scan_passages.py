@@ -25,7 +25,7 @@ Usage:
 
 Environment (.env at repo root):
     OPENAI_API_KEY   — required for scanning
-    SCAN_MODEL       — model to use (default: gpt-4o-mini)
+    SCAN_MODEL       — model to use (default: gpt-5.4-mini)
     SCAN_BATCH_SIZE  — passages per API call (default: 10)
 
 Outputs:
@@ -86,11 +86,8 @@ def write_passages(path: Path, rows: list[dict], fieldnames: list[str]):
 # ---------------------------------------------------------------------------
 # OpenAI API call
 # ---------------------------------------------------------------------------
-def call_openai(batch: list[dict], model: str = "gpt-4o-mini") -> list[dict]:
-    """Send a batch of passages to OpenAI and parse the response.
-
-    Uses the Responses API (/v1/responses) for gpt-5.x models,
-    and Chat Completions for older models.
+def call_openai(batch: list[dict], model: str = "gpt-5.4-mini") -> list[dict]:
+    """Send a batch of passages to OpenAI via the Responses API and parse the response.
 
     Returns a list of dicts: [{"id": ..., "tag": ..., "reasoning": ...}, ...]
     """
@@ -109,45 +106,26 @@ def call_openai(batch: list[dict], model: str = "gpt-4o-mini") -> list[dict]:
     user_msg = USER_PROMPT_TEMPLATE.format(n=len(batch), passages_block=passages_block)
     client = openai.OpenAI()
 
-    # Responses API (gpt-5.x and newer)
-    if model.startswith("gpt-5"):
-        try:
-            response = client.responses.create(
-                model=model,
-                instructions=SYSTEM_PROMPT,
-                input=user_msg,
-            )
-        except openai.APIStatusError as e:
-            raise RuntimeError(f"Responses API error {e.status_code}: {e.message}")
+    try:
+        response = client.responses.create(
+            model=model,
+            instructions=SYSTEM_PROMPT,
+            input=user_msg,
+        )
+    except openai.APIStatusError as e:
+        raise RuntimeError(f"Responses API error {e.status_code}: {e.message}")
 
-        raw = None
-        for block in response.output:
-            if block.type == "message":
-                for part in block.content:
-                    if part.type == "output_text":
-                        raw = part.text
-                        break
-            if raw:
-                break
-        if raw is None:
-            raise RuntimeError(
-                f"Could not find output_text in Responses API reply: {response}"
-            )
-    else:
-        # Chat Completions API (gpt-4o, gpt-4o-mini, etc.)
-        try:
-            response = client.chat.completions.create(
-                model=model,
-                temperature=0.1,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_msg},
-                ],
-                response_format={"type": "json_object"},
-            )
-        except openai.APIStatusError as e:
-            raise RuntimeError(f"Chat Completions API error {e.status_code}: {e.message}")
-        raw = response.choices[0].message.content.strip()
+    raw = None
+    for block in response.output:
+        if block.type == "message":
+            for part in block.content:
+                if part.type == "output_text":
+                    raw = part.text
+                    break
+        if raw:
+            break
+    if raw is None:
+        raise RuntimeError(f"Could not find output_text in Responses API reply: {response}")
 
     # Parse — model should return a JSON array, but might wrap it
     try:
@@ -287,7 +265,7 @@ def scan(
 
 
 # ---------------------------------------------------------------------------
-# Extract mode
+# Extract promising chunks into new csv file
 # ---------------------------------------------------------------------------
 def extract(rows: list[dict], fieldnames: list[str]):
     """Write non-junk rows to promising_passages.csv."""
@@ -341,7 +319,7 @@ def main():
         help="Number of API calls to send simultaneously (default: 5)"
     )
     parser.add_argument(
-        "--model", type=str, default=os.environ.get("SCAN_MODEL", "gpt-4o-mini"),
+        "--model", type=str, default=os.environ.get("SCAN_MODEL", "gpt-5.4-mini"),
         help="OpenAI model to use (default: SCAN_MODEL from .env, or gpt-4o-mini)"
     )
     parser.add_argument(
