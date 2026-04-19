@@ -175,18 +175,20 @@ teleological_essentialism/
 ├── README.md                              ← this file
 ├── teleology_history_catalogue.md         ← historical research on key figures
 ├── .env                                   ← secrets + config (not committed)
-├── Data/
-│   ├── corpus_config.py                   ← shared metadata, keyword lists, regex patterns
+├── .env.example                           ← template for .env
+├── requirements.txt
+├── scripts/
+│   ├── corpus_config.py                   ← shared metadata, keyword lists, regex patterns, PATHS
 │   ├── find_animal_chunks.py              ← Step 1: chunk texts → passages.csv
 │   ├── extract_sentences.py               ← Step 2: passages.csv → sentences.csv
-│   ├── scan_passages.py                   ← Step 3: LLM classification of sentences.csv
-│   ├── experiment4_final_coded.csv        ← lab's prior behavioral survey data (unrelated to pipeline)
-│   └── reference_texts/
-│       ├── passages.csv                   ← Step 1 output (~6,100 chunks)
-│       ├── sentences.csv                  ← Step 2 output (~12,900 passages, scan results added here)
-│       ├── promising_passages.csv         ← Step 3 extract output (non-junk only)
-│       ├── raw_texts/                     ← 16 original OCR text files + reference_index.md
-│       └── clean_texts/                   ← 16 cleaned text files + cleanup.md (OCR audit notes)
+│   └── scan_passages.py                   ← Step 3: LLM classification of sentences.csv
+└── Data/
+    ├── passages.csv                       ← Step 1 output (~6,100 chunks)
+    ├── sentences.csv                      ← Step 2 output (~12,900 passages, scan results added here)
+    ├── promising_passages.csv             ← Step 3 extract output (non-junk only)
+    └── texts/
+        ├── raw_texts/                     ← 16 original OCR text files + reference_index.md
+        └── clean_texts/                   ← 16 cleaned text files + cleanup.md (OCR audit notes)
 ```
 
 ## Technical Notes

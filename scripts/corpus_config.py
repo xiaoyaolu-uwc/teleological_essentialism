@@ -22,11 +22,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 PATHS = {
     "data_dir":       REPO_ROOT / "Data",
-    "clean_texts":    REPO_ROOT / "Data" / "reference_texts" / "clean_texts",
-    "raw_texts":      REPO_ROOT / "Data" / "reference_texts" / "raw_texts",
-    "passages_csv":   REPO_ROOT / "Data" / "reference_texts" / "passages.csv",
-    "sentences_csv":  REPO_ROOT / "Data" / "reference_texts" / "sentences.csv",
-    "promising_csv":  REPO_ROOT / "Data" / "reference_texts" / "promising_passages.csv",
+    "clean_texts":    REPO_ROOT / "Data" / "texts" / "clean_texts",
+    "raw_texts":      REPO_ROOT / "Data" / "texts" / "raw_texts",
+    "passages_csv":   REPO_ROOT / "Data" / "passages.csv",
+    "sentences_csv":  REPO_ROOT / "Data" / "sentences.csv",
+    "promising_csv":  REPO_ROOT / "Data" / "promising_passages.csv",
     "env_file":       REPO_ROOT / ".env",
 }
 
