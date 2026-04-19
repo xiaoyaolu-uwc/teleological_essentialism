@@ -1,0 +1,15 @@
+# secrets
+.env
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+
+# mac
+.DS_Store
+**/.DS_Store
+
+# editor
+.vscode/
+*.swp
