@@ -16,3 +16,4 @@ __pycache__/
 
 # eval results (generated outputs, not source)
 eval/results/*.csv
+eval/results/analysis/*.csv
