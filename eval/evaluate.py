@@ -24,14 +24,6 @@ from config.config import PATHS
 from models.openai import OpenAIModel
 from models.prompts import PROMPT_VERSIONS
 
-# ---------------------------------------------------------------------------
-# Config — change these to switch model or prompt
-# ---------------------------------------------------------------------------
-MODEL          = "gpt-4o-mini"
-PROMPT_VERSION = "v1"
-BATCH_SIZE     = 10
-# ---------------------------------------------------------------------------
-
 
 def load_dotenv():
     env = PATHS["env_file"]
@@ -42,6 +34,18 @@ def load_dotenv():
                 if line and not line.startswith("#") and "=" in line:
                     key, _, val = line.partition("=")
                     os.environ.setdefault(key.strip(), val.strip())
+
+
+load_dotenv()
+
+# ---------------------------------------------------------------------------
+# Config — PROMPT_VERSION and BATCH_SIZE can be edited here;
+# MODEL defaults to SCAN_MODEL from .env
+# ---------------------------------------------------------------------------
+MODEL          = os.environ.get("SCAN_MODEL", "gpt-4o-mini")
+PROMPT_VERSION = "v1"
+BATCH_SIZE     = int(os.environ.get("SCAN_BATCH_SIZE", 10))
+# ---------------------------------------------------------------------------
 
 
 def load_eval_set() -> list[dict]:
