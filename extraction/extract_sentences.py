@@ -10,12 +10,12 @@ then pulls in neighboring sentences only if they contain thematic content
 (purpose, function, design, definition, mechanism, etc.), not simply because
 they also mention an animal.
 
-Usage:
-    python3 extract_sentences.py
-    python3 extract_sentences.py --input path/to/passages.csv
-    python3 extract_sentences.py --output path/to/sentences.csv
-    python3 extract_sentences.py --context-window 1   # tighter context
-    python3 extract_sentences.py --dry-run
+Usage (run from repo root):
+    python3 extraction/extract_sentences.py
+    python3 extraction/extract_sentences.py --input path/to/passages.csv
+    python3 extraction/extract_sentences.py --output path/to/sentences.csv
+    python3 extraction/extract_sentences.py --context-window 1   # tighter context
+    python3 extraction/extract_sentences.py --dry-run
 """
 
 import os
@@ -25,8 +25,10 @@ import sys
 import json
 import argparse
 from collections import Counter
+from pathlib import Path
 
-from corpus_config import ANIMAL_PATTERN, get_animal_keywords, contains_thematic, PATHS
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config.config import ANIMAL_PATTERN, get_animal_keywords, contains_thematic, PATHS
 
 DEFAULT_INPUT  = str(PATHS["passages_csv"])
 DEFAULT_OUTPUT = str(PATHS["sentences_csv"])

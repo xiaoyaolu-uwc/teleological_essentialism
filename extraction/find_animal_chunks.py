@@ -5,10 +5,10 @@ find_animal_chunks.py
 Reads the cleaned reference texts, chunks them into ~300-word paragraph-aware
 passages, filters to those that mention animals, and exports to passages.csv.
 
-Usage:
-    python3 find_animal_chunks.py
-    python3 find_animal_chunks.py --output path/to/passages.csv
-    python3 find_animal_chunks.py --dry-run   # print stats only, no CSV
+Usage (run from repo root):
+    python3 extraction/find_animal_chunks.py
+    python3 extraction/find_animal_chunks.py --output path/to/passages.csv
+    python3 extraction/find_animal_chunks.py --dry-run   # print stats only, no CSV
 """
 
 import os
@@ -16,8 +16,10 @@ import csv
 import sys
 import json
 import argparse
+from pathlib import Path
 
-from corpus_config import TEXT_METADATA, ANIMAL_PATTERN, get_animal_keywords, PATHS
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config.config import TEXT_METADATA, ANIMAL_PATTERN, get_animal_keywords, PATHS
 
 CLEAN_DIR      = str(PATHS["clean_texts"])
 DEFAULT_OUTPUT = str(PATHS["passages_csv"])

@@ -111,3 +111,19 @@ Author: {author} ({year})
 Text:
 {text}
 """
+
+# ---------------------------------------------------------------------------
+# Versioned prompt registry
+# ---------------------------------------------------------------------------
+# As prompts evolve, append new entries here (v2, v3, ...) rather than mutating
+# existing ones. The eval harness selects a version via PROMPT_VERSION.
+# scan_passages.py still imports the module-level constants directly for now.
+
+PROMPT_VERSIONS = {
+    "v1": {
+        "system":           SYSTEM_PROMPT,
+        "user_template":    USER_PROMPT_TEMPLATE,
+        "passage_template": PASSAGE_TEMPLATE,
+        "valid_tags":       VALID_TAGS,
+    },
+}

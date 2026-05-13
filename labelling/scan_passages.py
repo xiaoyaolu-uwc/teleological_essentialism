@@ -9,19 +9,19 @@ internal essence, or junk).
 
 Usage:
     # Scan 50 chunks, 5 at a time in parallel:
-    python3 scan_passages.py --chunks 50
+    python3 labelling/scan_passages.py --chunks 50
 
     # Override parallelism:
-    python3 scan_passages.py --chunks 100 --parallel 10
+    python3 labelling/scan_passages.py --chunks 100 --parallel 10
 
     # Extract non-junk passages to a separate file after scanning:
-    python3 scan_passages.py --extract
+    python3 labelling/scan_passages.py --extract
 
     # Check progress:
-    python3 scan_passages.py --report
+    python3 labelling/scan_passages.py --report
 
     # Dry run — show what would be sent without calling the API:
-    python3 scan_passages.py --chunks 1 --dry-run
+    python3 labelling/scan_passages.py --chunks 1 --dry-run
 
 Environment (.env at repo root):
     OPENAI_API_KEY   — required for scanning
@@ -29,9 +29,9 @@ Environment (.env at repo root):
     SCAN_BATCH_SIZE  — passages per API call (default: 10)
 
 Outputs:
-    - Updates Data/reference_texts/sentences.csv in-place
+    - Updates data/sentences.csv in-place
       (adds scan_complete, scan_tag, scan_reasoning columns)
-    - --extract produces Data/promising_passages.csv (non-junk rows only)
+    - --extract produces data/promising_passages.csv (non-junk rows only)
 """
 
 import os
@@ -42,7 +42,8 @@ import time
 import argparse
 from pathlib import Path
 
-from corpus_config import PATHS
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config.config import PATHS
 from prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE, PASSAGE_TEMPLATE, VALID_TAGS
 
 # ---------------------------------------------------------------------------

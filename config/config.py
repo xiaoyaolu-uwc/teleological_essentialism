@@ -1,6 +1,6 @@
 """
-corpus_config.py
-================
+config.py
+=========
 Shared configuration for the teleological essentialism corpus pipeline.
 
 Provides:
@@ -17,16 +17,17 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Paths — single source of truth for all data locations
 # ---------------------------------------------------------------------------
-# REPO_ROOT is two levels up from this file (scripts/ → repo root)
+# REPO_ROOT is one level up from this file (config/ → repo root)
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 PATHS = {
-    "data_dir":       REPO_ROOT / "Data",
-    "clean_texts":    REPO_ROOT / "Data" / "texts" / "clean_texts",
-    "raw_texts":      REPO_ROOT / "Data" / "texts" / "raw_texts",
-    "passages_csv":   REPO_ROOT / "Data" / "passages.csv",
-    "sentences_csv":  REPO_ROOT / "Data" / "sentences.csv",
-    "promising_csv":  REPO_ROOT / "Data" / "promising_passages.csv",
+    "data_dir":       REPO_ROOT / "data",
+    "clean_texts":    REPO_ROOT / "data" / "texts" / "clean_texts",
+    "raw_texts":      REPO_ROOT / "data" / "texts" / "raw_texts",
+    "passages_csv":   REPO_ROOT / "data" / "passages.csv",
+    "sentences_csv":  REPO_ROOT / "data" / "sentences.csv",
+    "promising_csv":  REPO_ROOT / "data" / "promising_passages.csv",
+    "evaluation_csv": REPO_ROOT / "data" / "evaluation_set.csv",
     "env_file":       REPO_ROOT / ".env",
 }
 
