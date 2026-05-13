@@ -54,6 +54,7 @@ def aggregate(rows: list[dict]) -> list[dict]:
     """Group by text, count mislabellings and per-label frequencies."""
     by_text = defaultdict(lambda: {
         "correct_tag":      "",
+        "your_rationale":   "",
         "total_runs":       0,
         "mislabeled_count": 0,
         **{f"{l}_n": 0 for l in ALL_LABELS},
@@ -62,8 +63,9 @@ def aggregate(rows: list[dict]) -> list[dict]:
     for row in rows:
         text = row["text"]
         entry = by_text[text]
-        entry["correct_tag"]  = row["correct_tag"]
-        entry["total_runs"]  += 1
+        entry["correct_tag"]    = row["correct_tag"]
+        entry["your_rationale"] = row.get("your_rationale", "")
+        entry["total_runs"]    += 1
         label = row["predicted_tag"].strip().lower()
         key = f"{label}_n" if f"{label}_n" in entry else "error_n"
         entry[key] += 1
@@ -97,6 +99,8 @@ def print_report(records: list[dict]):
 
         print(f"\n{i}. [mislabeled {r['mislabeled_count']}/{r['total_runs']} runs]  correct: {r['correct_tag']}")
         print(f"   \"{snippet}\"")
+        if r["your_rationale"]:
+            print(f"   rationale: {r['your_rationale']}")
         print(f"   predicted as: {wrong_str or '—'}")
 
     print()
@@ -107,7 +111,7 @@ def write_analysis(records: list[dict]):
     out_dir.mkdir(exist_ok=True)
     out_path = out_dir / "error_analysis.csv"
 
-    fieldnames = ["text", "correct_tag", "total_runs", "mislabeled_count"] + [f"{l}_n" for l in ALL_LABELS]
+    fieldnames = ["text", "correct_tag", "your_rationale", "total_runs", "mislabeled_count"] + [f"{l}_n" for l in ALL_LABELS]
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
