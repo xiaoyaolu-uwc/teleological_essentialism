@@ -13,3 +13,6 @@ __pycache__/
 # editor
 .vscode/
 *.swp
+
+# eval results (generated outputs, not source)
+eval/results/*.csv

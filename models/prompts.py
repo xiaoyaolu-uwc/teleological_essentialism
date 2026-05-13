@@ -112,18 +112,24 @@ Text:
 {text}
 """
 
+# Text-only template used by the model adapter (no author/year metadata).
+PASSAGE_TEMPLATE_TEXT_ONLY = """\
+--- Passage {id} ---
+{text}
+"""
+
 # ---------------------------------------------------------------------------
 # Versioned prompt registry
 # ---------------------------------------------------------------------------
 # As prompts evolve, append new entries here (v2, v3, ...) rather than mutating
-# existing ones. The eval harness selects a version via PROMPT_VERSION.
+# existing ones. The eval harness and labelling both select a version at runtime.
 # scan_passages.py still imports the module-level constants directly for now.
 
 PROMPT_VERSIONS = {
     "v1": {
         "system":           SYSTEM_PROMPT,
         "user_template":    USER_PROMPT_TEMPLATE,
-        "passage_template": PASSAGE_TEMPLATE,
+        "passage_template": PASSAGE_TEMPLATE_TEXT_ONLY,
         "valid_tags":       VALID_TAGS,
     },
 }
