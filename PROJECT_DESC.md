@@ -55,9 +55,9 @@ The classifier should work on descriptions of **whole animals and animal parts**
 
 **3. Clean the texts — DONE.** OCR cleanup pipeline handling three quality tiers (near-clean 19th-century texts, double-spaced/hyphenated texts, and pre-1800 texts with long-s typography). ~250 correction patterns. Output: 16 cleaned files in `data/texts/clean_texts/`
 
-**4. Chunk and detect animal-relevant passages — DONE.** Pipeline chunks texts into ~300-word paragraph-aware segments, filters to passages containing animal references (~170-term keyword system), tags with metadata. Result: **6,136 animal-relevant passages**. Output: `scripts/find_animal_chunks.py` → `data/passages.csv`.
+**4. Chunk and detect animal-relevant passages — DONE.** Pipeline chunks texts into ~300-word paragraph-aware segments, filters to passages containing animal references (~170-term keyword system), tags with metadata. Result: **6,136 animal-relevant passages**. Output: `extraction/find_animal_chunks.py` → `data/passages.csv`.
 
-**5. Extract sentence-level passages and LLM-label them — DONE.** `scripts/extract_sentences.py` refines chunks down to focused sentence-level passages (~12,900). `scripts/scan_passages.py` then classifies each via the OpenAI Responses API into `divine_teleology`, `non_divine_teleology`, `internal_essence`, or `junk`.
+**5. Extract sentence-level passages and LLM-label them — DONE.** `extraction/extract_sentences.py` refines chunks down to focused sentence-level passages (~12,900). `labelling/scan_passages.py` then classifies each via the OpenAI Responses API into `divine_teleology`, `non_divine_teleology`, `internal_essence`, or `junk`.
 
 ### Timeline
 
@@ -141,6 +141,6 @@ Recommended approach: label with the nuanced taxonomy first, then produce a `red
 ## Technical Notes
 
 - Internet Archive blocks direct `curl` to djvu.txt files. Use Python `urllib.request` with a browser User-Agent header.
-- Pre-1800 OCR requires special handling for long-s typography ("firft" → "first"). The cleanup notes are in `Data/reference_texts/clean_texts/cleanup.md` (~250 correction patterns).
+- Pre-1800 OCR requires special handling for long-s typography ("firft" → "first"). The cleanup notes are in `data/texts/raw_texts/cleanup.md` (~250 correction patterns).
 - Genre comparability is a known concern: pre-1665 texts are a different genre from post-Philosophical Transactions journal articles. Teleological language may drop partly due to genre change, not just philosophical change.
 - `scan_passages.py` routes `gpt-5.x` models to the Responses API (`/v1/responses`) and older models to Chat Completions. Update the routing condition in `call_openai()` if adding a new model family.
