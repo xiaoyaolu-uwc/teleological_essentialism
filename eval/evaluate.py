@@ -57,7 +57,15 @@ def results_path(model: str, prompt_version: str) -> Path:
     safe_model = model.replace("/", "-")
     out_dir = Path(__file__).resolve().parent / "results"
     out_dir.mkdir(exist_ok=True)
-    return out_dir / f"eval_{safe_model}_{prompt_version}.csv"
+    base = out_dir / f"eval_{safe_model}_{prompt_version}.csv"
+    if not base.exists():
+        return base
+    run = 2
+    while True:
+        candidate = out_dir / f"eval_{safe_model}_{prompt_version}_{run}.csv"
+        if not candidate.exists():
+            return candidate
+        run += 1
 
 
 def write_results(rows: list[dict], preds: list[dict], out_path: Path):

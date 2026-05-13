@@ -9,7 +9,7 @@ import pytest
 
 
 # ---------------------------------------------------------------------------
-# results_path sanitises model names
+# results_path sanitises model names and avoids overwrites
 # ---------------------------------------------------------------------------
 
 def test_results_path_sanitises_slashes():
@@ -24,6 +24,19 @@ def test_results_path_contains_model_and_version():
     p = results_path("gpt-4o-mini", "v1")
     assert "gpt-4o-mini" in p.name
     assert "v1" in p.name
+
+
+def test_results_path_increments_if_exists(tmp_path, monkeypatch):
+    from eval import evaluate
+    monkeypatch.setattr(evaluate, "__file__", str(tmp_path / "evaluate.py"))
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+    (results_dir / "eval_m_v1.csv").touch()
+    p = evaluate.results_path("m", "v1")
+    assert p.name == "eval_m_v1_2.csv"
+    p.touch()
+    p2 = evaluate.results_path("m", "v1")
+    assert p2.name == "eval_m_v1_3.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -61,7 +74,7 @@ def test_eval_set_has_required_columns():
     with open(PATHS["evaluation_csv"], newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     assert len(rows) == 49
-    for col in ("text", "correct_tag", "rationale"):
+    for col in ("text", "correct_tag", "xy_rationale"):
         assert col in rows[0], f"Missing column: {col}"
 
 
