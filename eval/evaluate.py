@@ -69,7 +69,7 @@ def write_results(rows: list[dict], preds: list[dict], out_path: Path):
             writer.writerow({
                 "text":            row["text"],
                 "correct_tag":     row["correct_tag"],
-                "your_rationale":  row.get("rationale", ""),
+                "your_rationale":  row.get("xy_rationale", ""),
                 "predicted_tag":   pred["tag"],
                 "model_reasoning": pred["reasoning"],
                 "correct":         str(pred["tag"] == row["correct_tag"]),
@@ -99,6 +99,21 @@ def print_summary(rows: list[dict], preds: list[dict]):
     for label, row_vals in zip(all_labels, cm):
         print(label.ljust(col_width) + "".join(str(v).ljust(col_width) for v in row_vals))
     print()
+
+    incorrect = [
+        (row, pred) for row, pred in zip(rows, preds)
+        if pred["tag"] != row["correct_tag"]
+    ]
+    if incorrect:
+        print(f"--- Incorrect predictions ({len(incorrect)}) ---\n")
+        for row, pred in incorrect:
+            snippet = row["text"][:120].replace("\n", " ")
+            if len(row["text"]) > 120:
+                snippet += "..."
+            print(f"  text:      {snippet}")
+            print(f"  predicted: {pred['tag']}")
+            print(f"  correct:   {row['correct_tag']}")
+            print()
 
 
 def main():
