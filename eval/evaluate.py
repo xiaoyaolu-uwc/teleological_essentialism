@@ -6,11 +6,14 @@ Runs a model + prompt version against the hand-labelled evaluation set and
 reports accuracy, per-class precision/recall/F1, and a confusion matrix.
 
 Usage (from repo root):
-    python3 eval/evaluate.py
+    python3 eval/evaluate.py            # single run
+    python3 eval/evaluate.py --runs 5   # batch of 5 runs
 
-Output:
-    eval/results/eval_{MODEL}_{PROMPT_VERSION}.csv
-    CLI summary printed to stdout
+After all runs, prints a cross-run error analysis (most-mislabeled passages)
+and writes eval/results/analysis/error_analysis.csv.
+
+Output per run:
+    eval/results/eval_{MODEL}_{PROMPT_VERSION}.csv  (increments if exists)
 """
 
 import csv
@@ -108,41 +111,42 @@ def print_summary(rows: list[dict], preds: list[dict]):
         print(label.ljust(col_width) + "".join(str(v).ljust(col_width) for v in row_vals))
     print()
 
-    incorrect = [
-        (row, pred) for row, pred in zip(rows, preds)
-        if pred["tag"] != row["correct_tag"]
-    ]
-    if incorrect:
-        print(f"--- Incorrect predictions ({len(incorrect)}) ---\n")
-        for row, pred in incorrect:
-            snippet = row["text"][:120].replace("\n", " ")
-            if len(row["text"]) > 120:
-                snippet += "..."
-            print(f"  text:      {snippet}")
-            print(f"  predicted: {pred['tag']}")
-            print(f"  correct:   {row['correct_tag']}")
-            print()
-
 
 def main():
-    load_dotenv()
+    import argparse
+    from eval.analyze_errors import load_results, aggregate, print_report, write_analysis
+
+    parser = argparse.ArgumentParser(description="Evaluate model against the hand-labelled eval set")
+    parser.add_argument("--runs", type=int, default=1, help="Number of evaluation runs (default: 1)")
+    args = parser.parse_args()
 
     if not os.environ.get("OPENAI_API_KEY"):
         print("Error: OPENAI_API_KEY not set.", file=sys.stderr)
         sys.exit(1)
 
-    rows = load_eval_set()
+    rows  = load_eval_set()
     texts = [r["text"] for r in rows]
-
-    print(f"Evaluating {MODEL!r} with prompt {PROMPT_VERSION!r} on {len(rows)} passages...")
     model = OpenAIModel(model_name=MODEL, prompt_version=PROMPT_VERSION, batch_size=BATCH_SIZE)
-    preds = model.classify(texts)
 
-    out_path = results_path(MODEL, PROMPT_VERSION)
-    write_results(rows, preds, out_path)
-    print(f"Results written to: {out_path}")
+    batch_files = []
+    for run in range(1, args.runs + 1):
+        if args.runs > 1:
+            print(f"\n--- Run {run}/{args.runs} ---")
+        print(f"Evaluating {MODEL!r} with prompt {PROMPT_VERSION!r} on {len(rows)} passages...")
+        preds = model.classify(texts)
+        out_path = results_path(MODEL, PROMPT_VERSION)
+        write_results(rows, preds, out_path)
+        print(f"Results written to: {out_path}")
+        print_summary(rows, preds)
+        batch_files.append(out_path)
 
-    print_summary(rows, preds)
+    if args.runs > 1:
+        print(f"\n{'='*60}")
+        print(f"Batch complete ({args.runs} runs). Cross-run error analysis:")
+        print(f"{'='*60}\n")
+        records = aggregate(load_results(batch_files))
+        print_report(records)
+        write_analysis(records)
 
 
 if __name__ == "__main__":

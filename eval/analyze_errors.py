@@ -2,11 +2,12 @@
 """
 analyze_errors.py
 =================
-Aggregates all eval result CSVs in RESULTS_DIR, counts how often each
-passage was mislabeled across runs, and reports the worst offenders.
+Aggregates eval result CSVs, counts how often each passage was mislabeled
+across runs, and reports the worst offenders.
 
 Usage (from repo root):
-    python3 eval/analyze_errors.py
+    python3 eval/analyze_errors.py                    # globs all of RESULTS_DIR
+    python3 eval/analyze_errors.py path/to/a.csv ...  # explicit files
 
 Output:
     CLI: ranked top-N most-mislabeled passages
@@ -27,12 +28,14 @@ ALL_LABELS  = ["divine_teleology", "internal_essence", "junk", "mixed", "non_div
 # ---------------------------------------------------------------------------
 
 
-def load_results() -> list[dict]:
-    """Read all result CSVs from RESULTS_DIR, skipping the analysis subdir."""
-    files = [
-        f for f in RESULTS_DIR.glob("*.csv")
-        if f.parent == RESULTS_DIR
-    ]
+def load_results(files: list[Path] = None) -> list[dict]:
+    """Read result CSVs and return a flat list of rows.
+
+    If files is None or empty, globs all CSVs directly in RESULTS_DIR
+    (skipping the analysis subdir). Otherwise reads exactly the given files.
+    """
+    if not files:
+        files = [f for f in RESULTS_DIR.glob("*.csv") if f.parent == RESULTS_DIR]
     if not files:
         print(f"No result CSVs found in {RESULTS_DIR}", file=sys.stderr)
         sys.exit(1)
@@ -114,7 +117,8 @@ def write_analysis(records: list[dict]):
 
 
 def main():
-    rows    = load_results()
+    explicit = [Path(a) for a in sys.argv[1:]]
+    rows    = load_results(explicit or None)
     records = aggregate(rows)
     print_report(records)
     write_analysis(records)
