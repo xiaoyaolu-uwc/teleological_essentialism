@@ -1,15 +1,55 @@
 """
 prompts.py
 ==========
-Prompt templates for the LLM classification pipeline (scan_passages.py).
+Prompt templates for the LLM classification pipeline.
 
 Separated from scanning logic so prompts can be iterated on independently.
+New versions go into PROMPT_VERSIONS; scan_passages.py still uses the
+module-level constants (v1) directly until refactored.
 
 Contents:
-  SYSTEM_PROMPT        — instructs the model on the classification task and taxonomy
-  USER_PROMPT_TEMPLATE — per-batch user message; expects {n} and {passages_block}
-  PASSAGE_TEMPLATE     — formats a single passage; expects {id}, {author}, {year}, {text}
-  VALID_TAGS           — the set of tags the model is allowed to return
+  SYSTEM_PROMPT             — v1 system prompt (module-level, used by scan_passages.py)
+  USER_PROMPT_TEMPLATE      — per-batch user message; expects {n} and {passages_block}
+  PASSAGE_TEMPLATE          — formats a single passage with author/year metadata
+  PASSAGE_TEMPLATE_TEXT_ONLY — text-only variant used by the model adapter (no metadata)
+  VALID_TAGS                — the set of tags v1 is allowed to return
+  PROMPT_VERSIONS           — registry of versioned prompts keyed by "v1", "v2", ...
+
+Prompt version history
+----------------------
+v1 — original prompt.
+     Problems identified via eval harness (eval/evaluate.py, eval/analyze_errors.py):
+     1. divine_teleology triggered by divine attribution alone (God created animals)
+        even without a purposive claim (animals exist FOR something). Condition 1
+        (purpose) was not enforced independently of condition 2 (divine grounding).
+     2. Structural/anatomical language (e.g. "essential features", dissection results)
+        triggered internal_essence even for single-specimen observations that make no
+        general claim about what the animal is.
+     3. Incidental functional language (e.g. "for the good of each", organ described
+        as an "instrument" in an argument-from-design passage) triggered
+        non_divine_teleology even when the passage was not making a definitional claim
+        about animals.
+     4. Implicit functional definitions (organ-specialisation passages, ecological
+        role descriptions) were dismissed as junk because the model required explicit
+        "what is this animal" framing.
+     5. Mixed tags unused; "exceedingly rare" framing suppressed them even when
+        genuinely warranted.
+
+v2 — two-step decision structure.
+     Junk is promoted to a gating criterion (Step 1) rather than a residual.
+     The gate is framed as an ontological-position test: does the passage commit
+     to a position on what an animal or animal part fundamentally is? A sharp
+     heuristic is provided: "could this passage be true regardless of how you
+     define an animal? If so → junk."
+     Step 2 then disambiguates non_divine_teleology / divine_teleology /
+     internal_essence only for passages that have cleared the gate. This
+     simultaneously fixes Problems 3 (incidental functional language never
+     reaches Step 2) and 4 (implicit functional definitions pass Step 1 and
+     reach non_divine_teleology). divine_teleology tightened with both conditions
+     stated explicitly and a negative case added (Problem 1). internal_essence
+     linked back to Step 1 — single-specimen structural observations fail the gate
+     (Problem 2). Mixed tags renamed to mixed_ndt-ie / mixed_dt-ie, "do not appear
+     often" replaces "exceedingly rare", examples removed (Problem 5).
 """
 
 # ---------------------------------------------------------------------------
