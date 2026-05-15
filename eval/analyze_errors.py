@@ -106,10 +106,10 @@ def print_report(records: list[dict]):
     print()
 
 
-def write_analysis(records: list[dict], out_dir: Path = None):
+def write_analysis(records: list[dict], out_dir: Path = None, filename: str = "error_analysis.csv"):
     out_dir = (out_dir or RESULTS_DIR) / "analysis"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "error_analysis.csv"
+    out_path = out_dir / filename
 
     fieldnames = ["text", "correct_tag", "your_rationale", "total_runs", "mislabeled_count"] + [f"{l}_n" for l in ALL_LABELS]
     with open(out_path, "w", newline="", encoding="utf-8") as f:
@@ -123,8 +123,12 @@ def write_analysis(records: list[dict], out_dir: Path = None):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Aggregate eval result CSVs and report error analysis")
-    parser.add_argument("--run-dir", type=str, default=None, help="Subdirectory of eval/results/ to read from and write analysis into")
-    parser.add_argument("files", nargs="*", type=Path, help="Explicit result CSV files (overrides --run-dir globbing)")
+    parser.add_argument("--run-dir", type=str, default=None,
+                        help="Subdirectory of eval/results/ to read from and write analysis into")
+    parser.add_argument("--output-name", type=str, default="error_analysis.csv",
+                        help="Filename for the output CSV (default: error_analysis.csv)")
+    parser.add_argument("files", nargs="*", type=Path,
+                        help="Explicit result CSV files (overrides --run-dir globbing)")
     args = parser.parse_args()
 
     run_dir = RESULTS_DIR / args.run_dir if args.run_dir else None
@@ -138,7 +142,7 @@ def main():
 
     records = aggregate(rows)
     print_report(records)
-    write_analysis(records, out_dir=run_dir)
+    write_analysis(records, out_dir=run_dir, filename=args.output_name)
 
 
 if __name__ == "__main__":

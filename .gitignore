@@ -15,5 +15,4 @@ __pycache__/
 *.swp
 
 # eval results (generated outputs, not source)
-eval/results/*.csv
-eval/results/analysis/*.csv
+eval/results/**/*.csv
