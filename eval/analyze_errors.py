@@ -79,6 +79,30 @@ def aggregate(rows: list[dict]) -> list[dict]:
     )
 
 
+def print_stats(rows: list[dict]):
+    """Print aggregate accuracy, per-class F1, and confusion matrix from raw result rows."""
+    from sklearn.metrics import classification_report, confusion_matrix
+
+    y_true = [r["correct_tag"] for r in rows]
+    y_pred = [r["predicted_tag"].strip().lower() for r in rows]
+    all_labels = sorted(set(y_true) | set(y_pred))
+
+    total = len(y_true)
+    correct = sum(t == p for t, p in zip(y_true, y_pred))
+    n_runs = len({r["_source"] for r in rows})
+    print(f"Aggregate over {n_runs} run(s), {total} total predictions ({total // n_runs} passages each)\n")
+    print(f"Overall accuracy: {correct}/{total} = {correct/total:.1%}\n")
+    print(classification_report(y_true, y_pred, labels=all_labels, zero_division=0))
+
+    cm = confusion_matrix(y_true, y_pred, labels=all_labels)
+    col_width = max(len(l) for l in all_labels) + 2
+    print("Confusion matrix (rows=true, cols=predicted):")
+    print(" " * col_width + "".join(l.ljust(col_width) for l in all_labels))
+    for label, row_vals in zip(all_labels, cm):
+        print(label.ljust(col_width) + "".join(str(v).ljust(col_width) for v in row_vals))
+    print()
+
+
 def print_report(records: list[dict]):
     top = [r for r in records if r["mislabeled_count"] > 0][:TOP_N]
     if not top:
@@ -127,6 +151,8 @@ def main():
                         help="Subdirectory of eval/results/ to read from and write analysis into")
     parser.add_argument("--output-name", type=str, default="error_analysis.csv",
                         help="Filename for the output CSV (default: error_analysis.csv)")
+    parser.add_argument("--no-csv", action="store_true",
+                        help="Print stats and error report only; do not write CSV")
     parser.add_argument("files", nargs="*", type=Path,
                         help="Explicit result CSV files (overrides --run-dir globbing)")
     args = parser.parse_args()
@@ -140,9 +166,11 @@ def main():
     else:
         rows = load_results(None)
 
+    print_stats(rows)
     records = aggregate(rows)
     print_report(records)
-    write_analysis(records, out_dir=run_dir, filename=args.output_name)
+    if not args.no_csv:
+        write_analysis(records, out_dir=run_dir, filename=args.output_name)
 
 
 if __name__ == "__main__":
