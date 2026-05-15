@@ -159,6 +159,119 @@ PASSAGE_TEMPLATE_TEXT_ONLY = """\
 """
 
 # ---------------------------------------------------------------------------
+# v2 prompt
+# ---------------------------------------------------------------------------
+
+VALID_TAGS_V2 = {
+    "divine_teleology", "non_divine_teleology", "internal_essence", "junk",
+    "mixed_ndt-ie", "mixed_dt-ie",
+}
+
+USER_PROMPT_TEMPLATE_V2 = """\
+Classify each of the following {n} passages.
+
+You MUST return a JSON array of exactly {n} objects, one per passage, in the \
+same order as the passages appear below. Each object MUST have exactly these \
+three fields:
+  "id"        — the passage id shown in the header (copy it exactly as an integer)
+  "tag"       — one of: divine_teleology, non_divine_teleology, internal_essence, \
+junk, mixed_ndt-ie, mixed_dt-ie
+  "reasoning" — SHORT (under one sentence). Start with your certainty \
+(e.g. "Confident:", "Unsure:") then a quick justification pointing to \
+specific evidence in the text.
+
+Example output for 2 passages:
+[
+  {{"id": 0, "tag": "junk", "reasoning": "Confident: describes animal behaviour without committing to what the animal is."}},
+  {{"id": 1, "tag": "divine_teleology", "reasoning": "Confident: explicitly claims animals exist for a purpose ordained by God's plan."}}
+]
+
+Return ONLY the JSON array. No other text, no wrapper keys.
+
+{passages_block}
+"""
+
+SYSTEM_PROMPT_V2 = """\
+You are helping classify historical scientific passages about animals for a \
+research project studying how animals have been defined across the history of biology.
+
+Your task: apply the following two-step decision to each passage.
+
+────────────────────────────────────────────────────────────
+STEP 1 — IS THE PASSAGE DEFINITIONAL? (if no → junk)
+────────────────────────────────────────────────────────────
+
+Ask: does this passage commit to an ontological position on what an animal \
+or animal part is? The passage must carry an implicit or explicit claim about \
+what animals in general, or what a specific kind of animal or part, fundamentally \
+are — what makes them the kind of thing they are.
+
+A passage is NOT definitional — and is therefore junk — if it:
+- Mentions or describes animals without committing to what they are.
+- Describes a process or mechanism without asserting what animals are as \
+a consequence of or through that process.
+- Uses functional or instrumental language to argue for the existence of \
+a creator, rather than to assert what animals exist for.
+- Makes an observation about a structural feature of a specimen without \
+generalizing to what that kind of animal or part is.
+- Catalogs, enumerates, or narrates without characterizing what the animal is.
+
+The sharpest test: could this passage be true regardless of how you define \
+an animal? If so, it does not commit to an ontological position and is junk.
+
+If the passage does not clear this bar → tag it junk. Do not proceed to Step 2.
+
+────────────────────────────────────────────────────────────
+STEP 2 — IF DEFINITIONAL, WHICH KIND?
+────────────────────────────────────────────────────────────
+
+  non_divine_teleology — The passage defines or categorizes an animal or \
+part by the function or purpose it serves, without grounding that purpose \
+in God. Explicit purposive claims count, but so do implicit ones: an animal \
+or part characterized by what it does, what role it plays, or what it is \
+suited or adapted for. Explicit definitional framing is not required — \
+an implicit functional characterization is sufficient.
+
+  divine_teleology — The passage defines animals or parts as serving a \
+purpose AND grounds that purpose in God or a divine plan. Both conditions \
+must be independently satisfied:
+  (1) The passage claims animals or their parts serve a purpose or exist \
+for something.
+  (2) That purpose is attributed to divine will, plan, or intellect.
+  A passage that attributes animal existence to divine power or wisdom \
+without claiming animals were brought about FOR something satisfies only \
+condition (2) and is junk. Ask: does the passage say animals serve God’s \
+plan, or merely that God made them?
+
+  internal_essence — The passage defines or categorizes animals or parts \
+through internal structural or mechanistic features, independently of \
+external relationships or functions. The structural feature must be what \
+the passage uses to define or categorize the animal — not merely something \
+observed in passing. A structural observation that does not generalize to \
+what the animal or part is does not pass Step 1 and is junk.
+
+  mixed_ndt-ie — The passage simultaneously defines the animal through \
+non-divine function AND through internal structure, with neither being \
+incidental to the other. These do not appear often. Use only when genuinely \
+confident that both definitional modes are independently present; do not \
+use when uncertain between two single tags.
+
+  mixed_dt-ie — The passage simultaneously defines the animal through \
+divine purpose AND through internal structure, with neither being incidental. \
+These do not appear often. Apply the same double-definitional criterion as \
+mixed_ndt-ie.
+
+IMPORTANT GUIDELINES:
+- Most passages — probably 70–90% — will be junk.
+- The “camp” metadata reflects the AUTHOR’s overall intellectual position, \
+not necessarily what THIS specific passage does. An author tagged as \
+“divine_teleology” may have plenty of junk passages or even mechanistic \
+ones. Judge each passage on its own content, not the author’s camp.
+- Do NOT balance the distribution of tags across a batch. Tag each passage \
+independently.
+"""
+
+# ---------------------------------------------------------------------------
 # Versioned prompt registry
 # ---------------------------------------------------------------------------
 # As prompts evolve, append new entries here (v2, v3, ...) rather than mutating
@@ -171,5 +284,11 @@ PROMPT_VERSIONS = {
         "user_template":    USER_PROMPT_TEMPLATE,
         "passage_template": PASSAGE_TEMPLATE_TEXT_ONLY,
         "valid_tags":       VALID_TAGS,
+    },
+    "v2": {
+        "system":           SYSTEM_PROMPT_V2,
+        "user_template":    USER_PROMPT_TEMPLATE_V2,
+        "passage_template": PASSAGE_TEMPLATE_TEXT_ONLY,
+        "valid_tags":       VALID_TAGS_V2,
     },
 }

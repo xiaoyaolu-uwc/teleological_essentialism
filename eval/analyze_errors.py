@@ -24,7 +24,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 TOP_N       = 10
-ALL_LABELS  = ["divine_teleology", "internal_essence", "junk", "mixed", "non_divine_teleology", "error"]
+ALL_LABELS  = ["divine_teleology", "internal_essence", "junk", "mixed", "mixed_ndt-ie", "mixed_dt-ie", "non_divine_teleology", "error"]
 # ---------------------------------------------------------------------------
 
 

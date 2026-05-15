@@ -12,30 +12,27 @@ import pytest
 # results_path sanitises model names and avoids overwrites
 # ---------------------------------------------------------------------------
 
-def test_results_path_sanitises_slashes():
+def test_results_path_sanitises_slashes(tmp_path):
     from eval.evaluate import results_path
-    p = results_path("org/model-name", "v1")
+    p = results_path("org/model-name", "v1", tmp_path)
     assert "/" not in p.name
     assert "org-model-name" in p.name
 
 
-def test_results_path_contains_model_and_version():
+def test_results_path_contains_model_and_version(tmp_path):
     from eval.evaluate import results_path
-    p = results_path("gpt-4o-mini", "v1")
+    p = results_path("gpt-4o-mini", "v1", tmp_path)
     assert "gpt-4o-mini" in p.name
     assert "v1" in p.name
 
 
-def test_results_path_increments_if_exists(tmp_path, monkeypatch):
-    from eval import evaluate
-    monkeypatch.setattr(evaluate, "__file__", str(tmp_path / "evaluate.py"))
-    results_dir = tmp_path / "results"
-    results_dir.mkdir()
-    (results_dir / "eval_m_v1.csv").touch()
-    p = evaluate.results_path("m", "v1")
+def test_results_path_increments_if_exists(tmp_path):
+    from eval.evaluate import results_path
+    (tmp_path / "eval_m_v1.csv").touch()
+    p = results_path("m", "v1", tmp_path)
     assert p.name == "eval_m_v1_2.csv"
     p.touch()
-    p2 = evaluate.results_path("m", "v1")
+    p2 = results_path("m", "v1", tmp_path)
     assert p2.name == "eval_m_v1_3.csv"
 
 

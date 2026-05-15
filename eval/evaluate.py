@@ -46,7 +46,7 @@ load_dotenv()
 # MODEL defaults to SCAN_MODEL from .env
 # ---------------------------------------------------------------------------
 MODEL          = os.environ.get("SCAN_MODEL", "gpt-4o-mini")
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 BATCH_SIZE     = int(os.environ.get("SCAN_BATCH_SIZE", 10))
 # ---------------------------------------------------------------------------
 
@@ -90,7 +90,10 @@ def print_summary(rows: list[dict], preds: list[dict]):
     from sklearn.metrics import classification_report, confusion_matrix
 
     valid_tags = PROMPT_VERSIONS[PROMPT_VERSION]["valid_tags"]
-    all_labels = sorted(valid_tags | {"mixed"})
+    # Always include ground-truth labels that may not be in valid_tags
+    # (e.g. "mixed" from eval set rows labelled before the mixed_ndt-ie/mixed_dt-ie split)
+    ground_truth_tags = {r["correct_tag"] for r in rows}
+    all_labels = sorted(valid_tags | ground_truth_tags)
 
     y_true = [r["correct_tag"] for r in rows]
     y_pred = [p["tag"] for p in preds]
