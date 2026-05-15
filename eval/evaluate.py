@@ -56,10 +56,9 @@ def load_eval_set() -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def results_path(model: str, prompt_version: str) -> Path:
+def results_path(model: str, prompt_version: str, out_dir: Path) -> Path:
     safe_model = model.replace("/", "-")
-    out_dir = Path(__file__).resolve().parent / "results"
-    out_dir.mkdir(exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     base = out_dir / f"eval_{safe_model}_{prompt_version}.csv"
     if not base.exists():
         return base
@@ -118,7 +117,11 @@ def main():
 
     parser = argparse.ArgumentParser(description="Evaluate model against the hand-labelled eval set")
     parser.add_argument("--runs", type=int, default=1, help="Number of evaluation runs (default: 1)")
+    parser.add_argument("--run-dir", type=str, default=None, help="Subdirectory of eval/results/ to write output into")
     args = parser.parse_args()
+
+    base_results = Path(__file__).resolve().parent / "results"
+    out_dir = base_results / args.run_dir if args.run_dir else base_results
 
     if not os.environ.get("OPENAI_API_KEY"):
         print("Error: OPENAI_API_KEY not set.", file=sys.stderr)
@@ -134,7 +137,7 @@ def main():
             print(f"\n--- Run {run}/{args.runs} ---")
         print(f"Evaluating {MODEL!r} with prompt {PROMPT_VERSION!r} on {len(rows)} passages...")
         preds = model.classify(texts)
-        out_path = results_path(MODEL, PROMPT_VERSION)
+        out_path = results_path(MODEL, PROMPT_VERSION, out_dir)
         write_results(rows, preds, out_path)
         print(f"Results written to: {out_path}")
         print_summary(rows, preds)
@@ -146,7 +149,7 @@ def main():
         print(f"{'='*60}\n")
         records = aggregate(load_results(batch_files))
         print_report(records)
-        write_analysis(records)
+        write_analysis(records, out_dir=out_dir)
 
 
 if __name__ == "__main__":

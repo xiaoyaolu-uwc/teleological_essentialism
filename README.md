@@ -88,8 +88,12 @@ Tests a model and prompt version against the 49 hand-labelled passages in `data/
 
 **To run:**
 ```bash
-python3 eval/evaluate.py
+python3 eval/evaluate.py                          # single run
+python3 eval/evaluate.py --runs 5                 # batch of 5 runs
+python3 eval/evaluate.py --run-dir my-experiment  # isolate output in a subdirectory
 ```
+
+Use `--run-dir` to keep results from different configurations separate. The subdirectory is created under `eval/results/` if it doesn't exist.
 
 **To switch model or prompt**, edit the two variables at the top of `eval/evaluate.py`:
 ```python
@@ -98,5 +102,13 @@ PROMPT_VERSION = "v1"
 ```
 
 **Output:**
-- `eval/results/eval_{model}_{prompt_version}.csv` — one row per passage: text, correct label, your rationale, predicted label, model reasoning
+- `eval/results/[run-dir/]eval_{model}_{prompt_version}.csv` — one row per passage: text, correct label, your rationale, predicted label, model reasoning
 - CLI summary: overall accuracy, per-class precision/recall/F1, confusion matrix
+- On `--runs > 1`: cross-run error analysis written to `eval/results/[run-dir/]analysis/error_analysis.csv`
+
+**To analyse errors across runs:**
+```bash
+python3 eval/analyze_errors.py --run-dir my-experiment   # reads all CSVs in that subdir
+python3 eval/analyze_errors.py                           # reads all CSVs in eval/results/
+python3 eval/analyze_errors.py eval/results/run-a/*.csv  # explicit files
+```

@@ -106,9 +106,9 @@ def print_report(records: list[dict]):
     print()
 
 
-def write_analysis(records: list[dict]):
-    out_dir = RESULTS_DIR / "analysis"
-    out_dir.mkdir(exist_ok=True)
+def write_analysis(records: list[dict], out_dir: Path = None):
+    out_dir = (out_dir or RESULTS_DIR) / "analysis"
+    out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "error_analysis.csv"
 
     fieldnames = ["text", "correct_tag", "your_rationale", "total_runs", "mislabeled_count"] + [f"{l}_n" for l in ALL_LABELS]
@@ -121,11 +121,24 @@ def write_analysis(records: list[dict]):
 
 
 def main():
-    explicit = [Path(a) for a in sys.argv[1:]]
-    rows    = load_results(explicit or None)
+    import argparse
+    parser = argparse.ArgumentParser(description="Aggregate eval result CSVs and report error analysis")
+    parser.add_argument("--run-dir", type=str, default=None, help="Subdirectory of eval/results/ to read from and write analysis into")
+    parser.add_argument("files", nargs="*", type=Path, help="Explicit result CSV files (overrides --run-dir globbing)")
+    args = parser.parse_args()
+
+    run_dir = RESULTS_DIR / args.run_dir if args.run_dir else None
+
+    if args.files:
+        rows = load_results(args.files)
+    elif run_dir:
+        rows = load_results([f for f in run_dir.glob("*.csv") if f.parent == run_dir])
+    else:
+        rows = load_results(None)
+
     records = aggregate(rows)
     print_report(records)
-    write_analysis(records)
+    write_analysis(records, out_dir=run_dir)
 
 
 if __name__ == "__main__":
