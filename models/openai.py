@@ -53,8 +53,13 @@ class OpenAIModel(ModelAdapter):
         if raw is None:
             raise RuntimeError(f"No output_text in API response: {response}")
 
+        # Strip markdown code fences if present
+        stripped = raw.strip()
+        if stripped.startswith("```"):
+            stripped = stripped.split("\n", 1)[1] if "\n" in stripped else stripped
+            stripped = stripped.rsplit("```", 1)[0].strip()
         try:
-            parsed = json.loads(raw)
+            parsed = json.loads(stripped)
         except json.JSONDecodeError as e:
             raise RuntimeError(f"Failed to parse model response as JSON: {e}\nRaw:\n{raw}")
 

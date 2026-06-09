@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git mv *)",
+      "Bash(git commit *)",
+      "Bash(pip install *)",
+      "WebSearch"
+    ]
+  }
+}
