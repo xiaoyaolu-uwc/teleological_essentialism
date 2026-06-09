@@ -69,17 +69,51 @@ Then use it to label 6000+ passages from the anchor corpus, and fine-tune BERT.
 1. Run 5-run baselines for all three tracks before starting generation loops:
    ```bash
    # Single-layer mini (re-establish with 5 runs)
-   python3 eval/evaluate.py --runs 5 --run-dir v7c_5run --version v7c --model gpt-5.4-mini
-   python3 eval/analyze_errors.py --run-dir v7c_5run
+   python3 eval/evaluate.py --runs 5 --run-dir single_54mini/v7c_5run --version v7c --model gpt-5.4-mini
+   python3 eval/analyze_errors.py --run-dir single_54mini/v7c_5run
 
    # Single-layer full (establish proper baseline)
-   python3 eval/evaluate.py --runs 5 --run-dir v7c_full_5run --version v7c --model gpt-5.4
-   python3 eval/analyze_errors.py --run-dir v7c_full_5run
+   python3 eval/evaluate.py --runs 5 --run-dir single_54/baseline --version v7c --model gpt-5.4
+   python3 eval/analyze_errors.py --run-dir single_54/baseline
 
    # Two-layer bootstrap
    python3 eval/evaluate.py --method two-layer --l1-version l1_v1 --l2-version l2_v1 \
-       --runs 5 --run-dir two_layer_bootstrap --model gpt-5.4-mini
-   python3 eval/analyze_errors.py --run-dir two_layer_bootstrap --two-layer
+       --runs 5 --run-dir two_layer/baseline --model gpt-5.4-mini
+   python3 eval/analyze_errors.py --run-dir two_layer/baseline --two-layer
    ```
 
-2. Read the three error analyses and seed generation 1 for each track.
+2. ✅ Read all three error analyses, updated evolution files with baseline results + Gen 1 plans.
+
+### All three baselines completed
+
+| Track | Model | Prompt | Overall acc | DT | IE | Junk | NDT |
+|---|---|---|---|---|---|---|---|
+| Single mini | gpt-5.4-mini | v7c | 70.6% | 54% | 73% | 86% | 60% |
+| Single full | gpt-5.4 | v7c | 69.8% | **24%** | 87% | **95%** | 61% |
+| Two-layer | gpt-5.4-mini | l1_v1+l2_v1 | 61.2% | — | — | — | — |
+
+Two-layer breakdown: L1 gate 65.3% (junk recall 83%, non-junk recall 54%). L2 47.3% (effectively unmeasurable until L1 improves).
+
+### Generation 1 plans written for all three tracks
+
+See individual evolution files for full analysis, target passages, root causes, and 3 variants per track.
+
+**Single mini Gen 1 targets:** 2 Agassiz DT→junk passages (implicit taxonomic DT) + NDT hypothetical pair (→junk)
+- v7c_mini_gen1a: DT systemic extension only
+- v7c_mini_gen1b: NDT hypothetical fix only  
+- v7c_mini_gen1c: Both combined
+
+**Single full Gen 1 targets:** 7 DT→junk passages (DT recall 24%) + NDT hypothetical/domestic
+- v7c_full_gen1a: DT systemic/taxonomic extension
+- v7c_full_gen1b: NDT hypothetical + domestic fix
+- v7c_full_gen1c: Both combined
+
+**Two-layer L1 Gen 1 targets:** 4 FN passages (IE structural + NDT domestic being gated as junk)
+- l1_v2a: FN fix (structural-definition claims are non-junk)
+- l1_v2b: FP fix (meta-text + philosophical pattern-observation are junk)
+- l1_v2c: Both combined
+
+### Next actions
+
+Write the actual prompt variants in models/prompts.py (single tracks) and
+models/two_layer_prompts.py (two-layer L1), then run 5 evals each.

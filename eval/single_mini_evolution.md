@@ -162,6 +162,146 @@ v12c fixed NS-never-produce (0/3) but DT recall collapsed across the board.
 
 ---
 
+## Baseline: v7c on gpt-5.4-mini (5 runs, new eval set)
+
+Run dir: `eval/results/single_54mini/v7c_5run/`
+**Overall: 70.6% avg** (346/490 correct across 5 runs)
+
+Per-class recall:
+- divine_teleology: 54% (27/50)
+- internal_essence: 73% (22/30)
+- junk: 86% (82/95)
+- non_divine_teleology: 60% (42/70)
+
+### Stuck passages (5/5 wrong):
+
+| Passage snippet | Correct | Predicted | Notes |
+|---|---|---|---|
+| "parallelism between gradation among animals...exhibits thought" | junk | internal_essence ×5 | "exhibits thought" triggers IE/DT |
+| "perfect identity of the most delicate microscopic structures" | internal_essence | junk ×5 | Structural similarity claim gated as junk |
+| "order and arrangement of our studies are...indisputable" | divine_teleology | junk ×5 | Agassiz: implicit DT via classification order |
+| "nature and foundation of our scientific classifications" | divine_teleology | junk ×5 | Agassiz: implicit DT via classification purpose |
+| "man is not only the last and highest...last term of one of these natural series" | divine_teleology | internal_essence ×5 | DT divine ordering misread as structural IE |
+| "natural selection might easily specialise...one part...one function" | non_divine_teleology | junk ×5 | Hypothetical NDT construction |
+| "one of the two organs might with ease be modified and perfected" | non_divine_teleology | junk ×5 | Hypothetical NDT construction |
+
+### Stuck passages (4/5 wrong):
+
+| Passage snippet | Correct | Predicted | Notes |
+|---|---|---|---|
+| "merely mechanical weapons" (variety and rank among animals) | non_divine_teleology | junk ×3, divine_teleology ×1 | NDT about weapons/rank |
+| "Natural selection will never produce...anything injurious" | junk | non_divine_teleology ×4 | General NS principle misread as NDT |
+
+---
+
 ## Generation 1 (new loop)
 
-*To be filled when next iteration begins.*
+### Target passages
+
+Primary targets (all 5/5 wrong):
+1. **"order and arrangement of our studies"** (DT → junk): Agassiz arguing classification reflects divine plan
+2. **"nature and foundation of our scientific classifications"** (DT → junk): Agassiz arguing taxonomy has divine foundation
+3. **"natural selection might easily specialise...one part...one function"** (NDT → junk): hypothetical NDT
+4. **"one of the two organs might with ease be modified and perfected"** (NDT → junk): hypothetical NDT
+
+Secondary targets (3/5 wrong):
+5. **"mutual dependence of animal/vegetable kingdoms...exhibits thought"** (DT → junk ×3): implicit ecological DT
+
+Success criterion: targeted passages drop from 5/5 or 4/5 wrong → ≤2/5 wrong, without overall accuracy regressing below 70.6%.
+
+---
+
+### Root cause analysis
+
+**DT recall failure (passages 1, 2, 5):** The two Agassiz DT passages argue that zoological
+CLASSIFICATION ITSELF reflects divine thought — not that any specific organism was designed,
+but that the ARRANGEMENT and ORDER of taxa expresses God's plan. The model's current DT
+definition probably requires an explicit claim about an organism or its parts being designed.
+These passages make the claim at the level of the whole system of nature / taxonomic order.
+This IS DT: the argument is that divine purpose explains why classification takes the form it
+does, not just that any individual creature was made for a purpose.
+
+Principle basis for fix: DT should include "the ordering/arrangement/classification of animal
+groups reflects divine thought or plan" — an implicit divine teleology operating at the
+taxonomic level, not the organism level.
+
+Guard needed: must not catch "parallelism between gradation...exhibits thought" (junk). That
+passage observes a pattern and calls it evidence of thought, but makes NO claim about what
+defines animals or their classification. The Agassiz passages explicitly make a claim about the
+PURPOSE of classification. Key distinction: observing a thought-like pattern ≠ claiming divine
+purpose governs the classification of organisms.
+
+**NDT recall failure (passages 3, 4):** "Might easily specialise...one part to one function"
+and "might with ease be modified" are hypothetical descriptions of what natural selection CAN
+DO to specific organs. The model calls these junk because the "might" construction looks like a
+general statement rather than an actual claim. But NDT is about positing functional purpose
+for organic structures — and these passages DO posit that specific parts could serve specific
+functions via NS. The hypothetical framing is about the mechanism (NS), not about whether the
+function exists.
+
+Principle basis for fix: NDT includes passages that describe specific organs or structures
+acquiring or serving specific functions through natural selection, even when framed
+hypothetically ("might," "could be modified"). The test is whether a specific
+organ-function relationship is being asserted, not whether the language is indicative vs.
+conditional.
+
+Guard needed: must not catch "Natural selection will never produce anything injurious"
+(junk, 4/5 already wrong → NDT). That passage states a CONSTRAINT on NS in general, with no
+specific organ-function pair. The distinction: organ-function hypothesis (NDT) vs.
+general principle about NS behavior (junk).
+
+---
+
+### Three variants
+
+**v7c_mini_gen1a — DT fix only**
+
+Targeted at: passages 1, 2, 5 (Agassiz DT → junk)
+
+Change: In the DT category description, add one sentence after the existing definition:
+> "This includes passages that argue the zoological classification, ordering, or systematic
+> arrangement of animal groups reflects divine thought, plan, or intention — even when no
+> specific organism is named and no explicit creator-language is used. The claim that
+> taxonomy or the plan of nature itself has a divine purpose qualifies as divine_teleology."
+
+Justification: Principle-driven — DT is defined by attributing purpose to the divine; it is
+not limited to organism-level claims. Arguing that the ORDER of nature reflects God's thought
+is exactly the core DT claim Agassiz makes throughout his work.
+
+Violation flag: None. The addition does not reference passage-specific surface features.
+It generalizes a principle that covers the Agassiz passages by virtue of their conceptual
+content, not their wording.
+
+**v7c_mini_gen1b — NDT hypothetical fix only**
+
+Targeted at: passages 3, 4 (NDT hypothetical → junk)
+
+Change: In the NDT category description, add one sentence:
+> "NDT includes passages that describe how specific organs or structures might acquire or
+> serve specific functions through natural processes (e.g., 'natural selection might
+> specialise this organ for one purpose'). Hypothetical framing ('might,' 'could be
+> modified') does not disqualify a passage from NDT — what matters is whether a
+> specific organ-function relationship is being posited."
+
+Guard sentence to add (prevents NS-never-produce from flipping to NDT):
+> "General statements about what natural selection does or does not produce in principle,
+> with no specific organ-function pair, remain junk."
+
+Justification: Principle-driven — NDT is defined by attributing non-divine functional
+purpose to organic structures. A hypothetical claim about what a part COULD do for an
+organism is still making a teleological claim about that part. The conditionality is about
+mechanism, not about whether teleology is asserted.
+
+Violation flag: None. This is a logical extension of NDT's definition, not tailored to
+passage surface features.
+
+**v7c_mini_gen1c — Both fixes combined**
+
+Targeted at: passages 1, 2, 3, 4, 5
+
+Applies both changes from gen1a and gen1b simultaneously. Since the two fixes address
+independent failure modes (DT taxonomy vs. NDT hypothetical) and neither touches the same
+part of the prompt, the combined version should be additive with minimal interference.
+
+Risk: slightly longer prompt may increase junk FP rate (model becomes more permissive on
+multiple axes at once). Monitor overall junk recall (currently 86%) for regression.
