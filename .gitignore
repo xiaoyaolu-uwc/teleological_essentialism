@@ -16,3 +16,11 @@ __pycache__/
 
 # eval results (generated outputs, not source)
 eval/results/**/*.csv
+
+# relabel report (generated binaries/temp, not source)
+eval/relabel_report/*.docx
+eval/relabel_report/*.pdf
+eval/relabel_report/*.jpg
+eval/relabel_report/*.tmp
+eval/relabel_report/.~lock.*
+eval/relabel_report/*.csv
