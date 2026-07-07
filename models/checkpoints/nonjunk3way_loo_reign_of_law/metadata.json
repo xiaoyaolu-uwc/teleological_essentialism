@@ -1,0 +1,107 @@
+{
+  "run_name": "nonjunk3way_loo_reign_of_law",
+  "holdout_work": "The Reign of Law",
+  "model": "emanjavacas/MacBERTh",
+  "stage": "nonjunk_3way",
+  "stage_labels": [
+    "divine_teleology",
+    "non_divine_teleology",
+    "internal_essence"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 4,
+  "best_epoch": 3,
+  "best_val_macro_f1": 0.9076986157829596,
+  "train_n": 3850,
+  "val_n": 425,
+  "class_weights": [
+    2.2998805046081543,
+    0.7966066598892212,
+    0.7634344696998596
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.7751479289940828,
+    "macro_f1": 0.7249765751294803,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.7241379310344828,
+        "precision": 0.5675675675675675
+      },
+      "non_divine_teleology": {
+        "recall": 0.8053097345132744,
+        "precision": 0.8666666666666667
+      },
+      "internal_essence": {
+        "recall": 0.7037037037037037,
+        "precision": 0.7037037037037037
+      }
+    },
+    "confusion_matrix": [
+      [
+        21,
+        8,
+        0
+      ],
+      [
+        14,
+        91,
+        8
+      ],
+      [
+        2,
+        6,
+        19
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence"
+    ],
+    "n": 169
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.9,
+    "macro_f1": 0.903988603988604,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.9,
+        "precision": 0.9
+      },
+      "non_divine_teleology": {
+        "recall": 0.8571428571428571,
+        "precision": 0.9230769230769231
+      },
+      "internal_essence": {
+        "recall": 1.0,
+        "precision": 0.8571428571428571
+      }
+    },
+    "confusion_matrix": [
+      [
+        9,
+        1,
+        0
+      ],
+      [
+        1,
+        12,
+        1
+      ],
+      [
+        0,
+        0,
+        6
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence"
+    ],
+    "n": 30
+  }
+}

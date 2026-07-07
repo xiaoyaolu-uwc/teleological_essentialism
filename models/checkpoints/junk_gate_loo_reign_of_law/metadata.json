@@ -1,0 +1,81 @@
+{
+  "run_name": "junk_gate_loo_reign_of_law",
+  "holdout_work": "The Reign of Law",
+  "model": "emanjavacas/MacBERTh",
+  "stage": "junk_gate",
+  "stage_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 4,
+  "best_epoch": 4,
+  "best_val_macro_f1": 0.8255546316715472,
+  "train_n": 11122,
+  "val_n": 1232,
+  "class_weights": [
+    0.7647139430046082,
+    1.44441556930542
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.7505330490405118,
+    "macro_f1": 0.6990374331550802,
+    "per_class": {
+      "junk": {
+        "recall": 0.91,
+        "precision": 0.7520661157024794
+      },
+      "non_junk": {
+        "recall": 0.46745562130177515,
+        "precision": 0.7452830188679245
+      }
+    },
+    "confusion_matrix": [
+      [
+        273,
+        27
+      ],
+      [
+        90,
+        79
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 469
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.673469387755102,
+    "macro_f1": 0.6722408026755853,
+    "per_class": {
+      "junk": {
+        "recall": 0.7894736842105263,
+        "precision": 0.5555555555555556
+      },
+      "non_junk": {
+        "recall": 0.6,
+        "precision": 0.8181818181818182
+      }
+    },
+    "confusion_matrix": [
+      [
+        15,
+        4
+      ],
+      [
+        12,
+        18
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 49
+  }
+}
