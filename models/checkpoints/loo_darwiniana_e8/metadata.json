@@ -1,0 +1,130 @@
+{
+  "run_name": "loo_darwiniana_e8",
+  "holdout_work": "Darwiniana",
+  "model": "emanjavacas/MacBERTh",
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 8,
+  "best_epoch": 8,
+  "best_val_macro_f1": 0.7547062752212743,
+  "train_n": 10897,
+  "val_n": 1209,
+  "class_weights": [
+    4.746079921722412,
+    1.6254475116729736,
+    1.6167656183242798,
+    0.39130279421806335
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.8535564853556485,
+    "macro_f1": 0.49540013413554673,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.2727272727272727,
+        "precision": 0.25
+      },
+      "non_divine_teleology": {
+        "recall": 0.45,
+        "precision": 0.28125
+      },
+      "internal_essence": {
+        "recall": 0.45454545454545453,
+        "precision": 0.45454545454545453
+      },
+      "junk": {
+        "recall": 0.9021739130434783,
+        "precision": 0.938610662358643
+      }
+    },
+    "confusion_matrix": [
+      [
+        3,
+        0,
+        1,
+        7
+      ],
+      [
+        2,
+        18,
+        0,
+        20
+      ],
+      [
+        0,
+        1,
+        10,
+        11
+      ],
+      [
+        7,
+        45,
+        11,
+        581
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence",
+      "junk"
+    ],
+    "n": 717
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.6122448979591837,
+    "macro_f1": 0.627927993059572,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.4,
+        "precision": 0.4444444444444444
+      },
+      "non_divine_teleology": {
+        "recall": 0.6428571428571429,
+        "precision": 0.9
+      },
+      "internal_essence": {
+        "recall": 0.8333333333333334,
+        "precision": 0.7142857142857143
+      },
+      "junk": {
+        "recall": 0.631578947368421,
+        "precision": 0.5217391304347826
+      }
+    },
+    "confusion_matrix": [
+      [
+        4,
+        0,
+        0,
+        6
+      ],
+      [
+        1,
+        9,
+        0,
+        4
+      ],
+      [
+        0,
+        0,
+        5,
+        1
+      ],
+      [
+        4,
+        1,
+        2,
+        12
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence",
+      "junk"
+    ],
+    "n": 49
+  }
+}

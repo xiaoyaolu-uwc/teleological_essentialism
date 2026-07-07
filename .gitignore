@@ -24,3 +24,11 @@ eval/relabel_report/*.jpg
 eval/relabel_report/*.tmp
 eval/relabel_report/.~lock.*
 eval/relabel_report/*.csv
+
+# BERT checkpoints (weights are large binaries, not source; keep metadata.json)
+models/checkpoints/*/*
+!models/checkpoints/*/metadata.json
+
+# local Claude Code tool state, not project history
+.claude/settings.local.json
+.claude/scheduled_tasks.lock

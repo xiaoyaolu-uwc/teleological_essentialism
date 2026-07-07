@@ -28,6 +28,11 @@ PATHS = {
     "sentences_csv":  REPO_ROOT / "data" / "sentences.csv",
     "promising_csv":  REPO_ROOT / "data" / "promising_passages.csv",
     "evaluation_csv": REPO_ROOT / "data" / "evaluation_set.csv",
+    "sentences_labeled_csv": REPO_ROOT / "data" / "sentences_labeled.csv",
+    "sentences_train_csv":   REPO_ROOT / "data" / "sentences_train.csv",
+    "bert_checkpoints_dir":  REPO_ROOT / "models" / "checkpoints",
+    "bert_results_dir":      REPO_ROOT / "eval" / "results" / "bert",
+    "bert_cascade_results_dir": REPO_ROOT / "eval" / "results" / "bert_cascade",
     "env_file":       REPO_ROOT / ".env",
 }
 
