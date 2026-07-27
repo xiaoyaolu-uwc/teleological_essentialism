@@ -1,0 +1,215 @@
+{
+  "run_name": "junk_gate_bertbase_loo_darwiniana",
+  "holdout_work": "Darwiniana",
+  "model": "bert-base-uncased",
+  "stage": "junk_gate",
+  "stage_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 4,
+  "best_epoch": 3,
+  "best_val_macro_f1": 0.816933173543343,
+  "train_n": 10897,
+  "val_n": 1209,
+  "class_weights": [
+    0.7826055884361267,
+    1.3846251964569092
+  ],
+  "epoch_log": [
+    {
+      "epoch": 1,
+      "train_loss": 0.48565818493929075,
+      "val_metrics": {
+        "accuracy": 0.7965260545905707,
+        "macro_f1": 0.790008133801027,
+        "per_class": {
+          "junk": {
+            "recall": 0.7606727037516171,
+            "precision": 0.9060092449922958
+          },
+          "non_junk": {
+            "recall": 0.8600917431192661,
+            "precision": 0.6696428571428571
+          }
+        },
+        "confusion_matrix": [
+          [
+            588,
+            185
+          ],
+          [
+            61,
+            375
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "junk",
+          "non_junk"
+        ],
+        "n": 1209
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.31799595534823333,
+      "val_metrics": {
+        "accuracy": 0.8122415219189413,
+        "macro_f1": 0.8051911546223296,
+        "per_class": {
+          "junk": {
+            "recall": 0.7839586028460543,
+            "precision": 0.9099099099099099
+          },
+          "non_junk": {
+            "recall": 0.8623853211009175,
+            "precision": 0.6924493554327809
+          }
+        },
+        "confusion_matrix": [
+          [
+            606,
+            167
+          ],
+          [
+            60,
+            376
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "junk",
+          "non_junk"
+        ],
+        "n": 1209
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1682071116899039,
+      "val_metrics": {
+        "accuracy": 0.8354011579818031,
+        "macro_f1": 0.816933173543343,
+        "per_class": {
+          "junk": {
+            "recall": 0.9016817593790427,
+            "precision": 0.85
+          },
+          "non_junk": {
+            "recall": 0.7178899082568807,
+            "precision": 0.8046272493573264
+          }
+        },
+        "confusion_matrix": [
+          [
+            697,
+            76
+          ],
+          [
+            123,
+            313
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "junk",
+          "non_junk"
+        ],
+        "n": 1209
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.09418571868821257,
+      "val_metrics": {
+        "accuracy": 0.8229942100909843,
+        "macro_f1": 0.815153463648834,
+        "per_class": {
+          "junk": {
+            "recall": 0.8046571798188874,
+            "precision": 0.908029197080292
+          },
+          "non_junk": {
+            "recall": 0.8555045871559633,
+            "precision": 0.7118320610687023
+          }
+        },
+        "confusion_matrix": [
+          [
+            622,
+            151
+          ],
+          [
+            63,
+            373
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "junk",
+          "non_junk"
+        ],
+        "n": 1209
+      }
+    }
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.8772663877266388,
+    "macro_f1": 0.656085117516243,
+    "per_class": {
+      "junk": {
+        "recall": 0.9347826086956522,
+        "precision": 0.9290123456790124
+      },
+      "non_junk": {
+        "recall": 0.3698630136986301,
+        "precision": 0.391304347826087
+      }
+    },
+    "confusion_matrix": [
+      [
+        602,
+        42
+      ],
+      [
+        46,
+        27
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 717
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.6938775510204082,
+    "macro_f1": 0.6918238993710691,
+    "per_class": {
+      "junk": {
+        "recall": 0.7894736842105263,
+        "precision": 0.5769230769230769
+      },
+      "non_junk": {
+        "recall": 0.6333333333333333,
+        "precision": 0.8260869565217391
+      }
+    },
+    "confusion_matrix": [
+      [
+        15,
+        4
+      ],
+      [
+        11,
+        19
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 49
+  }
+}

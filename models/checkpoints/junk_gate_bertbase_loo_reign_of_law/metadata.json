@@ -1,0 +1,81 @@
+{
+  "run_name": "junk_gate_bertbase_loo_reign_of_law",
+  "holdout_work": "The Reign of Law",
+  "model": "bert-base-uncased",
+  "stage": "junk_gate",
+  "stage_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 4,
+  "best_epoch": 4,
+  "best_val_macro_f1": 0.8222405441615994,
+  "train_n": 11122,
+  "val_n": 1232,
+  "class_weights": [
+    0.7647139430046082,
+    1.44441556930542
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.7484008528784648,
+    "macro_f1": 0.7340349865436371,
+    "per_class": {
+      "junk": {
+        "recall": 0.7666666666666667,
+        "precision": 0.8273381294964028
+      },
+      "non_junk": {
+        "recall": 0.7159763313609467,
+        "precision": 0.6335078534031413
+      }
+    },
+    "confusion_matrix": [
+      [
+        230,
+        70
+      ],
+      [
+        48,
+        121
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 469
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.7755102040816326,
+    "macro_f1": 0.7657540199913082,
+    "per_class": {
+      "junk": {
+        "recall": 0.7368421052631579,
+        "precision": 0.7
+      },
+      "non_junk": {
+        "recall": 0.8,
+        "precision": 0.8275862068965517
+      }
+    },
+    "confusion_matrix": [
+      [
+        14,
+        5
+      ],
+      [
+        6,
+        24
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 49
+  }
+}

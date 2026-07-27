@@ -1,0 +1,33 @@
+{
+  "checkpoint": "junk_gate_bertbase_loo_darwiniana",
+  "holdout_work": "Darwiniana",
+  "stage": "junk_gate",
+  "eval_text_column": "text",
+  "accuracy": 0.8814504881450488,
+  "macro_f1": 0.6477839487265435,
+  "per_class": {
+    "junk": {
+      "recall": 0.9440993788819876,
+      "precision": 0.9254185692541856
+    },
+    "non_junk": {
+      "recall": 0.3287671232876712,
+      "precision": 0.4
+    }
+  },
+  "confusion_matrix": [
+    [
+      608,
+      36
+    ],
+    [
+      49,
+      24
+    ]
+  ],
+  "confusion_matrix_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "n": 717
+}

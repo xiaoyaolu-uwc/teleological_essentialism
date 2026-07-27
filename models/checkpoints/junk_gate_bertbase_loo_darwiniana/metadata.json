@@ -1,0 +1,81 @@
+{
+  "run_name": "junk_gate_bertbase_loo_darwiniana",
+  "holdout_work": "Darwiniana",
+  "model": "bert-base-uncased",
+  "stage": "junk_gate",
+  "stage_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 128,
+  "oversample": false,
+  "class_weighted_loss": true,
+  "epochs_run": 4,
+  "best_epoch": 3,
+  "best_val_macro_f1": 0.816933173543343,
+  "train_n": 10897,
+  "val_n": 1209,
+  "class_weights": [
+    0.7826055884361267,
+    1.3846251964569092
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.8772663877266388,
+    "macro_f1": 0.656085117516243,
+    "per_class": {
+      "junk": {
+        "recall": 0.9347826086956522,
+        "precision": 0.9290123456790124
+      },
+      "non_junk": {
+        "recall": 0.3698630136986301,
+        "precision": 0.391304347826087
+      }
+    },
+    "confusion_matrix": [
+      [
+        602,
+        42
+      ],
+      [
+        46,
+        27
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 717
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.6938775510204082,
+    "macro_f1": 0.6918238993710691,
+    "per_class": {
+      "junk": {
+        "recall": 0.7894736842105263,
+        "precision": 0.5769230769230769
+      },
+      "non_junk": {
+        "recall": 0.6333333333333333,
+        "precision": 0.8260869565217391
+      }
+    },
+    "confusion_matrix": [
+      [
+        15,
+        4
+      ],
+      [
+        11,
+        19
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "junk",
+      "non_junk"
+    ],
+    "n": 49
+  }
+}

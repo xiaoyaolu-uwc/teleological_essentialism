@@ -240,6 +240,9 @@ def main():
     ap.add_argument("--stage", default="full4way", choices=list(STAGE_LABELS.keys()),
                      help="full4way = original 4-class problem; junk_gate = binary junk/non_junk; "
                           "nonjunk_3way = 3-class DT/NDT/IE, junk rows dropped entirely")
+    ap.add_argument("--model-name", default=MODEL_NAME,
+                     help="Base model to fine-tune, e.g. bert-base-uncased instead of MacBERTh, "
+                          "to isolate whether historical pretraining matters for a given stage")
     args = ap.parse_args()
     max_length = args.max_length or (256 if args.text_column == "text" else 128)
     stage_labels = STAGE_LABELS[args.stage]
@@ -256,8 +259,8 @@ def main():
     train_rows, val_rows = stratified_val_split(train_pool)
     print(f"[{args.run_name}] train={len(train_rows)} val={len(val_rows)} held_out={len(held_out)}", flush=True)
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=num_labels)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(args.model_name, num_labels=num_labels)
     model.to(device)
 
     train_labels = [stage_label2id[stage_tag(r["deploy_tag"], args.stage)] for r in train_rows]
@@ -335,7 +338,7 @@ def main():
     report = {
         "run_name": args.run_name,
         "holdout_work": args.holdout_work,
-        "model": MODEL_NAME,
+        "model": args.model_name,
         "stage": args.stage,
         "stage_labels": stage_labels,
         "text_column": args.text_column,

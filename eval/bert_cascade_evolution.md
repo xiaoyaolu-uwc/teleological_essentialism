@@ -101,3 +101,109 @@ non_junk recall, since the failure looks like a calibration/threshold issue
 on a fundamentally learnable signal (the model *can* tell DT/NDT/IE apart
 extremely well once junk is out of the way) rather than a data or capacity
 problem.
+
+## Follow-up: base model, distribution shift, and proportion analysis
+
+Three follow-up checks on the junk gate specifically, plus a reframing of
+what "good enough" means given the project's actual research use (tracking
+category *proportions* across texts over time, not per-row accuracy).
+
+### bert-base-uncased vs. MacBERTh as the junk gate
+
+`--model-name` added to `models/train_bert.py` to swap the base model.
+Plain `bert-base-uncased`, same architecture/task, no historical pretraining:
+
+| Holdout | Model | Golden acc / macro-F1 | Golden non_junk recall |
+|---|---|---|---|
+| Reign of Law | MacBERTh | 0.673 / 0.672 | 0.60 |
+| Reign of Law | bert-base-uncased | **0.776 / 0.766** | **0.80** |
+| Darwiniana | MacBERTh | 0.694 / 0.689 | 0.67 |
+| Darwiniana | bert-base-uncased | 0.694 / 0.692 | 0.63 |
+
+Plain BERT clearly wins on Reign of Law, is a wash on Darwiniana, never
+loses. Historical pretraining isn't buying anything for this specific binary
+distinction — evidence the junk-gate weakness is a framing/architecture
+issue (binary loses the softmax "cushion" weak signal had in the 4-way
+setup), not a domain-vocabulary gap. Ruled out chasing a different
+historical-BERT variant as the fix.
+
+### Raw-text distribution shift (deploy_extract-trained, evaluated on raw `text`)
+
+`eval/evaluate_text_shift.py` re-evaluates an already-trained checkpoint (no
+retraining) on the raw `text` column instead of `deploy_extract`, since
+`deploy_extract` is itself an LLM-produced field — a standalone deployed
+model would need to work on raw passages directly. Cost is real but modest:
+roughly 2-6pp of macro-F1/recall across all 4 junk-gate configs (e.g.
+MacBERTh/Reign of Law: macro-F1 0.703 → 0.685; non_junk recall 0.47 → 0.43).
+Confirms the junk gate's core weakness isn't mainly this shift — it's
+present already when evaluated on-distribution.
+
+### The false-junk skew is against essentialism, not (only) divine_teleology
+
+Re-examined at the grouping that matches the actual research question —
+teleology (DT+NDT) vs. essentialism (IE) — rather than the finer 4-way
+split. On held-out text (larger, more reliable n than golden):
+
+| Model | Holdout | Teleology false-junk rate | Essentialism false-junk rate |
+|---|---|---|---|
+| MacBERTh | Reign of Law | 0.51 (72/142) | **0.67** (18/27) |
+| bert-base | Reign of Law | 0.23 (32/142) | **0.59** (16/27) |
+| MacBERTh | Darwiniana | 0.51 (26/51) | **0.73** (16/22) |
+| bert-base | Darwiniana | 0.57 (29/51) | **0.77** (17/22) |
+
+Essentialism is the more disadvantaged camp in all 4 configs — opposite of
+what the DT-only view suggested, because NDT survives the gate well and
+pulling it into "teleology" drags that pooled rate down. Golden-set numbers
+on this grouping are too small (n=6 for essentialism) to trust directionally
+and shouldn't be used for this comparison.
+
+Separately, the reverse error — true junk leaking through as a real
+category — is small (8-9% on held-out text) and roughly evenly spread
+across DT/NDT/IE (see cascade end-to-end confusion matrices). Leakage is not
+the risk; wrongful discarding of essentialism specifically is.
+
+### Output proportions: true vs. cascade end-to-end vs. hypothetical-perfect-gate
+
+Computed on each held-out text's own rows (not the pooled golden set, which
+isn't representative of any single text's true distribution). "True" here
+means `deploy_tag` (the LLM's own labels for that text — the golden set's
+human labels don't cover enough per-text rows to use directly).
+
+| Text | | Divine teleology | Non-divine teleology | Internal essentialism |
+|---|---|---|---|---|
+| Reign of Law (n=169) | True | 17.2% | 66.9% | 16.0% |
+| | Cascade end-to-end | 19.8% | 63.2% | 17.0% |
+| | Perfect-gate hypothetical (stage 2 alone) | 21.9% | 62.1% | 16.0% |
+| Darwiniana (n=73) | True | 15.1% | 54.8% | 30.1% |
+| | Cascade end-to-end | 20.7% | 63.4% | 15.9% |
+| | Perfect-gate hypothetical (stage 2 alone) | 16.4% | 46.6% | 37.0% |
+
+Reign of Law: cascade end-to-end is within a few points of true on every
+category, and a perfect gate wouldn't change much. Darwiniana: the cascade
+meaningfully overstates DT and understates IE (30.1% true → 15.9%); a
+perfect gate would *overstate* IE instead (→37.0%) — the sign flips. That
+flip is strong evidence the 3-way categorizer itself is trustworthy and the
+distortion is coming from the gate, but also that the gate's error isn't a
+fixed, correctable bias — it varies by text in a way not yet predictable.
+
+## Decision (updated)
+
+Not deployable for proportion-tracking yet, on either the single 4-way model
+or the cascade. Next steps, decided with the user:
+
+1. **Commit to fine-tuning a small LLM (via LoRA) specifically as the
+   junk/non-junk gate**, rather than further BERT-side tuning
+   (oversampling/threshold, above) — a bigger swing, justified because the
+   gate is the clearly-isolated bottleneck rather than a minor knob, and
+   because plain bert-base already matched or beat MacBERTh here, suggesting
+   more BERT tuning has limited headroom left.
+2. **Build a margin-of-error framework for reported proportions, not a
+   correction.** Explicitly decided *against* trying to mathematically
+   correct output proportions using known error rates (too risky given the
+   gate's error isn't a stable, correctable bias per the Darwiniana sign-flip
+   above) — instead, attach an honest uncertainty range to any proportion
+   estimate, derived from the model's track record on texts with known
+   answers.
+
+PI update summarizing all of the above sent — draft in `bert_progress_email.md`
+(repo root, untracked).
