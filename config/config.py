@@ -33,6 +33,8 @@ PATHS = {
     "bert_checkpoints_dir":  REPO_ROOT / "models" / "checkpoints",
     "bert_results_dir":      REPO_ROOT / "eval" / "results" / "bert",
     "bert_cascade_results_dir": REPO_ROOT / "eval" / "results" / "bert_cascade",
+    "lora_checkpoints_dir":  REPO_ROOT / "models" / "checkpoints" / "lora",
+    "lora_results_dir":      REPO_ROOT / "eval" / "results" / "lora",
     "env_file":       REPO_ROOT / ".env",
 }
 
