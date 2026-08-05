@@ -33,10 +33,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config.config import PATHS
 from models.data_utils import load_train_pool, load_golden_eval, stratified_val_split, metrics_from_preds
 from models.train_bert import STAGE_LABELS, stage_tag, get_device, evaluate, compute_class_weights
-from models.lora_gate.model import build_model_and_tokenizer, load_trained_model
+from models.lora_gate.model import build_model_and_tokenizer, load_trained_model, DEFAULT_TARGET_MODULES
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
+
+TARGET_MODULE_PRESETS = {
+    "attn": DEFAULT_TARGET_MODULES,
+    "attn_mlp": DEFAULT_TARGET_MODULES + ["gate_proj", "up_proj", "down_proj"],
+}
+
+
+def seed_everything(seed):
+    """Fixes the two randomness sources train_bert.py never controlled for
+    either (LoRA/classifier-head init, training shuffle order) -- both draw
+    from the same global torch RNG, so one call here controls both. Needed
+    for the hyperparameter sweep in LORA_JUNK_GATE_PLAN.md to mean anything:
+    without it, a difference between two configs could just be luck, the
+    same problem that made the BERT re-run comparison unreliable."""
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 HOLDOUT_WORK = "The Reign of Law"
 STAGE = "junk_gate"
@@ -95,11 +112,21 @@ def main():
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--lora-alpha", type=int, default=32)
     ap.add_argument("--lora-dropout", type=float, default=0.05)
+    ap.add_argument("--target-modules", default="attn", choices=list(TARGET_MODULE_PRESETS.keys()),
+                     help="attn = q/k/v/o_proj only (default, cheapest); "
+                          "attn_mlp = attn plus gate/up/down_proj (~2x trainable params)")
+    ap.add_argument("--oversample", action="store_true",
+                     help="Use a WeightedRandomSampler (inverse class frequency) instead of "
+                          "uniform shuffling, mirroring train_bert.py's --oversample")
+    ap.add_argument("--seed", type=int, default=42,
+                     help="Fixes LoRA/classifier-head init and training shuffle order, so sweep "
+                          "runs differ only in the hyperparameter being varied")
     args = ap.parse_args()
 
+    seed_everything(args.seed)
     device = get_device()
     print(f"[{args.run_name}] device={device} model={args.model_name} "
-          f"holdout={HOLDOUT_WORK!r} stage={STAGE}", flush=True)
+          f"holdout={HOLDOUT_WORK!r} stage={STAGE} seed={args.seed}", flush=True)
 
     train_pool, held_out = load_train_pool(HOLDOUT_WORK)
     train_rows, val_rows = stratified_val_split(train_pool)
@@ -108,6 +135,7 @@ def main():
     model, tokenizer = build_model_and_tokenizer(
         args.model_name, num_labels=len(STAGE_LABEL_LIST),
         lora_r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
+        target_modules=TARGET_MODULE_PRESETS[args.target_modules],
     )
     model.to(device)
     model.print_trainable_parameters()
@@ -119,7 +147,17 @@ def main():
     val_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in val_rows]
     train_ds = PromptedTagDataset([r[args.text_column] for r in train_rows], train_labels, tokenizer, args.max_length)
     val_ds = PromptedTagDataset([r[args.text_column] for r in val_rows], val_labels, tokenizer, args.max_length)
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+
+    if args.oversample:
+        # Same rationale as train_bert.py's --oversample: draw rare classes
+        # (non_junk, here) into more batches per epoch than their raw share
+        # would produce under uniform shuffling.
+        cpu_class_weights = compute_class_weights(train_labels, len(STAGE_LABEL_LIST))
+        sample_weights = [cpu_class_weights[l].item() for l in train_labels]
+        sampler = WeightedRandomSampler(sample_weights, num_samples=len(train_rows), replacement=True)
+        train_loader = DataLoader(train_ds, batch_size=args.batch_size, sampler=sampler)
+    else:
+        train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
     loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights)
@@ -179,6 +217,9 @@ def main():
         "lora_r": args.lora_r,
         "lora_alpha": args.lora_alpha,
         "lora_dropout": args.lora_dropout,
+        "target_modules": args.target_modules,
+        "oversample": args.oversample,
+        "seed": args.seed,
         "lr": args.lr,
         "epochs_run": args.epochs,
         "best_epoch": best_epoch,
