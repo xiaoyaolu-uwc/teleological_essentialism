@@ -43,6 +43,12 @@ def build_model_and_tokenizer(
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
+    # The passage being classified sits at the very end of every prompt
+    # template ("...Passage: {text}"). Default truncation cuts from the end,
+    # which would silently drop the actual passage on any row that overflows
+    # max_length -- truncating from the left instead sacrifices prompt
+    # boilerplate first, never the content being classified.
+    tokenizer.truncation_side = "left"
 
     base_model = AutoModelForSequenceClassification.from_pretrained(
         model_name, num_labels=num_labels,
@@ -69,6 +75,8 @@ def load_trained_model(model_name, ckpt_dir, num_labels, device):
     from peft import PeftModel
 
     tokenizer = AutoTokenizer.from_pretrained(ckpt_dir)
+    tokenizer.padding_side = "right"
+    tokenizer.truncation_side = "left"
     base_model = AutoModelForSequenceClassification.from_pretrained(
         model_name, num_labels=num_labels,
     )

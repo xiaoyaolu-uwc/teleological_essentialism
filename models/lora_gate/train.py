@@ -68,12 +68,24 @@ STAGE_LABEL2ID = {l: i for i, l in enumerate(STAGE_LABEL_LIST)}
 # that's prompted.
 #
 # "none" is a bare-text control (like BERT ever saw) -- answers whether
-# prompting helps at all before trusting any of the others. "rich" spells
-# out the three positive subtypes explicitly rather than leaving "purpose,
-# function, or structure" abstract. "fewshot" adds one concrete example of
-# each class -- both examples below are synthetic, written for this prompt,
-# not pulled from the corpus, so there's no risk of leaking held-out/golden
-# text into training via the prompt itself.
+# prompting helps at all before trusting any of the others.
+#
+# "rich" and both "fewshot" variants are grounded in the real category
+# definitions from models/prompts.py's r6a system prompt (the deployment
+# prompt, d_v3, that actually labeled the corpus at 91.8% golden accuracy)
+# rather than an ad hoc restatement. r6a's actual Step 1 test is stricter
+# than "explains or asserts something about purpose/function/structure": a
+# passage is only non_junk if it makes a DEFINITIONAL/CATEGORICAL claim about
+# what an animal (or animal part) fundamentally IS -- grounded in a purpose
+# (divine or not) or in internal structure. Merely describing or asserting a
+# fact about a part's function, without generalizing to what kind of animal
+# it is, is explicitly junk under r6a (e.g. "the eye is contrived for
+# vision" alone does not characterize what kind of animal has that eye).
+# Sharpest test from r6a: could this passage be true regardless of how you
+# define the animal? If so, it's junk.
+#
+# All examples below are synthetic, written for this prompt, not pulled
+# from the corpus -- no risk of leaking held-out/golden text via the prompt.
 PROMPT_VARIANTS = {
     "none": None,
     "current": (
@@ -85,24 +97,51 @@ PROMPT_VARIANTS = {
     ),
     "rich": (
         "Classify this passage from a historical natural-history text as junk or non_junk.\n"
-        "non_junk passages explain or assert something about an animal's purpose, function, "
-        "or structure -- for example: a divine/teleological purpose (\"the wing is formed for "
-        "flight, by design\"), a naturalized/evolutionary function (\"this trait persists "
-        "because it aids survival\"), or an internal structural/anatomical account (\"the "
-        "limb's structure follows a common archetype\").\n"
-        "junk passages contain no such explanatory content (e.g. narrative, citation, or "
-        "unrelated description).\n\n"
+        "non_junk passages make a DEFINITIONAL or CATEGORICAL claim about what an animal (or "
+        "animal part) fundamentally is or what kind it belongs to -- grounded in a purpose it "
+        "serves (whether divinely ordained or not) or in its internal structure. The test: "
+        "could this passage be true regardless of how you define the animal? If yes, it's junk.\n"
+        "junk passages describe, mention, or narrate without committing to such a claim -- e.g. "
+        "observing a structural feature in passing without generalizing to what kind of animal "
+        "it is, describing a process or mechanism without characterizing the animal as a result, "
+        "or citing animal features only as evidence for a creator's existence rather than "
+        "asserting what the animal is for.\n\n"
         "Passage: {text}"
     ),
     "fewshot": (
         "Classify passages from historical natural-history texts as junk or non_junk.\n\n"
-        "Example (non_junk): \"The eye is admirably contrived for the purpose of vision, its "
-        "lens and humours cooperating to focus light upon the retina.\"\n"
-        "Example (junk): \"The author then proceeded to describe the voyage from Lisbon, "
-        "dwelling at length upon the discomforts of the passage.\"\n\n"
+        "Example (non_junk): \"The mole may be classed among the burrowing kind, its broad "
+        "spade-like feet marking it as an animal fitted by nature for a life spent underground.\" "
+        "(definitional: categorizes the animal by a function/purpose its structure fits it for)\n"
+        "Example (junk): \"The eye is admirably contrived for the purpose of vision, its lens "
+        "and humours cooperating to focus light upon the retina.\" (not definitional: describes "
+        "a part's function without generalizing to what kind of animal has it)\n\n"
         "Now classify this passage:\n"
-        "non_junk: explains or asserts something about an animal's purpose, function, or structure.\n"
-        "junk: does not.\n\n"
+        "non_junk: makes a definitional/categorical claim about what kind of animal this is, "
+        "grounded in purpose or structure.\n"
+        "junk: describes or mentions without making such a claim.\n\n"
+        "Passage: {text}"
+    ),
+    "fewshot_multi": (
+        "Classify passages from historical natural-history texts as junk or non_junk.\n\n"
+        "non_junk passages make a definitional/categorical claim about what kind of animal "
+        "something is, grounded in purpose (divine or not) or in structure. Three examples, "
+        "one per pattern:\n"
+        "1. \"The wing was given to the bird by its Creator for the very purpose of flight, "
+        "marking it as an inhabitant of the air by design.\" (purpose, divinely grounded)\n"
+        "2. \"The mole may be classed among the burrowing kind, its broad spade-like feet "
+        "marking it as an animal fitted by nature for a life spent underground.\" (purpose, "
+        "not divinely grounded)\n"
+        "3. \"The whale is properly ranked among the mammals, not the fishes, its warm blood "
+        "and internal skeleton marking the true nature of the kind, whatever its outward "
+        "likeness to a fish.\" (internal structure)\n\n"
+        "junk passages describe, mention, or narrate without making such a claim, e.g.:\n"
+        "\"The eye is admirably contrived for the purpose of vision, its lens and humours "
+        "cooperating to focus light upon the retina.\" (describes a part's function without "
+        "generalizing to what kind of animal it is -- not definitional)\n\n"
+        "Now classify this passage:\n"
+        "non_junk: makes a definitional/categorical claim about what kind of animal this is.\n"
+        "junk: describes or mentions without making such a claim.\n\n"
         "Passage: {text}"
     ),
 }
@@ -140,13 +179,16 @@ def main():
     ap.add_argument("--lr", type=float, default=2e-4,
                      help="LoRA typically wants a higher LR than full fine-tuning "
                           "(train_bert.py uses 2e-5) since far fewer params are updated")
-    ap.add_argument("--max-length", type=int, default=160,
-                     help="Higher than train_bert.py's 128 to leave room for the prompt template")
+    ap.add_argument("--max-length", type=int, default=384,
+                     help="Higher than train_bert.py's 128 to leave room for the prompt template -- "
+                          "fewshot_multi alone runs ~270 tokens before the passage text is even added, "
+                          "so this must comfortably exceed the longest template plus a full extract")
     ap.add_argument("--text-column", default="deploy_extract", choices=["deploy_extract", "text"])
     ap.add_argument("--prompt-variant", default="current", choices=list(PROMPT_VARIANTS.keys()),
-                     help="none = bare text (BERT-style control); current = existing abstract "
-                          "framing; rich = names the three positive subtypes explicitly; "
-                          "fewshot = adds one synthetic junk/non_junk example")
+                     help="none = bare text (BERT-style control); current = original (imprecise) "
+                          "framing; rich = correct definitional/categorical test from r6a, no "
+                          "examples; fewshot = one non_junk/junk example pair; fewshot_multi = "
+                          "three non_junk examples (one per DT/NDT/IE pattern) plus one junk")
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--lora-alpha", type=int, default=32)
     ap.add_argument("--lora-dropout", type=float, default=0.05)
