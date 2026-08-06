@@ -66,18 +66,52 @@ STAGE_LABEL2ID = {l: i for i, l in enumerate(STAGE_LABEL_LIST)}
 # this doesn't turn the classification-head approach into the generative one
 # -- the model still just picks argmax over 2 logits, it's only the *input*
 # that's prompted.
-PROMPT_TEMPLATE = (
-    "Classify this passage from a historical natural-history text.\n"
-    "non_junk: the passage explains or asserts something about an animal's "
-    "purpose, function, or structure.\n"
-    "junk: the passage does not.\n\n"
-    "Passage: {text}"
-)
+#
+# "none" is a bare-text control (like BERT ever saw) -- answers whether
+# prompting helps at all before trusting any of the others. "rich" spells
+# out the three positive subtypes explicitly rather than leaving "purpose,
+# function, or structure" abstract. "fewshot" adds one concrete example of
+# each class -- both examples below are synthetic, written for this prompt,
+# not pulled from the corpus, so there's no risk of leaking held-out/golden
+# text into training via the prompt itself.
+PROMPT_VARIANTS = {
+    "none": None,
+    "current": (
+        "Classify this passage from a historical natural-history text.\n"
+        "non_junk: the passage explains or asserts something about an animal's "
+        "purpose, function, or structure.\n"
+        "junk: the passage does not.\n\n"
+        "Passage: {text}"
+    ),
+    "rich": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n"
+        "non_junk passages explain or assert something about an animal's purpose, function, "
+        "or structure -- for example: a divine/teleological purpose (\"the wing is formed for "
+        "flight, by design\"), a naturalized/evolutionary function (\"this trait persists "
+        "because it aids survival\"), or an internal structural/anatomical account (\"the "
+        "limb's structure follows a common archetype\").\n"
+        "junk passages contain no such explanatory content (e.g. narrative, citation, or "
+        "unrelated description).\n\n"
+        "Passage: {text}"
+    ),
+    "fewshot": (
+        "Classify passages from historical natural-history texts as junk or non_junk.\n\n"
+        "Example (non_junk): \"The eye is admirably contrived for the purpose of vision, its "
+        "lens and humours cooperating to focus light upon the retina.\"\n"
+        "Example (junk): \"The author then proceeded to describe the voyage from Lisbon, "
+        "dwelling at length upon the discomforts of the passage.\"\n\n"
+        "Now classify this passage:\n"
+        "non_junk: explains or asserts something about an animal's purpose, function, or structure.\n"
+        "junk: does not.\n\n"
+        "Passage: {text}"
+    ),
+}
 
 
 class PromptedTagDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length):
-        prompted = [PROMPT_TEMPLATE.format(text=t) for t in texts]
+    def __init__(self, texts, labels, tokenizer, max_length, prompt_variant="current"):
+        template = PROMPT_VARIANTS[prompt_variant]
+        prompted = texts if template is None else [template.format(text=t) for t in texts]
         enc = tokenizer(
             prompted, truncation=True, padding="max_length",
             max_length=max_length, return_tensors="pt",
@@ -109,6 +143,10 @@ def main():
     ap.add_argument("--max-length", type=int, default=160,
                      help="Higher than train_bert.py's 128 to leave room for the prompt template")
     ap.add_argument("--text-column", default="deploy_extract", choices=["deploy_extract", "text"])
+    ap.add_argument("--prompt-variant", default="current", choices=list(PROMPT_VARIANTS.keys()),
+                     help="none = bare text (BERT-style control); current = existing abstract "
+                          "framing; rich = names the three positive subtypes explicitly; "
+                          "fewshot = adds one synthetic junk/non_junk example")
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--lora-alpha", type=int, default=32)
     ap.add_argument("--lora-dropout", type=float, default=0.05)
@@ -145,8 +183,8 @@ def main():
     print(f"[{args.run_name}] class_weights={class_weights.tolist()}", flush=True)
 
     val_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in val_rows]
-    train_ds = PromptedTagDataset([r[args.text_column] for r in train_rows], train_labels, tokenizer, args.max_length)
-    val_ds = PromptedTagDataset([r[args.text_column] for r in val_rows], val_labels, tokenizer, args.max_length)
+    train_ds = PromptedTagDataset([r[args.text_column] for r in train_rows], train_labels, tokenizer, args.max_length, args.prompt_variant)
+    val_ds = PromptedTagDataset([r[args.text_column] for r in val_rows], val_labels, tokenizer, args.max_length, args.prompt_variant)
 
     if args.oversample:
         # Same rationale as train_bert.py's --oversample: draw rare classes
@@ -218,6 +256,7 @@ def main():
         "lora_alpha": args.lora_alpha,
         "lora_dropout": args.lora_dropout,
         "target_modules": args.target_modules,
+        "prompt_variant": args.prompt_variant,
         "oversample": args.oversample,
         "seed": args.seed,
         "lr": args.lr,
@@ -231,7 +270,7 @@ def main():
     }
 
     held_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in held_out]
-    held_ds = PromptedTagDataset([r[args.text_column] for r in held_out], held_labels, tokenizer, args.max_length)
+    held_ds = PromptedTagDataset([r[args.text_column] for r in held_out], held_labels, tokenizer, args.max_length, args.prompt_variant)
     held_loader = DataLoader(held_ds, batch_size=args.batch_size)
     held_preds, held_labels_out = evaluate(best_model, held_loader, device)
     held_metrics = metrics_from_preds(held_preds, held_labels_out, STAGE_LABEL_LIST)
@@ -242,7 +281,7 @@ def main():
 
     golden = load_golden_eval(args.text_column)
     golden_labels = [STAGE_LABEL2ID[stage_tag(r["tag"], STAGE)] for r in golden]
-    golden_ds = PromptedTagDataset([r["text"] for r in golden], golden_labels, tokenizer, args.max_length)
+    golden_ds = PromptedTagDataset([r["text"] for r in golden], golden_labels, tokenizer, args.max_length, args.prompt_variant)
     golden_loader = DataLoader(golden_ds, batch_size=args.batch_size)
     golden_preds, golden_labels_out = evaluate(best_model, golden_loader, device)
     golden_metrics = metrics_from_preds(golden_preds, golden_labels_out, STAGE_LABEL_LIST)

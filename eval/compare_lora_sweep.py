@@ -43,6 +43,7 @@ def main():
             "lora_alpha": d["lora_alpha"],
             "target_modules": d.get("target_modules", "?"),
             "oversample": d.get("oversample", "?"),
+            "prompt_variant": d.get("prompt_variant", "current"),
             "seed": d.get("seed", "?"),
             "held_acc": d["holdout_text_metrics"]["accuracy"],
             "held_macro_f1": d["holdout_text_metrics"]["macro_f1"],
@@ -55,17 +56,18 @@ def main():
     rows.sort(key=lambda r: r["held_non_junk_recall"], reverse=True)
 
     header = (f"{'run_name':32s} {'lr':>8s} {'r':>3s} {'alpha':>5s} {'target':>8s} "
-              f"{'oversmp':>7s} {'seed':>4s} | {'held_recall':>11s} {'held_f1':>7s} "
+              f"{'oversmp':>7s} {'prompt':>8s} {'seed':>4s} | {'held_recall':>11s} {'held_f1':>7s} "
               f"{'gold_recall':>11s} {'gold_f1':>7s}")
     print(header)
     print("-" * len(header))
     print(f"{'BERT baseline (Reign of Law)':32s} {'':>8s} {'':>3s} {'':>5s} {'':>8s} "
-          f"{'':>7s} {'':>4s} | {BERT_BASELINE['held_out_non_junk_recall']:>11.4f} {'':>7s} "
+          f"{'':>7s} {'':>8s} {'':>4s} | {BERT_BASELINE['held_out_non_junk_recall']:>11.4f} {'':>7s} "
           f"{BERT_BASELINE['golden_non_junk_recall']:>11.4f} {'':>7s}")
     print("-" * len(header))
     for r in rows:
         print(f"{r['run_name']:32s} {r['lr']:>8.0e} {r['lora_r']:>3d} {r['lora_alpha']:>5d} "
-              f"{r['target_modules']:>8s} {str(r['oversample']):>7s} {r['seed']:>4} | "
+              f"{r['target_modules']:>8s} {str(r['oversample']):>7s} {r['prompt_variant']:>8s} "
+              f"{r['seed']:>4} | "
               f"{r['held_non_junk_recall']:>11.4f} {r['held_macro_f1']:>7.4f} "
               f"{r['golden_non_junk_recall']:>11.4f} {r['golden_macro_f1']:>7.4f}")
 
