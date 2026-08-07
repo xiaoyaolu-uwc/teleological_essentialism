@@ -84,8 +84,13 @@ STAGE_LABEL2ID = {l: i for i, l in enumerate(STAGE_LABEL_LIST)}
 # Sharpest test from r6a: could this passage be true regardless of how you
 # define the animal? If so, it's junk.
 #
-# All examples below are synthetic, written for this prompt, not pulled
-# from the corpus -- no risk of leaking held-out/golden text via the prompt.
+# The fewshot/fewshot_multi examples below are real deploy_extract quotes
+# pulled from the training pool (excluding the Reign of Law holdout and the
+# golden set, which is already excluded from sentences_train.csv) rather than
+# invented ones -- an earlier synthetic wing/bird example blurred exactly the
+# animal-vs-part distinction these prompts are meant to teach. One OCR typo
+# ("contracing") was corrected per the project's existing word-level OCR
+# policy; one quote is trimmed for length (cut, not reworded).
 PROMPT_VARIANTS = {
     "none": None,
     "current": (
@@ -110,12 +115,15 @@ PROMPT_VARIANTS = {
     ),
     "fewshot": (
         "Classify passages from historical natural-history texts as junk or non_junk.\n\n"
-        "Example (non_junk): \"The mole may be classed among the burrowing kind, its broad "
-        "spade-like feet marking it as an animal fitted by nature for a life spent underground.\" "
-        "(definitional: categorizes the animal by a function/purpose its structure fits it for)\n"
-        "Example (junk): \"The eye is admirably contrived for the purpose of vision, its lens "
-        "and humours cooperating to focus light upon the retina.\" (not definitional: describes "
-        "a part's function without generalizing to what kind of animal has it)\n\n"
+        "Example (non_junk): \"These well known, or Flying-Fishes, as they are called, are "
+        "instantly distinguished among the Abdominales by the excessive size of their "
+        "pectorals, which are sufficiently large to support them in the air for a few "
+        "moments.\" (definitional: names and categorizes the animal kind itself, grounded in a "
+        "structural feature that fits it for a function)\n"
+        "Example (junk): \"The argument for the existence of an intelligent Creator is "
+        "generally drawn from the adaptation of means to ends, upon which the Bridgewater "
+        "treatises, for example, have been based.\" (not definitional: comments on an argument "
+        "about design, asserts nothing about what any animal is)\n\n"
         "Now classify this passage:\n"
         "non_junk: makes a definitional/categorical claim about what kind of animal this is, "
         "grounded in purpose or structure.\n"
@@ -125,20 +133,26 @@ PROMPT_VARIANTS = {
     "fewshot_multi": (
         "Classify passages from historical natural-history texts as junk or non_junk.\n\n"
         "non_junk passages make a definitional/categorical claim about what kind of animal "
-        "something is, grounded in purpose (divine or not) or in structure. Three examples, "
-        "one per pattern:\n"
-        "1. \"The wing was given to the bird by its Creator for the very purpose of flight, "
-        "marking it as an inhabitant of the air by design.\" (purpose, divinely grounded)\n"
-        "2. \"The mole may be classed among the burrowing kind, its broad spade-like feet "
-        "marking it as an animal fitted by nature for a life spent underground.\" (purpose, "
-        "not divinely grounded)\n"
-        "3. \"The whale is properly ranked among the mammals, not the fishes, its warm blood "
-        "and internal skeleton marking the true nature of the kind, whatever its outward "
-        "likeness to a fish.\" (internal structure)\n\n"
-        "junk passages describe, mention, or narrate without making such a claim, e.g.:\n"
-        "\"The eye is admirably contrived for the purpose of vision, its lens and humours "
-        "cooperating to focus light upon the retina.\" (describes a part's function without "
-        "generalizing to what kind of animal it is -- not definitional)\n\n"
+        "something is, grounded in purpose or in structure -- not merely a fact about one of "
+        "its parts. Two examples:\n"
+        "1. \"These well known, or Flying-Fishes, as they are called, are instantly "
+        "distinguished among the Abdominales by the excessive size of their pectorals, which "
+        "are sufficiently large to support them in the air for a few moments.\" (the animal "
+        "kind itself is named and categorized, grounded in a structural feature suited to a "
+        "function)\n"
+        "2. \"Oken's Intestinal or Gelatinous animals are characterized by a single system of "
+        "organs, the intestine.\" (the animal kind itself is categorized, grounded purely in "
+        "internal structure)\n\n"
+        "junk passages describe, mention, or narrate without making such a claim about the "
+        "animal itself. Two examples:\n"
+        "1. \"The argument for the existence of an intelligent Creator is generally drawn from "
+        "the adaptation of means to ends, upon which the Bridgewater treatises, for example, "
+        "have been based.\" (comments on an argument about design, asserts nothing about what "
+        "any animal is)\n"
+        "2. \"The problem before us involves, therefore, two questions, the influence of "
+        "physical agents upon animals and plants already in existence, and the origin of "
+        "these beings.\" (sets up a research question, asserts nothing about what any animal "
+        "is)\n\n"
         "Now classify this passage:\n"
         "non_junk: makes a definitional/categorical claim about what kind of animal this is.\n"
         "junk: describes or mentions without making such a claim.\n\n"
