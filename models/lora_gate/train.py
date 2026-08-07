@@ -31,7 +31,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config.config import PATHS
-from models.data_utils import load_train_pool, load_golden_eval, stratified_val_split, metrics_from_preds
+from models.data_utils import (
+    load_train_pool, load_golden_eval, stratified_val_split, metrics_from_preds,
+    gate_proportion_metrics,
+)
 from models.train_bert import STAGE_LABELS, stage_tag, get_device, evaluate, compute_class_weights
 from models.lora_gate.model import build_model_and_tokenizer, load_trained_model, DEFAULT_TARGET_MODULES
 
@@ -335,6 +338,19 @@ def main():
           f"acc={held_metrics['accuracy']:.4f} macro_f1={held_metrics['macro_f1']:.4f} "
           f"non_junk_recall={held_metrics['per_class']['non_junk']['recall']:.4f}", flush=True)
 
+    # Category-level view (see LORA_JUNK_GATE_PLAN.md discussion): pooled
+    # non_junk recall above hides whether DT/NDT/IE survive the gate at
+    # equal rates, which is what actually determines whether downstream
+    # category proportions come out right. true_tag is the row's original
+    # 4-way label (not the binary one used for training/scoring above).
+    held_true_tags = [r["deploy_tag"] for r in held_out]
+    held_gate_preds = [STAGE_LABEL_LIST[p] for p in held_preds]
+    held_prop_metrics = gate_proportion_metrics(held_true_tags, held_gate_preds)
+    report["holdout_proportion_metrics"] = held_prop_metrics
+    print(f"[{args.run_name}] HELD-OUT per-category recall: "
+          f"{ {k: round(v, 3) for k, v in held_prop_metrics['per_category_recall'].items()} } "
+          f"evenness={held_prop_metrics['recall_evenness']:.3f}", flush=True)
+
     golden = load_golden_eval(args.text_column)
     golden_labels = [STAGE_LABEL2ID[stage_tag(r["tag"], STAGE)] for r in golden]
     golden_ds = PromptedTagDataset([r["text"] for r in golden], golden_labels, tokenizer, args.max_length, args.prompt_variant)
@@ -346,6 +362,14 @@ def main():
           f"macro_f1={golden_metrics['macro_f1']:.4f} "
           f"non_junk_recall={golden_metrics['per_class']['non_junk']['recall']:.4f} "
           f"n={golden_metrics['n']}", flush=True)
+
+    golden_true_tags = [r["tag"] for r in golden]
+    golden_gate_preds = [STAGE_LABEL_LIST[p] for p in golden_preds]
+    golden_prop_metrics = gate_proportion_metrics(golden_true_tags, golden_gate_preds)
+    report["golden_proportion_metrics"] = golden_prop_metrics
+    print(f"[{args.run_name}] GOLDEN per-category recall: "
+          f"{ {k: round(v, 3) for k, v in golden_prop_metrics['per_category_recall'].items()} } "
+          f"evenness={golden_prop_metrics['recall_evenness']:.3f}", flush=True)
 
     with open(results_dir / "metrics.json", "w") as f:
         json.dump(report, f, indent=2)

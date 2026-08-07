@@ -100,6 +100,89 @@ def stratified_val_split(rows, val_frac=0.1, seed=13):
     return train, val
 
 
+NONJUNK_LABELS = ["divine_teleology", "non_divine_teleology", "internal_essence"]
+
+
+def _gate_proportion_summary(category_total, category_survived, predicted_junk_total, total_n):
+    """Shared core for gate_proportion_metrics / gate_proportion_metrics_from_4way_confusion.
+    See either caller's docstring for what each field means and why."""
+    per_category_recall = {c: category_survived[c] / category_total[c] for c in NONJUNK_LABELS}
+    evenness = max(per_category_recall.values()) - min(per_category_recall.values())
+
+    true_nonjunk_total = sum(category_total[c] for c in NONJUNK_LABELS)
+    true_nonjunk_mix = {c: category_total[c] / true_nonjunk_total for c in NONJUNK_LABELS}
+
+    output_mix = {"junk": predicted_junk_total / total_n}
+    output_mix.update({c: category_survived[c] / total_n for c in NONJUNK_LABELS})
+    # True junk rows the gate incorrectly passed can't be credited to any
+    # category under a perfect-3-way-classifier assumption (it has no junk
+    # option) -- this residual is exactly the gate's junk-leakage rate.
+    leaked_junk_uncredited_frac = 1.0 - sum(output_mix.values())
+
+    # Same DT/NDT/IE mix, but normalized over survivors only (not the whole
+    # text) -- directly comparable to true_nonjunk_mix on the same basis, so
+    # the relative distortion (e.g. essentialism's share shrinking among
+    # survivors) is visible without junk's share diluting the comparison.
+    survived_total = sum(category_survived.values())
+    survived_relative_mix = (
+        {c: category_survived[c] / survived_total for c in NONJUNK_LABELS}
+        if survived_total else {c: None for c in NONJUNK_LABELS}
+    )
+
+    return {
+        "per_category_recall": per_category_recall,
+        "recall_evenness": evenness,
+        "true_nonjunk_mix": true_nonjunk_mix,
+        "survived_relative_mix": survived_relative_mix,
+        "output_mix_perfect_stage2": output_mix,
+        "leaked_junk_uncredited_frac": leaked_junk_uncredited_frac,
+        "n": total_n,
+    }
+
+
+def gate_proportion_metrics(true_tags, gate_preds):
+    """Given per-row true 4-way tags and per-row binary gate predictions
+    (junk/non_junk), computes the category-level view the project actually
+    needs (accurate proportions across a text), not just pooled accuracy:
+    per-category recall, how uneven those recalls are across DT/NDT/IE, the
+    text's true non-junk mix, and the 4-way mix the gate would produce
+    assuming a PERFECT downstream 3-way classifier -- a survivor is credited
+    to its true category, not whatever stage 2 would guess, which isolates
+    gate-induced distortion from stage-2 error entirely."""
+    category_total = {c: 0 for c in NONJUNK_LABELS + ["junk"]}
+    category_survived = {c: 0 for c in NONJUNK_LABELS}
+    predicted_junk_total = 0
+    for true_tag, pred in zip(true_tags, gate_preds):
+        category_total[true_tag] += 1
+        if pred == "junk":
+            predicted_junk_total += 1
+        elif true_tag in NONJUNK_LABELS:
+            category_survived[true_tag] += 1
+    return _gate_proportion_summary(category_total, category_survived, predicted_junk_total, len(true_tags))
+
+
+def gate_proportion_metrics_from_4way_confusion(confusion_matrix, labels):
+    """Same output as gate_proportion_metrics, but derived from an existing
+    4-way (true x predicted) confusion matrix from an end-to-end cascade run
+    -- no per-row data or rerun needed. Valid because 'predicted != junk'
+    already means 'gate said non_junk'; what stage 2 specifically guessed
+    doesn't matter here, only whether the row survived the gate at all,
+    which the perfect-stage-2 assumption then credits to the row's true
+    category regardless of stage 2's actual (possibly wrong) guess."""
+    junk_idx = labels.index("junk")
+    category_total, category_survived = {}, {}
+    predicted_junk_total, total_n = 0, 0
+    for i, true_label in enumerate(labels):
+        row = confusion_matrix[i]
+        row_total = sum(row)
+        total_n += row_total
+        category_total[true_label] = row_total
+        predicted_junk_total += row[junk_idx]
+        if true_label != "junk":
+            category_survived[true_label] = row_total - row[junk_idx]
+    return _gate_proportion_summary(category_total, category_survived, predicted_junk_total, total_n)
+
+
 def metrics_from_preds(preds, labels, label_names):
     from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score, confusion_matrix
     acc = accuracy_score(labels, preds)

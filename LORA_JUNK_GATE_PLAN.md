@@ -346,6 +346,62 @@ North star, not a hard target: GPT-5.4's 91.8% golden accuracy on the full
 labeling task. Not expected to reach that with a 0.6B–1.7B model — included
 only so "how far from the ceiling are we" stays visible.
 
+### Update: pooled non_junk recall superseded by per-category proportion metrics
+
+The targets above (§9, original) were framed around pooled non_junk recall
+and end-to-end cascade recall per category. Revised framing, decided later:
+the project's actual deliverable is accurate category *proportions* across
+a text, which pooled recall can look fine on while still being systematically
+wrong — e.g. if the gate keeps NDT at a much higher rate than IE, the pooled
+average hides that IE's estimated share of the corpus comes out too low.
+
+Three metrics now anchor evaluation instead (see `models/data_utils.py`'s
+`gate_proportion_metrics`, and `eval/compare_lora_sweep.py`):
+1. **Per-category recall** (DT/NDT/IE individually) through the gate alone —
+   no cascade run needed, since a row's true category is known regardless of
+   what a downstream classifier would guess.
+2. **Recall evenness** (max−min across the three) — the direct measure of
+   the distortion-risk described above.
+3. **Precision** (junk leakage into non_junk) — already captured by the
+   existing `junk` per-class precision in `holdout_text_metrics`, no new
+   computation needed.
+
+Additionally, per-category recall lets us compute the actual category *mix*
+without running stage 2 at all: assume a perfect downstream 3-way classifier
+(a survivor is credited to its true category), and compare the resulting
+mix against the text's true non-junk composition. This isolates gate-induced
+distortion from stage-2 error entirely.
+
+**BERT baseline, recomputed under this framing** (Reign of Law, from the
+already-stored `eval/results/bert_cascade/loo_reign_of_law/metrics.json` —
+no rerun needed, since "predicted ≠ junk" already means "gate said
+non_junk" regardless of what stage 2 guessed):
+
+| Metric | Held-out text (n=469) | Golden set (n=49) |
+|---|---|---|
+| Per-category recall — DT | 0.483 | 0.400 |
+| Per-category recall — NDT | 0.496 | 0.714 |
+| Per-category recall — IE | 0.333 | 0.667 |
+| Recall evenness (max−min) | **0.162** | 0.314 |
+| True non-junk mix (DT/NDT/IE) | 17.2% / 66.9% / 16.0% | 33.3% / 46.7% / 20.0% |
+| Survivor mix, perfect-stage-2 assumption | 17.7% / 70.9% / **11.4%** | 22.2% / 55.6% / 22.2% |
+
+IE's share shrinks from 16.0%→11.4% among held-out survivors — the
+essentialism-specific distortion from project memory, now quantified
+directly rather than inferred from the false-junk-rate analysis.
+
+**Revised targets** (held-out, since golden's n=30 non-junk rows makes
+evenness especially noisy there — one flipped row moves it a lot):
+- Per-category recall ≥ 0.65 on **each** of DT/NDT/IE (not just the pooled
+  average clearing that bar)
+- Recall evenness ≤ 0.10 (down from BERT's 0.162)
+- Junk precision (no regression on leakage) ≥ BERT's held-out junk
+  precision of 0.752
+
+`eval/compare_lora_sweep.py` now sorts runs by worst-case per-category
+recall on held-out, not pooled non_junk recall, so a run can't win by being
+strong on two categories while abandoning the third.
+
 ---
 
 ## 10. Decisions — resolved
