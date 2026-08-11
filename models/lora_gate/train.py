@@ -161,6 +161,65 @@ PROMPT_VARIANTS = {
         "junk: describes or mentions without making such a claim.\n\n"
         "Passage: {text}"
     ),
+    # Round 1 of the prompt-iteration loop (see eval/lora_prompt_evolution.md).
+    # Each variant below tests one independent hypothesis for fixing the
+    # NDT-rockets/IE-collapses pattern -- not a phrasing tweak of another.
+    "A_structured": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
+        "animal (or animal part) fundamentally is, or what kind it belongs to? If no such claim is "
+        "made, it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of two ways:\n"
+        "- Purpose: the animal (or part) is characterized by the function or end it serves (divine or natural).\n"
+        "- Internal structure/essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, or structure -- with no reference to purpose or function at all.\n\n"
+        "junk passages describe, mention, or narrate without committing to such a claim -- e.g. "
+        "observing a feature in passing, describing a process without characterizing the animal as a "
+        "result, or citing features only as evidence for a creator's existence rather than asserting "
+        "what the animal is for.\n\n"
+        "Passage: {text}"
+    ),
+    "B_structured_antiheuristic": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
+        "animal (or animal part) fundamentally is, or what kind it belongs to? If no such claim is "
+        "made, it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of two ways:\n"
+        "- Purpose: the animal (or part) is characterized by the function or end it serves (divine or natural).\n"
+        "- Internal structure/essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, or structure -- with no reference to purpose or function at all.\n\n"
+        "junk passages describe, mention, or narrate without committing to such a claim.\n\n"
+        "Note: many non_junk passages ground their claim purely in internal structure and use no "
+        "purpose or function language at all. Do not require purpose-language as a signal for "
+        "non_junk, and do not assume a passage with no purpose language must be junk.\n\n"
+        "Passage: {text}"
+    ),
+    "C_hard_contrastive": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n"
+        "non_junk: makes a definitional/categorical claim about what kind of animal (or animal part) "
+        "something is, grounded in either purpose or internal structure alone.\n"
+        "junk: describes, mentions, or narrates without making such a claim.\n\n"
+        "Example (non_junk, grounded in structure alone, no purpose language): \"Oken's Intestinal or "
+        "Gelatinous animals are characterized by a single system of organs, the intestine.\"\n"
+        "Example (junk, uses purpose-like language but makes no claim about any specific animal): "
+        "\"The argument for the existence of an intelligent Creator is generally drawn from the "
+        "adaptation of means to ends, upon which the Bridgewater treatises, for example, have been based.\"\n\n"
+        "Passage: {text}"
+    ),
+    "D_structured_plus_example": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
+        "animal (or animal part) fundamentally is, or what kind it belongs to? If no such claim is "
+        "made, it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of two ways:\n"
+        "- Purpose: the animal (or part) is characterized by the function or end it serves (divine or natural).\n"
+        "- Internal structure/essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, or structure -- with no reference to purpose or function at all.\n\n"
+        "junk passages describe, mention, or narrate without committing to such a claim.\n\n"
+        "Example (non_junk, grounded in structure alone, no purpose language): \"Oken's Intestinal or "
+        "Gelatinous animals are characterized by a single system of organs, the intestine.\"\n\n"
+        "Passage: {text}"
+    ),
 }
 
 
