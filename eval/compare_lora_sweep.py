@@ -19,6 +19,15 @@ saved checkpoint, no retraining) or those columns show as "N/A" here.
 Doesn't train or predict anything itself; each run already wrote its own
 metrics.json, this just reads them back and lines them up.
 
+Also prints an "ovrl" (overall recall) column and a "jprec" (junk
+precision) column, both derived from data already in metrics.json (no
+rerun needed). Overall recall = per-category recall weighted by each
+category's true share of the non-junk mix; it's shown as a sanity check
+alongside the per-category numbers, not the sort key -- a run can raise
+overall recall by favoring the largest category (historically NDT) while
+still starving IE, which is exactly what worst-case per-category recall
+is meant to catch.
+
 Usage:
     python3 eval/compare_lora_sweep.py
 """
@@ -39,6 +48,7 @@ BERT_BASELINE = {
     "held_recall_evenness": 0.162,
     "golden_per_category_recall": {"divine_teleology": 0.400, "non_divine_teleology": 0.714, "internal_essence": 0.667},
     "golden_recall_evenness": 0.314,
+    "held_junk_precision": 0.752,
 }
 
 CATS = ["divine_teleology", "non_divine_teleology", "internal_essence"]
@@ -51,6 +61,17 @@ def fmt_cats(per_category_recall):
     if per_category_recall is None:
         return "N/A".center(24)
     return " ".join(f"{CAT_ABBR[c]}={per_category_recall[c]:.2f}" for c in CATS)
+
+
+def overall_recall(prop_metrics):
+    # Weighted average of per-category recall, weighted by each category's
+    # true share of the non-junk mix -- equal to survived_total/true_total,
+    # i.e. "what fraction of all non-junk rows made it through the gate."
+    if prop_metrics is None:
+        return None
+    per_cat = prop_metrics["per_category_recall"]
+    mix = prop_metrics["true_nonjunk_mix"]
+    return sum(mix[c] * per_cat[c] for c in CATS)
 
 
 def main():
@@ -75,10 +96,12 @@ def main():
             "prompt_variant": d.get("prompt_variant", "current"),
             "held_per_cat": held_prop["per_category_recall"] if held_prop else None,
             "held_evenness": held_prop["recall_evenness"] if held_prop else None,
+            "held_overall_recall": overall_recall(held_prop),
             "held_min_recall": min(held_prop["per_category_recall"].values()) if held_prop else -1,
-            "held_non_junk_precision": d["holdout_text_metrics"].get("per_class", {}).get("junk", {}).get("precision"),
+            "held_junk_precision": d["holdout_text_metrics"].get("per_class", {}).get("junk", {}).get("precision"),
             "golden_per_cat": golden_prop["per_category_recall"] if golden_prop else None,
             "golden_evenness": golden_prop["recall_evenness"] if golden_prop else None,
+            "golden_overall_recall": overall_recall(golden_prop),
         })
 
     # Primary sort: worst-case per-category recall on held-out, descending --
@@ -87,21 +110,28 @@ def main():
     rows.sort(key=lambda r: r["held_min_recall"], reverse=True)
 
     print(f"{'run_name':34s} {'lr':>8s} {'r':>3s} {'tgt':>8s} {'ovspl':>6s} {'prompt':>14s} | "
-          f"{'held-out DT/NDT/IE recall':28s} {'even':>5s} | {'golden DT/NDT/IE recall':28s} {'even':>5s}")
-    print("-" * 145)
+          f"{'held-out DT/NDT/IE recall':28s} {'even':>5s} {'ovrl':>5s} {'jprec':>5s} | "
+          f"{'golden DT/NDT/IE recall':28s} {'even':>5s} {'ovrl':>5s}")
+    print("-" * 170)
     print(f"{'BERT baseline (Reign of Law)':34s} {'':>8s} {'':>3s} {'':>8s} {'':>6s} {'':>14s} | "
           f"{fmt_cats(BERT_BASELINE['held_per_category_recall']):28s} "
-          f"{BERT_BASELINE['held_recall_evenness']:>5.2f} | "
+          f"{BERT_BASELINE['held_recall_evenness']:>5.2f} "
+          f"{BERT_BASELINE['held_out_non_junk_recall']:>5.2f} "
+          f"{BERT_BASELINE['held_junk_precision']:>5.2f} | "
           f"{fmt_cats(BERT_BASELINE['golden_per_category_recall']):28s} "
-          f"{BERT_BASELINE['golden_recall_evenness']:>5.2f}")
-    print("-" * 145)
+          f"{BERT_BASELINE['golden_recall_evenness']:>5.2f} "
+          f"{BERT_BASELINE['golden_non_junk_recall']:>5.2f}")
+    print("-" * 170)
     for r in rows:
         held_even = f"{r['held_evenness']:.2f}" if r["held_evenness"] is not None else "N/A"
         gold_even = f"{r['golden_evenness']:.2f}" if r["golden_evenness"] is not None else "N/A"
+        held_ovrl = f"{r['held_overall_recall']:.2f}" if r["held_overall_recall"] is not None else "N/A"
+        gold_ovrl = f"{r['golden_overall_recall']:.2f}" if r["golden_overall_recall"] is not None else "N/A"
+        held_jprec = f"{r['held_junk_precision']:.2f}" if r["held_junk_precision"] is not None else "N/A"
         print(f"{r['run_name']:34s} {r['lr']:>8.0e} {r['lora_r']:>3d} {r['target_modules']:>8s} "
               f"{str(r['oversample']):>6s} {r['prompt_variant']:>14s} | "
-              f"{fmt_cats(r['held_per_cat']):28s} {held_even:>5s} | "
-              f"{fmt_cats(r['golden_per_cat']):28s} {gold_even:>5s}")
+              f"{fmt_cats(r['held_per_cat']):28s} {held_even:>5s} {held_ovrl:>5s} {held_jprec:>5s} | "
+              f"{fmt_cats(r['golden_per_cat']):28s} {gold_even:>5s} {gold_ovrl:>5s}")
 
     scored = [r for r in rows if r["held_min_recall"] >= 0]
     if scored:
