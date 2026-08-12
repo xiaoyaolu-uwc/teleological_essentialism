@@ -33,19 +33,29 @@ precision ≥ BERT's 0.752 (no regression on leakage).
 
 *(update this paragraph each review)*
 
-**As of this entry: hyperparameter sweep + prompt Round 0 + combined-config
-ablation are all done and logged.** Best hyperparameter-only result is
-`r32a64` (0.66/0.82/0.63, evenness=0.19); combining all four individual
-winners (`combined_v1`) does not beat that (0.62/0.82/0.59, evenness=0.23)
-— see Findings. This entire hyperparameter table has since been
-**superseded by prompting**: the prompt-iteration loop (see
-`eval/lora_prompt_evolution.md`) found `B_structured_antiheuristic`, same
-hyperparameter base as `lr2e4`, reaching 0.86/0.88/0.70 (evenness=0.17) —
-beats every row here. Current focus has moved to that loop's Round 2
-(closing the remaining evenness gap) and an eventual integration run
-(Round 5: best prompt + best hyperparameters together, not yet tested in
-combination). This doc stays as the historical record of what the
-hyperparameter axis alone could achieve.
+**As of this entry: hyperparameter sweep + prompt loop (all 5 rounds) +
+a broader multi-seed reliability pass are done and logged.** Best
+hyperparameter-only result at seed=42 was `r32a64` (0.66/0.82/0.63,
+evenness=0.19); combining all four individual winners (`combined_v1`)
+does not beat that (0.62/0.82/0.59, evenness=0.23) — see Findings.
+
+**Update — multi-seed reliability pass reverses the earlier "superseded
+by prompting" framing.** The prompt loop's `B_structured_antiheuristic`
+initially looked dominant (0.86/0.88/0.70, evenness=0.17, beating every
+row here) but that result was shown not to hold up under reseeding — see
+`eval/lora_prompt_evolution.md`'s "Broader multi-seed reliability pass".
+`r32a64` was reseeded at 7/123 alongside B and `A_structured`: across 3
+seeds, `r32a64` has the highest or tied-highest mean recall on every
+category (DT .703, NDT .827, IE .607) **and** by far the tightest spread
+(IE spread .07 vs. .26-.30 for every prompt-based candidate) — more
+robust than any prompt-loop candidate once seed noise is accounted for.
+`r32a64` is therefore the best-supported single config across the whole
+project right now, not superseded by prompting after all. No candidate
+(hyperparameter or prompt) clears the evenness ≤0.10 target on average —
+all cluster at .22-.26. Next reasonable step: test `r32a64`'s
+hyperparameters combined with `A_structured` or `B`'s prompt at multiple
+seeds (the one integration run tried, Round 5, used `B` at a single seed
+and predates this finding).
 
 ## Experiments
 
@@ -60,7 +70,9 @@ r=16/alpha=32, attn-only, no oversample, prompt=current, max_length=384).
 | `junk_gate_lora_lr1e4` | done | lr=1e-4 | 0.59/0.76/0.56 | 0.21 | 0.30/0.79/0.83 | Strictly better than lr2e4 default on every held-out number. LR sweep winner. |
 | `junk_gate_lora_lr2e4` | done | (= defaults, seed=42) | 0.59/0.72/0.52 | 0.20 | 0.50/0.79/0.83 | Baseline default; also the shared base for all Round 0 prompt-variant runs. |
 | `junk_gate_lora_lr3e4` | done | lr=3e-4 | 0.59/0.89/0.41 | 0.49 | 0.20/0.71/0.83 | NDT to .89 but IE craters to .41 — worst evenness of the sweep; textbook case of the NDT-rockets/IE-collapses pattern. |
-| `junk_gate_lora_r32a64` | done | r=32, alpha=64 | 0.66/0.82/0.63 | 0.19 | 0.50/0.71/0.83 | Wins on every held-out number vs. default — the strongest single hyperparameter dimension, and (until Round 1 prompting) the sweep's best result. |
+| `junk_gate_lora_r32a64` | done | r=32, alpha=64 | 0.66/0.82/0.63 | 0.19 | 0.50/0.71/0.83 | Wins on every held-out number vs. default — the strongest single hyperparameter dimension. |
+| `junk_gate_lora_r32a64_seed7` | done | r=32, alpha=64, seed=7 | 0.76/0.78/0.56 | 0.22 | 0.50/0.71/0.67 | Reseed check. |
+| `junk_gate_lora_r32a64_seed123` | done | r=32, alpha=64, seed=123 | 0.69/0.88/0.63 | 0.26 | 0.40/0.79/0.83 | Reseed check. 3-seed mean: 0.703/0.827/0.607, evenness .22, IE spread only .07 — the tightest/most robust config found across the whole project once reseeded; see Findings and `eval/lora_prompt_evolution.md`'s broader reliability pass. |
 | `junk_gate_lora_attnmlp` | done | target_modules=attn_mlp | 0.66/0.76/0.59 | 0.17 | 0.30/0.79/1.00 | Beats default on all three categories + evenness; golden IE=1.00 is a small-n golden artifact, not trustworthy. |
 | `junk_gate_lora_oversample` | done | oversample=True | 0.62/0.72/0.56 | 0.16 | 0.40/0.71/0.83 | Smallest effect of the four hyperparameter dimensions, but real and consistent. |
 | `junk_gate_lora_combined_v1` | done | lr=1e-4, r=32/a=64, attn_mlp, oversample=True | 0.62/0.82/0.59 | 0.23 | 0.60/0.79/0.83 | All four individual winners combined. Does **not** beat r32a64 alone on any held-out axis except NDT (tied) — see Findings, gains didn't stack. |
@@ -115,13 +127,19 @@ r=16/alpha=32, attn-only, no oversample, prompt=current, max_length=384).
 - [x] Finish prompt-variant comparison (none/rich/fewshot/fewshot_multi,
       plus the two max_length=640 truncation checks)
 - [x] Combine the sweep winner's hyperparameters — done, did not beat the
-      single best dimension (see Findings); superseded by prompting anyway
-- [ ] Combine the prompt-loop winner with the best hyperparameters in one
-      run (Round 5 of `eval/lora_prompt_evolution.md`)
-- [ ] Multi-seed reliability pass on the final combined config before
-      trusting small deltas
-- [ ] Decide whether Qwen3-1.7B is worth trying if 0.6B plateaus below
-      target
+      single best dimension (see Findings)
+- [x] Combine the prompt-loop winner (`B`) with `r32a64` — done (Round 5 of
+      `eval/lora_prompt_evolution.md`), did not stack, regressed vs. B alone
+- [x] Multi-seed reliability pass — done on the top 4 candidates
+      (baseline, `A_structured`, `B`, `r32a64`); reverses the earlier
+      "superseded by prompting" conclusion — `r32a64` is now the
+      best-supported config, not `B` (see Findings)
+- [ ] Test `r32a64`'s hyperparameters combined with `A_structured` or `B`'s
+      prompt at multiple seeds (only the single-seed `B` + `r32a64`
+      combination has been tried so far, and predates the reliability pass)
+- [ ] Decide whether Qwen3-1.7B is worth trying, now that the measured
+      prompting effect is smaller than first thought and `r32a64` (a
+      hyperparameter change) is the more robust lever found so far
 - [ ] Investigate the duplicate golden-row join artifact flagged earlier
       (three golden rows resolved to the same extract, one with `work=''`)
       — deprioritized as minor, not yet fixed

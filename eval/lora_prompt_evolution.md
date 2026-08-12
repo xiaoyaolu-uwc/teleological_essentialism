@@ -247,6 +247,44 @@ provisional until reseeded. Not re-running the entire sweep with multiple
 seeds (out of scope for this loop), but flagging this as a real caveat on
 everything reported above.
 
+## Broader multi-seed reliability pass
+
+The B-vs-baseline comparison above only covered 2 of the 4 leading
+candidates. Reseeded `A_structured` and `r32a64` (the best hyperparameter-
+only config) at the same 2 seeds (7, 123), giving all four candidates 3
+seeds each (42/7/123). All numbers are held-out DT/NDT/IE recall unless
+noted.
+
+| candidate | seed 42 | seed 7 | seed 123 | mean DT/NDT/IE | mean evenness | spread (max−min) per category |
+|---|---|---|---|---|---|---|
+| `current` (baseline) | .59/.72/.52 | .55/.71/.37 | .69/.81/.67 | .610/.747/.520 | .23 | DT .14, NDT .10, IE **.30** |
+| `A_structured` | .62/.87/.63 | .69/.86/.67 | .55/.75/.41 | .620/.827/.570 | .26 | DT .14, NDT .12, IE .26 |
+| `B_structured_antiheuristic` | .86/.88/.70 | .55/.78/.44 | .59/.72/.52 | .667/.793/.553 | .24 | DT **.31**, NDT .16, IE .26 |
+| `r32a64` | .66/.82/.63 | .76/.78/.56 | .69/.88/.63 | **.703/.827/.607** | .22 | DT .10, NDT .10, IE **.07** |
+
+**`r32a64` looks like the most robust candidate here, not `B`.** It has
+the highest (or tied-highest) mean on all three categories, and by far the
+tightest spread across seeds — its IE spread (.07) is roughly a quarter of
+every other candidate's (.26-.30). Paired seed-by-seed against baseline,
+`r32a64` wins outright at seed 42 and seed 7, and ties at seed 123 (DT
+tied, NDT higher, IE marginally lower) — a consistent, one-sided pattern,
+unlike B's 2-wins-1-loss-with-a-lucky-margin record. Paired directly
+against B: `r32a64` beats B at seed 7 and seed 123, and only loses at
+B's favorable seed 42 — i.e. B's apparent edge over `r32a64` throughout
+Rounds 1-5 was driven almost entirely by one favorable draw for B (and
+comparisons were never run against `r32a64` at matching seeds until now).
+
+**Verdict**: no candidate reliably clears the evenness ≤0.10 target on
+average — all four cluster at .22-.26, indistinguishable within this
+noise; that target has not been met by anything tested. On raw recall,
+`r32a64` (a hyperparameter change, not a prompt change) is the one
+candidate whose improvement over baseline is both consistent
+seed-to-seed and low-variance, which is a more trustworthy signal at n=3
+per candidate than a single favorable draw. `A_structured` and `B` are
+both plausibly real, smaller, noisier improvements over baseline (means
+still edge baseline on most categories) but neither is the standout this
+log's earlier framing suggested.
+
 ## Final summary (honest, post-reseed)
 
 Reseeded the plain `current` baseline with the same 2 seeds as B, so the
@@ -281,20 +319,34 @@ targets) does not survive honest reseeding and should not be treated as
 established fact — it was real signal plus a large favorable draw, not a
 settled result.
 
+**Update — (b) was carried out.** `A_structured` and `r32a64` were also
+reseeded at 7/123 (see "Broader multi-seed reliability pass" above). That
+pass **overturns this section's framing**: `r32a64` — a hyperparameter
+change, not B's prompt — turned out to be the most robust candidate once
+all four are compared at matching seeds, with the highest or tied-highest
+mean recall on every category and a much tighter spread (IE spread .07 vs
+.26-.30 for every prompt-based candidate). B's edge over `r32a64`
+throughout Rounds 1-5 traces to one favorable seed for B; at the other two
+seeds `r32a64` beats B outright. Treat the section above as the record of
+what the loop concluded *before* that broader pass, not the final answer.
+
 **What this means going forward**: every ranking in this log and in
 `eval/lora_junk_gate_evolution.md` (the full hyperparameter sweep, all 11
-prompt-loop candidates) is single-seed, at a noise scale that can span
-15-30 recall points on a single category. Rounds where the gap between
-candidates was large (B vs. C/D in Round 1, `r32a64` vs. baseline in the
-hyperparameter sweep) are more likely to reflect real effects than noise,
-but should not be fully trusted until reseeded. Given the scope
-authorized for this loop, further multi-seed sweeping of every candidate
-is out of scope here; recommend marcus decide whether to (a) accept B as
-the best available (if noisy) candidate and move on, (b) run 2-3 more
-seeds each on the top 2-3 candidates (B, `r32a64`, plain `current`) before
-trusting any of them, or (c) treat prompting's *general* direction
-(structured explanation + anti-heuristic framing beat every example-based
-approach, consistently, across all seeds tested) as the durable finding,
+prompt-loop candidates) beyond the 4 candidates now reseeded is still
+single-seed, at a noise scale that can span 15-30 recall points on a
+single category. Rounds where the gap between candidates was large (B vs.
+C/D in Round 1) are more likely to reflect real effects than noise, but
+should not be fully trusted until reseeded. Recommend marcus decide
+whether to (a) adopt `r32a64` as the current best-supported config and
+move on, (b) run 2-3 more seeds on `r32a64` specifically (n=3 is still
+thin) before fully trusting it, or (c) treat prompting's *general*
+direction (structured explanation + anti-heuristic framing beat every
+example-based approach, consistently, across all seeds tested) as the
+durable qualitative finding, independent of whether B or `r32a64` is the
+final numeric answer — these aren't mutually exclusive, and testing
+`r32a64`'s hyperparameters combined with `A_structured` or `B`'s prompt
+at multiple seeds (rather than the single-seed integration attempt in
+Round 5, which used `B` specifically) is a reasonable next step,
 independent of the exact magnitude.
 
 ## Backlog
