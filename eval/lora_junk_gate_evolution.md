@@ -22,12 +22,19 @@ metrics anchor evaluation (see `models/data_utils.py`'s
 1. **Per-category recall** (DT/NDT/IE individually) through the gate
 2. **Recall evenness** (max−min across the three) — low is good; a gate
    that's uneven distorts the category mix even if pooled recall looks fine
-3. **Precision** (junk leakage into non_junk) — already the existing `junk`
-   per-class precision, no new computation needed
+3. **Precision** (junk leakage into non_junk, i.e. purity of the kept set
+   actually passed downstream) — **CORRECTED**: this is `non_junk_precision`
+   (precision of the *non_junk* call), not the `junk`-class precision this
+   doc used throughout. See the "Precision metric was wrong" Finding below
+   — `junk` precision measures over-aggressive discarding of good rows, a
+   different (and less important, per marcus's stated priority) failure
+   mode than junk leaking into the kept set.
 
 Targets (held-out text, Reign of Law — see `LORA_JUNK_GATE_PLAN.md` §9):
-per-category recall ≥ 0.65 on **each** of DT/NDT/IE, evenness ≤ 0.10, junk
-precision ≥ BERT's 0.752 (no regression on leakage).
+per-category recall ≥ 0.65 on **each** of DT/NDT/IE, evenness ≤ 0.10,
+**non_junk** precision ≥ BERT's 0.745 (no regression on leakage) — not
+0.752, which was BERT's `junk`-class precision, a different number that
+happens to be close by coincidence for BERT specifically.
 
 ## Status snapshot
 
@@ -88,6 +95,25 @@ r=16/alpha=32, attn-only, no oversample, prompt=current, max_length=384).
 
 ## Findings
 
+- **The precision metric tracked throughout this whole doc was the wrong
+  one.** "Junk precision" (precision of the `junk` call: of rows labeled
+  junk, how many really are) measures over-aggressive discarding of good
+  non_junk rows. It does NOT measure junk leaking into the kept set — that
+  requires `non_junk_precision` (precision of the `non_junk` call: of rows
+  labeled non_junk and passed downstream, how many are truly non_junk),
+  the mirror-image metric. Marcus's stated priority ("if we have low
+  precision, that is a sin, because we necessarily get things wrong in the
+  final output") is unambiguously about the latter. The two happened to be
+  close for BERT (junk=0.752, non_junk=0.745) which is why this went
+  unnoticed, but they diverge sharply for the LoRA sweep: `r32a64`'s
+  junk-precision looked great (0.85-0.88 across seeds) while its
+  non_junk_precision is 0.670-0.706 per seed (0.732 ensembled) — **below
+  BERT's 0.745 on every single seed, and still below it even ensembled.**
+  This means the "LoRA beats BERT" framing throughout this document was
+  built on the wrong axis; on the metric that actually matters most now,
+  LoRA has not yet clearly beaten BERT. See
+  `eval/lora_prompt_evolution.md`'s precision-focused reliability pass for
+  the full multi-config comparison on the corrected metric.
 - **Golden's 30 non-junk rows are too noisy for single-run comparisons.**
   Retraining BERT's junk gate fresh (same config, different random
   init/shuffle) swung golden non_junk recall from 0.60 (archived run) to
