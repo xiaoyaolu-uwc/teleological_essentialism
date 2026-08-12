@@ -36,7 +36,10 @@ from models.data_utils import (
     gate_proportion_metrics,
 )
 from models.train_bert import STAGE_LABELS, stage_tag, get_device, evaluate, compute_class_weights
-from models.lora_gate.model import build_model_and_tokenizer, load_trained_model, DEFAULT_TARGET_MODULES
+from models.lora_gate.model import (
+    build_model_and_tokenizer, load_trained_model, DEFAULT_TARGET_MODULES,
+    build_full_finetune_model_and_tokenizer, load_full_finetune_model,
+)
 
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
@@ -331,24 +334,35 @@ def main():
     ap.add_argument("--seed", type=int, default=42,
                      help="Fixes LoRA/classifier-head init and training shuffle order, so sweep "
                           "runs differ only in the hyperparameter being varied")
+    ap.add_argument("--full-finetune", action="store_true",
+                     help="Baseline comparison point only: skip LoRA, train every parameter "
+                          "directly (all --lora-* flags ignored). Not meant to be iterated on "
+                          "the way the LoRA config is -- just a cursory 'is there headroom' check.")
     args = ap.parse_args()
 
     seed_everything(args.seed)
     device = get_device()
     print(f"[{args.run_name}] device={device} model={args.model_name} "
-          f"holdout={HOLDOUT_WORK!r} stage={STAGE} seed={args.seed}", flush=True)
+          f"holdout={HOLDOUT_WORK!r} stage={STAGE} seed={args.seed} "
+          f"full_finetune={args.full_finetune}", flush=True)
 
     train_pool, held_out = load_train_pool(HOLDOUT_WORK)
     train_rows, val_rows = stratified_val_split(train_pool)
     print(f"[{args.run_name}] train={len(train_rows)} val={len(val_rows)} held_out={len(held_out)}", flush=True)
 
-    model, tokenizer = build_model_and_tokenizer(
-        args.model_name, num_labels=len(STAGE_LABEL_LIST),
-        lora_r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
-        target_modules=TARGET_MODULE_PRESETS[args.target_modules],
-    )
+    if args.full_finetune:
+        model, tokenizer = build_full_finetune_model_and_tokenizer(
+            args.model_name, num_labels=len(STAGE_LABEL_LIST),
+        )
+    else:
+        model, tokenizer = build_model_and_tokenizer(
+            args.model_name, num_labels=len(STAGE_LABEL_LIST),
+            lora_r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
+            target_modules=TARGET_MODULE_PRESETS[args.target_modules],
+        )
     model.to(device)
-    model.print_trainable_parameters()
+    if not args.full_finetune:
+        model.print_trainable_parameters()
 
     train_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in train_rows]
     class_weights = compute_class_weights(train_labels, len(STAGE_LABEL_LIST)).to(device)
@@ -409,7 +423,10 @@ def main():
 
     if resume_state_path.exists():
         state = torch.load(resume_state_path, map_location=device)
-        set_peft_model_state_dict(model, state["adapter_state"])
+        if args.full_finetune:
+            model.load_state_dict(state["adapter_state"])
+        else:
+            set_peft_model_state_dict(model, state["adapter_state"])
         optimizer.load_state_dict(state["optimizer"])
         start_epoch = state["epoch"] + 1
         best_f1 = state["best_f1"]
@@ -453,7 +470,7 @@ def main():
 
         resume_dir.mkdir(parents=True, exist_ok=True)
         torch.save({
-            "adapter_state": get_peft_model_state_dict(model),
+            "adapter_state": model.state_dict() if args.full_finetune else get_peft_model_state_dict(model),
             "optimizer": optimizer.state_dict(),
             "epoch": epoch,
             "best_f1": best_f1,
@@ -468,7 +485,10 @@ def main():
 
     print(f"[{args.run_name}] best epoch={best_epoch} val_macro_f1={best_f1:.4f} "
           f"-- reloading best adapter for final eval", flush=True)
-    best_model, _ = load_trained_model(args.model_name, ckpt_dir, len(STAGE_LABEL_LIST), device)
+    if args.full_finetune:
+        best_model, _ = load_full_finetune_model(ckpt_dir, len(STAGE_LABEL_LIST), device)
+    else:
+        best_model, _ = load_trained_model(args.model_name, ckpt_dir, len(STAGE_LABEL_LIST), device)
 
     report = {
         "run_name": args.run_name,
@@ -485,6 +505,7 @@ def main():
         "prompt_variant": args.prompt_variant,
         "oversample": args.oversample,
         "ie_weight_multiplier": args.ie_weight_multiplier,
+        "full_finetune": args.full_finetune,
         "seed": args.seed,
         "lr": args.lr,
         "epochs_run": args.epochs,

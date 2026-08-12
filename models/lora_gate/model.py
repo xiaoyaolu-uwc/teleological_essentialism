@@ -67,6 +67,37 @@ def build_model_and_tokenizer(
     return model, tokenizer
 
 
+def build_full_finetune_model_and_tokenizer(model_name, num_labels):
+    """Baseline comparison point only -- no LoRA, every parameter
+    trainable. Answers "does the LoRA-adapter capacity bottleneck explain
+    the recall/precision trade-off we've been seeing," not meant to be
+    iterated on the way the LoRA config was."""
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+    tokenizer.truncation_side = "left"
+
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_name, num_labels=num_labels,
+    )
+    model.config.pad_token_id = tokenizer.pad_token_id
+    return model, tokenizer
+
+
+def load_full_finetune_model(ckpt_dir, num_labels, device):
+    """Mirrors load_trained_model for the full-fine-tune case: ckpt_dir
+    already holds the complete model weights (save_pretrained on a plain
+    AutoModelForSequenceClassification, not just an adapter), so there's no
+    base-model-plus-adapter step."""
+    tokenizer = AutoTokenizer.from_pretrained(ckpt_dir)
+    tokenizer.padding_side = "right"
+    tokenizer.truncation_side = "left"
+    model = AutoModelForSequenceClassification.from_pretrained(ckpt_dir, num_labels=num_labels)
+    model.to(device)
+    return model, tokenizer
+
+
 def load_trained_model(model_name, ckpt_dir, num_labels, device):
     """Reloads a saved adapter for inference/eval. Unlike a full fine-tune
     checkpoint, ckpt_dir only contains the small LoRA adapter weights --
