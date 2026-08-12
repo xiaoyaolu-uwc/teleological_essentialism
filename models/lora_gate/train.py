@@ -260,7 +260,7 @@ PROMPT_VARIANTS = {
 
 
 class PromptedTagDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length, prompt_variant="current"):
+    def __init__(self, texts, labels, tokenizer, max_length, prompt_variant="current", sample_weights=None):
         template = PROMPT_VARIANTS[prompt_variant]
         prompted = texts if template is None else [template.format(text=t) for t in texts]
         enc = tokenizer(
@@ -270,6 +270,16 @@ class PromptedTagDataset(Dataset):
         self.input_ids = enc["input_ids"]
         self.attention_mask = enc["attention_mask"]
         self.labels = torch.tensor(labels, dtype=torch.long)
+        # Per-sample loss weight, distinct from the per-class weight passed
+        # to CrossEntropyLoss -- lets --ie-weight-multiplier upweight
+        # internal_essence rows specifically, since blanket non_junk
+        # oversampling (--oversample) treats all three non-junk categories
+        # equally and dilutes IE's already-sparse signal with NDT's volume.
+        # Defaults to 1.0 (no-op) for val/held-out/golden where this isn't used.
+        self.sample_weights = (
+            torch.ones(len(labels), dtype=torch.float)
+            if sample_weights is None else torch.tensor(sample_weights, dtype=torch.float)
+        )
 
     def __len__(self):
         return len(self.labels)
@@ -279,6 +289,7 @@ class PromptedTagDataset(Dataset):
             "input_ids": self.input_ids[idx],
             "attention_mask": self.attention_mask[idx],
             "labels": self.labels[idx],
+            "weight": self.sample_weights[idx],
         }
 
 
@@ -310,6 +321,12 @@ def main():
     ap.add_argument("--oversample", action="store_true",
                      help="Use a WeightedRandomSampler (inverse class frequency) instead of "
                           "uniform shuffling, mirroring train_bert.py's --oversample")
+    ap.add_argument("--ie-weight-multiplier", type=float, default=1.0,
+                     help="Multiplies the per-sample training loss for internal_essence rows "
+                          "specifically. Distinct from --oversample, which upweights all non_junk "
+                          "categories equally and dilutes IE's already-sparse signal with NDT's "
+                          "volume; this targets IE alone, orthogonal to the binary junk/non_junk "
+                          "class weighting already applied via compute_class_weights.")
     ap.add_argument("--seed", type=int, default=42,
                      help="Fixes LoRA/classifier-head init and training shuffle order, so sweep "
                           "runs differ only in the hyperparameter being varied")
@@ -337,7 +354,11 @@ def main():
     print(f"[{args.run_name}] class_weights={class_weights.tolist()}", flush=True)
 
     val_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in val_rows]
-    train_ds = PromptedTagDataset([r[args.text_column] for r in train_rows], train_labels, tokenizer, args.max_length, args.prompt_variant)
+    ie_sample_weights = [
+        args.ie_weight_multiplier if r["deploy_tag"] == "internal_essence" else 1.0
+        for r in train_rows
+    ]
+    train_ds = PromptedTagDataset([r[args.text_column] for r in train_rows], train_labels, tokenizer, args.max_length, args.prompt_variant, sample_weights=ie_sample_weights)
     val_ds = PromptedTagDataset([r[args.text_column] for r in val_rows], val_labels, tokenizer, args.max_length, args.prompt_variant)
 
     if args.oversample:
@@ -352,7 +373,12 @@ def main():
         train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
-    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights)
+    # reduction="none" so the per-sample IE weight (from --ie-weight-multiplier,
+    # baked into train_ds/train_loader's "weight" field, 1.0 for everyone
+    # when the flag is unused) can be applied on top of the existing
+    # per-class junk/non_junk weighting -- the two are orthogonal, one
+    # keys off the binary label, the other off the original 4-way category.
+    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights, reduction="none")
     optimizer = torch.optim.AdamW(
         (p for p in model.parameters() if p.requires_grad), lr=args.lr,
     )
@@ -373,10 +399,12 @@ def main():
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
+            sample_weight = batch["weight"].to(device)
 
             optimizer.zero_grad()
             logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-            loss = loss_fn(logits, labels)
+            per_sample_loss = loss_fn(logits, labels)
+            loss = (per_sample_loss * sample_weight).sum() / sample_weight.sum()
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
@@ -412,6 +440,7 @@ def main():
         "target_modules": args.target_modules,
         "prompt_variant": args.prompt_variant,
         "oversample": args.oversample,
+        "ie_weight_multiplier": args.ie_weight_multiplier,
         "seed": args.seed,
         "lr": args.lr,
         "epochs_run": args.epochs,
