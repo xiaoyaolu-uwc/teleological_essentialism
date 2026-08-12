@@ -180,6 +180,32 @@ force a combination for its own sake, **Round 4 concludes with no change:
 B_structured_antiheuristic stands as the prompt-loop winner**, carried
 into Round 5 unmodified.
 
+## Round 5 — integration with best hyperparameters (concluded: does not stack)
+
+Tested B_structured_antiheuristic at `r32a64`'s hyperparameters (lr=2e-4,
+lora_r=32, lora_alpha=64, target_modules=attn, no oversample, max_length=
+384 unchanged) — the actual best *hyperparameter-only* config from
+`eval/lora_junk_gate_evolution.md` (not the failed combined_v1/v2).
+
+| Run name | Config | Held DT/NDT/IE recall | Held evenness | Golden DT/NDT/IE recall | Notes |
+|---|---|---|---|---|---|
+| `junk_gate_lora_prompt_B_structured_antiheuristic` | prompt=B, r16/alpha32 (default) | **0.86/0.88/0.70** | **0.17** | 0.50/1.00/1.00 | Round 3 winner, unmodified |
+| `junk_gate_lora_integration_v1` | prompt=B, r32/alpha64 | 0.72/0.89/0.59 | 0.30 | 0.60/0.79/0.83 | Regresses vs. B on DT, IE, evenness, and junk precision (.90→.87); only NDT ticks up marginally (.88→.89) |
+
+**Conclusion: the hyperparameter gain does not stack with the prompt
+gain**, mirroring `eval/lora_junk_gate_evolution.md`'s finding that the
+four hyperparameter dimensions don't stack with *each other* either. This
+is now the third instance of "combining two independently-good things
+makes the result worse, not better" in this project (hyperparameter ×
+hyperparameter, and now hyperparameter × prompt) — the pattern seems to be
+that this model/task combination has a fairly narrow region of
+configurations that work well, and pushing multiple levers simultaneously
+overshoots it rather than compounding gains. **B_structured_antiheuristic
+at default hyperparameters (lr=2e-4, r=16/alpha=32, attn, no oversample,
+max_length=384) is the best configuration found in this entire project**
+— nothing tested beats it, including every attempt to improve on it
+further.
+
 ## Backlog
 
 - [x] Round 1: submit, backfill, compare all four candidates
@@ -187,8 +213,7 @@ into Round 5 unmodified.
 - [x] Round 3: select survivor — B_structured_antiheuristic, undisputed
 - [x] Round 4: evaluate combination — concluded not warranted, no
       independent idea left to merge
-- [ ] Round 5: integrate B with r32a64 hyperparameters (the actual best
-      hyperparameter-only config — NOT the failed combined_v1/v2, see
-      `eval/lora_junk_gate_evolution.md`), compare against B at default
-      hyperparameters to see if the gains stack
-- [ ] Multi-seed check on whichever config comes out of Round 5 as final
+- [x] Round 5: integrate B with r32a64 hyperparameters — concluded it does
+      not stack; B at default hyperparameters remains the winner
+- [ ] Multi-seed check on B at default hyperparameters (seed=42 already
+      done; running seed=7 and seed=123 next)
