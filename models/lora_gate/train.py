@@ -40,6 +40,7 @@ from models.lora_gate.model import build_model_and_tokenizer, load_trained_model
 
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
+from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
 TARGET_MODULE_PRESETS = {
     "attn": DEFAULT_TARGET_MODULES,
@@ -388,11 +389,39 @@ def main():
     results_dir = PATHS["lora_results_dir"] / args.run_name
     results_dir.mkdir(parents=True, exist_ok=True)
 
+    # Resume support: SLURM preemption on the `preempt` partition kills the
+    # process outright and requeues the same sbatch script from scratch, so
+    # without this, a preempted run loses everything and restarts at epoch
+    # 1 -- costly for anything beyond the default 4 epochs (an 8-epoch run
+    # got preempted ~40 min in and had to start over). ckpt_dir already
+    # holds the best-epoch-so-far adapter (saved below), but that alone
+    # doesn't let the training LOOP resume -- this also needs the optimizer
+    # state, epoch counter, and RNG state, saved every epoch (not just on a
+    # new best) to a separate "_resume" dir so it doesn't get confused with
+    # the best-epoch checkpoint used for final eval.
+    resume_dir = PATHS["lora_checkpoints_dir"] / f"{args.run_name}_resume"
+    resume_state_path = resume_dir / "resume_state.pt"
+
     best_f1 = -1.0
     best_epoch = -1
     epoch_log = []
+    start_epoch = 1
 
-    for epoch in range(1, args.epochs + 1):
+    if resume_state_path.exists():
+        state = torch.load(resume_state_path, map_location=device)
+        set_peft_model_state_dict(model, state["adapter_state"])
+        optimizer.load_state_dict(state["optimizer"])
+        start_epoch = state["epoch"] + 1
+        best_f1 = state["best_f1"]
+        best_epoch = state["best_epoch"]
+        epoch_log = state["epoch_log"]
+        torch.set_rng_state(state["rng_state"])
+        if state["cuda_rng_state"] is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(state["cuda_rng_state"])
+        print(f"[{args.run_name}] resumed from epoch {state['epoch']} "
+              f"(best_f1={best_f1:.4f} at epoch {best_epoch})", flush=True)
+
+    for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         total_loss = 0.0
         for batch in train_loader:
@@ -421,6 +450,21 @@ def main():
             best_epoch = epoch
             model.save_pretrained(ckpt_dir)
             tokenizer.save_pretrained(ckpt_dir)
+
+        resume_dir.mkdir(parents=True, exist_ok=True)
+        torch.save({
+            "adapter_state": get_peft_model_state_dict(model),
+            "optimizer": optimizer.state_dict(),
+            "epoch": epoch,
+            "best_f1": best_f1,
+            "best_epoch": best_epoch,
+            "epoch_log": epoch_log,
+            "rng_state": torch.get_rng_state(),
+            "cuda_rng_state": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+        }, resume_state_path)
+
+    if resume_state_path.exists():
+        resume_state_path.unlink()
 
     print(f"[{args.run_name}] best epoch={best_epoch} val_macro_f1={best_f1:.4f} "
           f"-- reloading best adapter for final eval", flush=True)
