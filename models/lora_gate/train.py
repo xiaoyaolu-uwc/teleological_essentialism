@@ -220,6 +220,42 @@ PROMPT_VARIANTS = {
         "Gelatinous animals are characterized by a single system of organs, the intestine.\"\n\n"
         "Passage: {text}"
     ),
+    # Round 2: targeted refinements of Round 1's winner (B_structured_antiheuristic),
+    # not a broad new sweep -- see eval/lora_prompt_evolution.md.
+    "E_B_plus_hard_example": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
+        "animal (or animal part) fundamentally is, or what kind it belongs to? If no such claim is "
+        "made, it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of two ways:\n"
+        "- Purpose: the animal (or part) is characterized by the function or end it serves (divine or natural).\n"
+        "- Internal structure/essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, or structure -- with no reference to purpose or function at all.\n\n"
+        "junk passages describe, mention, or narrate without committing to such a claim.\n\n"
+        "Note: many non_junk passages ground their claim purely in internal structure and use no "
+        "purpose or function language at all. Do not require purpose-language as a signal for "
+        "non_junk, and do not assume a passage with no purpose language must be junk.\n\n"
+        "Example (non_junk, grounded in structure alone, no purpose language): \"Oken's Intestinal or "
+        "Gelatinous animals are characterized by a single system of organs, the intestine.\"\n\n"
+        "Passage: {text}"
+    ),
+    "F_B_stronger_clause": (
+        "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
+        "animal (or animal part) fundamentally is, or what kind it belongs to? If no such claim is "
+        "made, it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of two ways:\n"
+        "- Internal structure/essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, or structure -- with no reference to purpose or function at all. "
+        "This is just as valid as purpose-grounding and does NOT require any purpose language to "
+        "count as non_junk.\n"
+        "- Purpose: the animal (or part) is characterized by the function or end it serves (divine or natural).\n\n"
+        "junk passages describe, mention, or narrate without committing to such a claim.\n\n"
+        "Note: a passage with no purpose language is NOT automatically junk -- check specifically "
+        "whether it makes a structural/categorical claim before deciding. Do not use presence or "
+        "absence of purpose-language as your primary signal.\n\n"
+        "Passage: {text}"
+    ),
 }
 
 

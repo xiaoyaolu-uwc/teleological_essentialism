@@ -72,6 +72,33 @@ For reference, Round 0 prompt results (same hyperparameter base) from
 | fewshot | .62/.68/.59 | **.09** |
 | fewshot_multi | .69/.86/.44 | .41 |
 
+## Round 2 — targeted refinements of B (not a broad new sweep)
+
+B already clears 2 of 3 targets (per-category recall ≥0.65, junk
+precision ≥0.752); evenness (.17) is the one gap left (target ≤0.10),
+driven by IE (.70) lagging DT (.86)/NDT (.88). Two independent refinements
+of B specifically targeting that gap — not sequential edits of one
+prompt, per methodology (both start from B, but test different, unrelated
+mechanisms). No reseed check yet, per explicit decision — that happens
+once we're near a final configuration, not every round.
+
+Token-length check against all 469 held-out passages:
+
+| variant | template-only tokens | median total | max total | % >384 |
+|---|---|---|---|---|
+| E_B_plus_hard_example | 251 | 306 | 463 | 1.9% |
+| F_B_stronger_clause | 225 | 280 | 437 | 0.6% |
+
+| variant | hypothesis tested |
+|---|---|
+| E_B_plus_hard_example | B + one concrete IE example (structure-only, no purpose language) appended. Tests whether a concrete anchor reinforces B's rule further, unlike Round 1's D (example added to A without the anti-heuristic clause) which hurt DT. |
+| F_B_stronger_clause | B with the structure/purpose order swapped (structure listed first) and the anti-heuristic note expanded to be more directive ("check specifically whether it makes a structural/categorical claim before deciding"). Tests whether a stronger, more specific version of B's own working mechanism closes the gap further. |
+
+| Run name | Status | Held DT/NDT/IE recall | Held evenness | Golden DT/NDT/IE recall | Notes |
+|---|---|---|---|---|---|
+| `junk_gate_lora_prompt_E_B_plus_hard_example` | queued | | | | |
+| `junk_gate_lora_prompt_F_B_stronger_clause` | queued | | | | |
+
 ## Findings
 
 - **Round 1: B_structured_antiheuristic strictly dominates the other three
