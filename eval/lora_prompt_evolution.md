@@ -96,8 +96,8 @@ Token-length check against all 469 held-out passages:
 
 | Run name | Status | Held DT/NDT/IE recall | Held evenness | Golden DT/NDT/IE recall | Notes |
 |---|---|---|---|---|---|
-| `junk_gate_lora_prompt_E_B_plus_hard_example` | queued | | | | |
-| `junk_gate_lora_prompt_F_B_stronger_clause` | queued | | | | |
+| `junk_gate_lora_prompt_E_B_plus_hard_example` | done | 0.59/0.79/0.48 | 0.31 | 0.30/0.79/0.83 | Regresses vs. B on every axis (DT .86→.59, NDT .88→.79, IE .70→.48, evenness .17→.31). Adding the example hurt rather than helped. |
+| `junk_gate_lora_prompt_F_B_stronger_clause` | done | 0.59/0.69/0.48 | 0.21 | 0.20/0.71/0.83 | Also regresses vs. B on every axis (DT .86→.59, NDT .88→.69, IE .70→.48, evenness .17→.21). Reordering + strengthening the clause hurt rather than helped. |
 
 ## Findings
 
@@ -137,12 +137,58 @@ Token-length check against all 469 held-out passages:
   with last-real-token pooling); not chasing it further since max_length
   is fixed at 384 by explicit constraint regardless. See
   `eval/lora_junk_gate_evolution.md` for the truncation-rate measurement.
+- **Round 2: both targeted refinements of B regressed instead of
+  improving it.** E (B + one hard IE example) and F (B with structure/
+  purpose order swapped + a stronger, more directive anti-heuristic
+  clause) both fell to IE=0.48 (from B's 0.70) and worse evenness (.31
+  and .21 vs. B's .17), with DT and NDT also down. This is the fourth
+  independent instance of "adding a concrete example on top of a working
+  rule hurts" (Round 0 fewshot/fewshot_multi vs. rich-style rules, Round 1
+  C/D vs. A/B, now Round 2 E) — a consistent pattern, not noise from one
+  run. F's failure is more surprising: it only changed ordering and
+  wording of the *same* mechanism that made B work, and still regressed,
+  suggesting B's exact phrasing sits at a fairly sharp local optimum for
+  this model/prompt-length combination rather than being on a smooth
+  "more explicit = better" gradient.
+
+## Round 3 — selection (autonomous, per marcus's "be agentic" authorization)
+
+Across all 11 candidates tested (Round 0: none/current/rich/fewshot/
+fewshot_multi; Round 1: A/B/C/D; Round 2: E/F), **B_structured_antiheuristic
+is the winner** — it strictly dominates every other candidate on every
+held-out axis (DT/NDT/IE recall and evenness simultaneously), not just on
+one metric traded against another. No candidate came within striking
+distance: the next-best worst-case recall is A/D tied at .62-.63, well
+below B's .70. Junk precision (.90) is comfortably above the 0.752 floor
+throughout the B family. Decision: **B_structured_antiheuristic is the
+Round 3 survivor**, carried forward as-is (not re-derived or re-weighted
+from Round 2's failures, since neither Round 2 candidate offered anything
+worth folding back in).
+
+## Round 4 — combination (concluded: not warranted)
+
+Per the loop's methodology, combination only makes sense when a second,
+genuinely independent idea has been validated alongside the round winner.
+Reviewing everything tested: A (structure only) is a strict subset of B;
+C, D, E all tested example-based additions and every one of them
+underperformed the corresponding rule-only version; F tested a stronger/
+reordered version of B's own clause and also underperformed. There is no
+surviving independent idea left to merge with B — the entire "add
+examples" and "strengthen the clause further" directions are now each
+independently falsified (4 and 1 data points respectively). Rather than
+force a combination for its own sake, **Round 4 concludes with no change:
+B_structured_antiheuristic stands as the prompt-loop winner**, carried
+into Round 5 unmodified.
 
 ## Backlog
 
 - [x] Round 1: submit, backfill, compare all four candidates
-- [ ] Round 3: select survivors against Round 1 data with the user
-- [ ] Round 4: combine top ≤2 survivors into one prompt
-- [ ] Round 5: integrate round winner with the finalized combined
-      hyperparameter config from `eval/lora_junk_gate_evolution.md`,
-      multi-seed check before calling it done
+- [x] Round 2: submit, backfill, compare E/F refinements — both regressed
+- [x] Round 3: select survivor — B_structured_antiheuristic, undisputed
+- [x] Round 4: evaluate combination — concluded not warranted, no
+      independent idea left to merge
+- [ ] Round 5: integrate B with r32a64 hyperparameters (the actual best
+      hyperparameter-only config — NOT the failed combined_v1/v2, see
+      `eval/lora_junk_gate_evolution.md`), compare against B at default
+      hyperparameters to see if the gains stack
+- [ ] Multi-seed check on whichever config comes out of Round 5 as final
