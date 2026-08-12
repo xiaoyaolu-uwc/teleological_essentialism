@@ -247,6 +247,56 @@ provisional until reseeded. Not re-running the entire sweep with multiple
 seeds (out of scope for this loop), but flagging this as a real caveat on
 everything reported above.
 
+## Final summary (honest, post-reseed)
+
+Reseeded the plain `current` baseline with the same 2 seeds as B, so the
+comparison is averaged on both sides rather than an averaged B against a
+single baseline run (one baseline job, `..._seed7`, hit a cluster launch
+failure mid-run and was cancelled/resubmitted clean as job 424001 — no
+effect on results, just noted for the record).
+
+| | seed 42 | seed 7 | seed 123 | mean |
+|---|---|---|---|---|
+| `current` (baseline) DT/NDT/IE | .59/.72/.52 | .55/.71/.37 | .69/.81/.67 | **.610/.747/.520** |
+| `B_structured_antiheuristic` DT/NDT/IE | .86/.88/.70 | .55/.78/.44 | .59/.72/.52 | **.667/.793/.553** |
+
+**Paired seed-by-seed**: B beats baseline decisively at seed 42 (the
+original result this whole loop was built on), beats it slightly at seed
+7 (DT tied, NDT/IE both a bit higher), and *loses* to baseline at seed 123
+(baseline is better on all three categories at that seed). 2 of 3 seed
+pairings favor B, but the seed-42 margin that drove every decision in
+Rounds 1-5 was a substantial overstatement of the true effect size.
+
+**Revised conclusion**: B likely does have a real, positive effect over
+the plain baseline prompt — the direction is consistent 2 of 3 times, and
+even at its worst seed it isn't clearly worse than baseline — but the
+effect size is much smaller than originally measured (means differ by
+roughly 4-6 points per category, versus the ~15-30 point differences
+individual seeds swing by). **Averaged, B does not clear the
+`LORA_JUNK_GATE_PLAN.md` §9 targets**: IE mean (.553) falls short of the
+≥0.65 bar that the single seed=42 run appeared to clear (.70), and
+evenness-of-means (~.24) is well above the ≤0.10 target. The single-seed
+Round 1-5 narrative ("best result in the whole project," clearing 2 of 3
+targets) does not survive honest reseeding and should not be treated as
+established fact — it was real signal plus a large favorable draw, not a
+settled result.
+
+**What this means going forward**: every ranking in this log and in
+`eval/lora_junk_gate_evolution.md` (the full hyperparameter sweep, all 11
+prompt-loop candidates) is single-seed, at a noise scale that can span
+15-30 recall points on a single category. Rounds where the gap between
+candidates was large (B vs. C/D in Round 1, `r32a64` vs. baseline in the
+hyperparameter sweep) are more likely to reflect real effects than noise,
+but should not be fully trusted until reseeded. Given the scope
+authorized for this loop, further multi-seed sweeping of every candidate
+is out of scope here; recommend marcus decide whether to (a) accept B as
+the best available (if noisy) candidate and move on, (b) run 2-3 more
+seeds each on the top 2-3 candidates (B, `r32a64`, plain `current`) before
+trusting any of them, or (c) treat prompting's *general* direction
+(structured explanation + anti-heuristic framing beat every example-based
+approach, consistently, across all seeds tested) as the durable finding,
+independent of the exact magnitude.
+
 ## Backlog
 
 - [x] Round 1: submit, backfill, compare all four candidates
@@ -256,5 +306,14 @@ everything reported above.
       independent idea left to merge
 - [x] Round 5: integrate B with r32a64 hyperparameters — concluded it does
       not stack; B at default hyperparameters remains the winner
-- [ ] Multi-seed check on B at default hyperparameters (seed=42 already
-      done; running seed=7 and seed=123 next)
+- [x] Multi-seed check on B and on the baseline (3 seeds each) — B's
+      seed=42 result was substantially overstated by seed luck; see Final
+      summary above for the honest averaged comparison
+- [ ] Decision needed from marcus: accept B as-is, run more seeds on the
+      top 2-3 candidates before trusting any ranking, or treat only the
+      qualitative direction (structure + anti-heuristic > examples) as
+      established and not the exact numbers
+- [ ] If pursuing further: multi-seed the hyperparameter sweep's `r32a64`
+      result too, since it was also single-seed
+- [ ] Decide whether Qwen3-1.7B is still worth trying given prompting's
+      true (noisier, more modest) effect size
