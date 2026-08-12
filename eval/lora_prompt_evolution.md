@@ -56,10 +56,10 @@ All four safely fit within max_length=384 for effectively all rows.
 
 | Run name | Status | Held DT/NDT/IE recall | Held evenness | Golden DT/NDT/IE recall | Notes |
 |---|---|---|---|---|---|
-| `junk_gate_lora_prompt_A_structured` | queued | | | | |
-| `junk_gate_lora_prompt_B_structured_antiheuristic` | queued | | | | |
-| `junk_gate_lora_prompt_C_hard_contrastive` | queued | | | | |
-| `junk_gate_lora_prompt_D_structured_plus_example` | queued | | | | |
+| `junk_gate_lora_prompt_A_structured` | done | 0.62/0.87/0.63 | 0.25 | 0.30/0.79/1.00 | Structure alone already beats every Round 0 prompt on IE. |
+| `junk_gate_lora_prompt_B_structured_antiheuristic` | done | **0.86/0.88/0.70** | **0.17** | 0.50/0.79/1.00 | Best result in the entire sweep (all rounds, all hyperparameter runs) by a wide margin — see Findings. |
+| `junk_gate_lora_prompt_C_hard_contrastive` | done | 0.48/0.74/0.44 | 0.30 | 0.30/0.79/0.83 | Weakest of the four; below the `current` baseline on DT and IE both. |
+| `junk_gate_lora_prompt_D_structured_plus_example` | done | 0.59/0.87/0.70 | 0.28 | 0.40/0.79/1.00 | Ties B on IE but DT is much weaker and evenness worse — the example addition didn't help over B. |
 
 For reference, Round 0 prompt results (same hyperparameter base) from
 `eval/lora_junk_gate_evolution.md`:
@@ -74,6 +74,30 @@ For reference, Round 0 prompt results (same hyperparameter base) from
 
 ## Findings
 
+- **Round 1: B_structured_antiheuristic strictly dominates the other three
+  candidates on every held-out axis** (DT .86 vs. A's .62/C's .48/D's .59;
+  NDT .88 vs. .87/.74/.87; IE .70 vs. .63/.44/.70; evenness .17 vs.
+  .25/.30/.28) — not a trade-off, better on all four numbers
+  simultaneously. It's also the best result across the *entire* project so
+  far, beating every Round 0 prompt and every hyperparameter-sweep run
+  (previous best worst-case recall was `r32a64` at .63; B reaches .70) and
+  clearing the original targets in `LORA_JUNK_GATE_PLAN.md` §9
+  (per-category recall ≥0.65 each ✓, evenness ≤0.10 — .17 is close but not
+  quite there, jprec ≥0.752 ✓ at .90). Structure alone (A) already beat
+  every Round 0 prompt on IE (.63, vs. rich's .48); naming the purpose-
+  language shortcut explicitly (B's addition over A) is what pushed DT way
+  up too (.62→.86) without sacrificing IE — suggesting the anti-heuristic
+  clause helped the model use the *structure* correctly for ambiguous DT
+  cases, not just IE ones.
+- **The hard-contrastive example approach (C) underperformed**, coming in
+  below even the plain `current` baseline on DT and IE. Combining it with
+  structure (D) recovered NDT/IE to B's level but not DT, and worsened
+  evenness vs. B. Tentative read: for this task, an explicit rule
+  (A/B-style) generalizes better than concrete examples (C/D-style) — echoes
+  the Round 0 pattern where `rich` (rule-only) beat `fewshot` (example-only)
+  on aggregate, though `fewshot` had the better evenness there. Not
+  conclusive from n=4 candidates; worth another rule-vs-example test in a
+  later round if this keeps holding.
 - **No hard numeric selection bar set for Round 3** — per explicit
   decision, candidates get judged against real Round 1 data together
   rather than a bar picked before seeing results.
@@ -89,7 +113,7 @@ For reference, Round 0 prompt results (same hyperparameter base) from
 
 ## Backlog
 
-- [ ] Round 1: submit, backfill, compare all four candidates
+- [x] Round 1: submit, backfill, compare all four candidates
 - [ ] Round 3: select survivors against Round 1 data with the user
 - [ ] Round 4: combine top ≤2 survivors into one prompt
 - [ ] Round 5: integrate round winner with the finalized combined
