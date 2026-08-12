@@ -206,6 +206,47 @@ max_length=384) is the best configuration found in this entire project**
 — nothing tested beats it, including every attempt to improve on it
 further.
 
+## Multi-seed check — B's seed=42 result does not hold up
+
+Per marcus's instruction ("reseed-check only when we approach final
+configuration"), reran B_structured_antiheuristic with 2 additional seeds
+at default hyperparameters:
+
+| seed | Held DT/NDT/IE recall | Held evenness | Golden DT/NDT/IE recall |
+|---|---|---|---|
+| 42 (original, reported throughout Rounds 1-5) | 0.86/0.88/0.70 | 0.17 | 0.50/1.00/1.00 |
+| 7 | 0.55/0.78/0.44 | 0.33 | 0.30/0.79/0.67 |
+| 123 | 0.59/0.72/0.52 | 0.20 | 0.40/0.79/0.67 |
+| **mean across 3 seeds** | **0.667/0.793/0.553** | **~0.24** | — |
+
+**Seed=42's result does not hold up.** Seed 7 is worse than the plain
+`current` baseline on DT and IE; seed 123 lands almost exactly on that
+baseline (0.59/0.72/0.52 vs. baseline's 0.59/0.72/0.52 — identical to two
+decimal places). This is the same seed-variance risk documented earlier
+for BERT (golden recall swung 0.60→0.73 with zero config change) showing
+up again, at a scale large enough to have driven every Round 1-5 decision
+built on top of B's single-seed number. Averaged across 3 seeds, B still
+beats the single-seed baseline on all three categories (0.667/0.793/0.553
+vs. baseline's 0.59/0.72/0.52), but the margin is far smaller than the
+single-seed comparisons throughout this log suggested, and evenness is no
+longer clearly improved (~0.24 vs. baseline's 0.20, though baseline itself
+is only single-seed). Reseed-checking the baseline itself now (2 more
+seeds, run-names `junk_gate_lora_lr2e4_seed7`/`_seed123`) before drawing a
+final conclusion, so the comparison is honestly averaged on both sides
+rather than an averaged number against a single lucky/unlucky baseline
+run.
+
+**Implication beyond this one comparison**: every ranking in both
+evolution logs (hyperparameter sweep, Round 0-5 prompts) is based on a
+single seed each. The relative ordering of the *clear* wins (e.g. B's
+Round 1 margin over C/D, which was large — .70 vs .44/.48 IE — and
+`r32a64`'s clean sweep over the plain baseline on every axis) are less
+likely to be pure noise given the size of those gaps, but any conclusion
+resting on a *narrow* margin between two candidates should be treated as
+provisional until reseeded. Not re-running the entire sweep with multiple
+seeds (out of scope for this loop), but flagging this as a real caveat on
+everything reported above.
+
 ## Backlog
 
 - [x] Round 1: submit, backfill, compare all four candidates
