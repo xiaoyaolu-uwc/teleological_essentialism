@@ -66,9 +66,10 @@ def preds_from_probs(probs, threshold):
 
 def junk_precision(true_tags, gate_preds):
     """Precision of the "junk" call: of everything predicted junk, what
-    fraction was actually junk. This is the leakage-control number --
-    the thing that matters most now that precision is weighted roughly
-    equal to recall."""
+    fraction was actually junk. High junk-precision means we're not
+    over-aggressively discarding good non_junk rows -- it does NOT
+    measure junk leaking into the kept set (that's non_junk_precision,
+    below)."""
     predicted_junk = [i for i, p in enumerate(gate_preds) if p == "junk"]
     if not predicted_junk:
         return None
@@ -76,11 +77,26 @@ def junk_precision(true_tags, gate_preds):
     return correct / len(predicted_junk)
 
 
+def non_junk_precision(true_tags, gate_preds):
+    """Precision of the "non_junk" call: of everything predicted
+    non_junk (the set actually passed downstream to stage 2 / the final
+    output), what fraction is truly non_junk. 1 minus this is exactly
+    the junk-leakage-into-final-output rate marcus is most concerned
+    about -- this is the metric his "precision" priority statement
+    actually describes, distinct from junk_precision above."""
+    predicted_nonjunk = [i for i, p in enumerate(gate_preds) if p == "non_junk"]
+    if not predicted_nonjunk:
+        return None
+    correct = sum(1 for i in predicted_nonjunk if true_tags[i] != "junk")
+    return correct / len(predicted_nonjunk)
+
+
 def evaluate_probs(probs, true_tags, threshold):
     preds = preds_from_probs(probs, threshold)
     prop = gate_proportion_metrics(true_tags, preds)
     jprec = junk_precision(true_tags, preds)
-    return prop, jprec
+    njprec = non_junk_precision(true_tags, preds)
+    return prop, jprec, njprec
 
 
 def load_data(text_column):
@@ -120,33 +136,36 @@ def main():
         per_model_held_probs.append(held_probs)
         per_model_golden_probs.append(golden_probs)
 
-        prop, jprec = evaluate_probs(held_probs, held_true_tags, 0.5)
+        prop, jprec, njprec = evaluate_probs(held_probs, held_true_tags, 0.5)
         print(f"[{run_name}] held-out per-category recall: "
               f"{ {k: round(v, 3) for k, v in prop['per_category_recall'].items()} } "
-              f"evenness={prop['recall_evenness']:.3f} junk_precision={jprec:.3f}", flush=True)
+              f"evenness={prop['recall_evenness']:.3f} junk_precision={jprec:.3f} "
+              f"non_junk_precision={njprec:.3f}", flush=True)
 
     held_ensemble = torch.stack(per_model_held_probs, dim=0).mean(dim=0)
     golden_ensemble = torch.stack(per_model_golden_probs, dim=0).mean(dim=0)
 
     print(f"\n=== Ensemble of {len(args.run_names)} models (avg probability, threshold=0.5) ===")
-    held_prop, held_jprec = evaluate_probs(held_ensemble, held_true_tags, 0.5)
-    golden_prop, golden_jprec = evaluate_probs(golden_ensemble, golden_true_tags, 0.5)
+    held_prop, held_jprec, held_njprec = evaluate_probs(held_ensemble, held_true_tags, 0.5)
+    golden_prop, golden_jprec, golden_njprec = evaluate_probs(golden_ensemble, golden_true_tags, 0.5)
     print(f"HELD-OUT per-category recall: "
           f"{ {k: round(v, 3) for k, v in held_prop['per_category_recall'].items()} } "
-          f"evenness={held_prop['recall_evenness']:.3f} junk_precision={held_jprec:.3f}")
+          f"evenness={held_prop['recall_evenness']:.3f} junk_precision={held_jprec:.3f} "
+          f"non_junk_precision={held_njprec:.3f}")
     print(f"GOLDEN per-category recall: "
           f"{ {k: round(v, 3) for k, v in golden_prop['per_category_recall'].items()} } "
-          f"evenness={golden_prop['recall_evenness']:.3f} junk_precision={golden_jprec:.3f}")
+          f"evenness={golden_prop['recall_evenness']:.3f} junk_precision={golden_jprec:.3f} "
+          f"non_junk_precision={golden_njprec:.3f}")
 
     if args.sweep:
         print(f"\n=== Threshold sweep (held-out, ensemble) ===")
-        print(f"{'threshold':>9s} | {'DT':>5s} {'NDT':>5s} {'IE':>5s} | {'even':>5s} | {'jprec':>5s}")
+        print(f"{'threshold':>9s} | {'DT':>5s} {'NDT':>5s} {'IE':>5s} | {'even':>5s} | {'jprec':>5s} | {'non_junk_prec':>13s}")
         for t100 in range(30, 71, 5):
             t = t100 / 100.0
-            prop, jprec = evaluate_probs(held_ensemble, held_true_tags, t)
+            prop, jprec, njprec = evaluate_probs(held_ensemble, held_true_tags, t)
             rec = prop["per_category_recall"]
             print(f"{t:9.2f} | {rec['divine_teleology']:.2f}  {rec['non_divine_teleology']:.2f}  "
-                  f"{rec['internal_essence']:.2f} | {prop['recall_evenness']:.3f} | {jprec:.3f}")
+                  f"{rec['internal_essence']:.2f} | {prop['recall_evenness']:.3f} | {jprec:.3f} | {njprec:>13.3f}")
 
 
 if __name__ == "__main__":
