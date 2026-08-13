@@ -432,9 +432,13 @@ def main():
         best_f1 = state["best_f1"]
         best_epoch = state["best_epoch"]
         epoch_log = state["epoch_log"]
-        torch.set_rng_state(state["rng_state"])
+        # map_location=device (above) moves every tensor in the checkpoint
+        # to the training device, but torch.set_rng_state/set_rng_state_all
+        # specifically require CPU ByteTensors regardless of where training
+        # runs -- force back to CPU or resume crashes on any CUDA run.
+        torch.set_rng_state(state["rng_state"].cpu())
         if state["cuda_rng_state"] is not None and torch.cuda.is_available():
-            torch.cuda.set_rng_state_all(state["cuda_rng_state"])
+            torch.cuda.set_rng_state_all([t.cpu() for t in state["cuda_rng_state"]])
         print(f"[{args.run_name}] resumed from epoch {state['epoch']} "
               f"(best_f1={best_f1:.4f} at epoch {best_epoch})", flush=True)
 
