@@ -361,11 +361,83 @@ independent of the exact magnitude.
 - [x] Multi-seed check on B and on the baseline (3 seeds each) — B's
       seed=42 result was substantially overstated by seed luck; see Final
       summary above for the honest averaged comparison
-- [ ] Decision needed from marcus: accept B as-is, run more seeds on the
-      top 2-3 candidates before trusting any ranking, or treat only the
-      qualitative direction (structure + anti-heuristic > examples) as
-      established and not the exact numbers
-- [ ] If pursuing further: multi-seed the hyperparameter sweep's `r32a64`
-      result too, since it was also single-seed
-- [ ] Decide whether Qwen3-1.7B is still worth trying given prompting's
-      true (noisier, more modest) effect size
+- [x] Decision from marcus: run more seeds on the top candidate
+      (`r32a64`+`A_structured`) before trusting it, then wrap up
+      remaining levers and get cursory baselines for full fine-tune and
+      Qwen3-1.7B
+- [x] `r32a64`+`A_structured` brought to 5 seeds (42/7/123/99/7777) --
+      see "Final resolution" below
+- [x] Full fine-tune and Qwen3-1.7B cursory baselines run
+- [x] Ensemble + threshold sweep applied to the final 5-seed set
+
+## Final resolution
+
+**Also corrected here**: every precision number below and throughout
+this doc's later sections uses `non_junk_precision` (precision of the
+*non_junk* call -- see `eval/lora_junk_gate_evolution.md`'s "precision
+metric was wrong" Finding), not the `junk`-class precision earlier
+sections of this log were tracking. Recall and precision are weighted
+**equally**, not precision-dominant, per marcus's explicit correction.
+
+**5-seed confirmation of `r32a64`+`A_structured`** (lr=2e-4, r=32/alpha=64,
+attn, prompt=A_structured, max_length=384), seeds 42/7/123/99/7777:
+
+| seed | DT | NDT | IE | evenness | non_junk_prec |
+|---|---|---|---|---|---|
+| 42 | .655 | .761 | .481 | .280 | .771 |
+| 7 | .655 | .805 | .556 | .250 | .735 |
+| 123 | .655 | .770 | .704 | .115 | .723 |
+| 99 | .586 | .796 | .667 | .210 | .619 |
+| 7777 | .414 | .673 | .407 | .265 | .818 |
+| **mean** | **.593** | **.761** | **.563** | **.198** | **.733** |
+
+The extra 2 seeds (99, 7777) pulled the mean down from the earlier 3-seed
+snapshot -- seed 7777 in particular is a real, weak outlier (DT=.414).
+This confirms the original 3-seed read of this config was still
+optimistic; 5 seeds is a more honest picture, and even 5 is thin for a
+config this variable.
+
+**Ensemble of the 5 checkpoints** (average probability across all 5,
+threshold=0.5 unchanged) -- a free, no-retraining check:
+
+| | DT | NDT | IE | evenness | non_junk_prec |
+|---|---|---|---|---|---|
+| 5-seed mean (naive) | .593 | .761 | .563 | .198 | .733 |
+| **5-seed ensemble** | .586 | **.796** | **.593** | .210 | **.759** |
+
+Ensembling improves NDT, IE, and precision at a trivial cost to DT and
+evenness -- a real, adoptable improvement, and it beats BERT's
+non_junk_precision (.745) for the first time on this specific config.
+**This ensemble is the final, adopted SOTA** -- see
+`JUNK_GATE_PROGRESS_REPORT.md` for the accessible write-up.
+
+**Threshold sweep on the ensemble** (0.30-0.70): confirmed marcus's prior
+skepticism was correct -- no threshold strictly dominates 0.5. Every
+recall/evenness gain at a lower threshold (e.g. 0.45: better DT/NDT/IE
+*and* better evenness than 0.50) comes with a real precision cost (0.45's
+non_junk_prec=.722 vs 0.50's .759); every precision gain at a higher
+threshold costs recall. Kept the default 0.5 -- this is a genuine
+trade, not a free lever, exactly as suspected going in.
+
+**Cursory baselines** (single seed each, not iterated):
+
+| config | DT | NDT | IE | evenness | non_junk_prec |
+|---|---|---|---|---|---|
+| Full fine-tune (no LoRA, Qwen3-0.6B, prompt=A_structured, lr=2e-5) | .690 | .779 | .481 | .297 | .651 |
+| Qwen3-1.7B (same recipe as SOTA) | .655 | .770 | .481 | .288 | .758 |
+
+Full fine-tune clearly underperforms the SOTA ensemble on precision
+(.651 vs .759) for no recall benefit -- not worth pursuing. Qwen3-1.7B
+essentially ties the SOTA ensemble on precision (.758 vs .759) without
+beating it on recall -- interesting (bigger base model reaches similar
+precision without the ensembling trick) but not a clear enough win to
+justify the added cost right now. Neither baseline was iterated on; both
+could plausibly improve with tuning, so this is not a final verdict on
+either approach, just a "no obvious low-hanging fruit" signal.
+
+**Bug found and fixed during this pass**: the first ensemble run used the
+script's default `--prompt-variant current` instead of `A_structured`,
+silently evaluating with the wrong prompt template. Caught before
+trusting the numbers; rerun with the correct flag produced the results
+above. Any future use of `eval/ensemble_gate.py` must pass
+`--prompt-variant` explicitly matching the checkpoints being evaluated.

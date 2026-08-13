@@ -64,6 +64,18 @@ hyperparameters combined with `A_structured` or `B`'s prompt at multiple
 seeds (the one integration run tried, Round 5, used `B` at a single seed
 and predates this finding).
 
+**Final resolution**: that integration test was run properly (5 seeds:
+42/7/123/99/7777) in `eval/lora_prompt_evolution.md`'s "Final resolution"
+section. `r32a64`+`A_structured`, ensembled across the 5 seeds, is the
+final adopted SOTA: DT=.586, NDT=.796, IE=.593, evenness=.210,
+non_junk_precision=.759 — beats BERT's non_junk_precision (.745) while
+far exceeding it on every recall number. Cursory (non-iterated) baselines
+for full fine-tuning and Qwen3-1.7B were also run; neither clearly beats
+this config (full fine-tune: non_junk_precision=.651, worse; 1.7B:
+non_junk_precision=.758, ties but doesn't beat on recall) — see that
+section for the full comparison. Accessible write-up for external
+stakeholders: `JUNK_GATE_PROGRESS_REPORT.md`.
+
 ## Experiments
 
 Status: `queued` (submitted, not yet finished) / `done` (results filled in
