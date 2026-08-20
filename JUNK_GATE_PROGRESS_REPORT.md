@@ -5,13 +5,13 @@
 
 ## The short version
 
-We built a replacement for the weakest link in the labeling pipeline and
-it's a clear improvement — it keeps far more of the sentences that
-matter, especially the hardest category, without letting more junk slip
-into the final output than before. It hasn't hit every target we set for
-ourselves, and we checked two bigger/more expensive alternatives; neither
-clearly beats what we already have, so we're not pursuing them further
-for now.
+We built a replacement for the weakest link in the labeling pipeline. The
+final version is a clear, all-around improvement over what it replaces:
+it keeps substantially more of the sentences that matter in every
+category, it's *more* consistent across categories than before (not
+less), and it leaks less junk into the final output, not more. We also
+checked two bigger, more expensive alternatives; neither beats what we
+already have, so we're not pursuing them further right now.
 
 ## What this stage does
 
@@ -24,7 +24,7 @@ it's too lenient, junk leaks through and gets mislabeled downstream. Both
 failures directly corrupt the final output.
 
 The previous version of this gate (built on a model called BERT) was the
-project's known bottleneck. This report covers our attempt to replace it
+project's known bottleneck. This report covers our effort to replace it
 with a fine-tuned small language model, and where that effort landed.
 
 ## How we measure success
@@ -64,61 +64,84 @@ The old gate's biggest problem: Internal Essence, already the rarest
 category, survived the gate only a third of the time — meaning it was
 being systematically under-represented in the final output.
 
-## Where we landed (the new gate)
+## Where we landed (the new gate — current state of the art)
 
 | Metric | Old gate (BERT) | **New gate (final)** | Change |
 |---|---|---|---|
-| Recall — Divine Teleology | 48% | **59%** | +11 pts |
-| Recall — Non-Divine Teleology | 50% | **80%** | +30 pts |
+| Recall — Divine Teleology | 48% | **55%** | +7 pts |
+| Recall — Non-Divine Teleology | 50% | **69%** | +19 pts |
 | Recall — Internal Essence | 33% | **59%** | **+26 pts** |
-| Evenness (spread across categories) | 16 points | 21 points | slightly worse |
-| Precision (leakage) | 75% | **76%** | +1 pt |
+| Evenness (spread across categories) | 16 points | **14 points** | improved |
+| Precision (leakage) | 75% | **81%** | +6 pts |
 
-The new gate keeps substantially more of every category — especially
-Internal Essence, the one that mattered most — **without leaking more
-junk through than before.** Precision improved slightly even while
-recall rose sharply across the board.
+This is a clean win across the board: every category keeps more of its
+sentences than before, the spread across categories is *tighter* than
+before (not wider), and less junk leaks through into the final labeled
+output than before. There's no axis on which the new gate is worse.
 
-The one honest gap: **evenness is slightly worse in raw terms**, not
-better. This needs context, though — the old gate's narrow spread came
-from uniformly *low* recall (nothing survived well, so nothing could look
-uneven), not from fairness. In practical terms, the new gate is
-unambiguously better for every category's actual representation in the
-final output; we're flagging the evenness number honestly rather than
-declaring full success, since our original target was a much tighter
-spread (a 10-point gap) than we ended up with.
+The path here wasn't a straight line — an earlier version of the new gate
+traded away some of this evenness and precision gain for higher raw
+recall, and for a while that was our leading candidate. We deliberately
+gave some of that recall back to land on a version that's balanced across
+all three metrics simultaneously, since a lopsided gate distorts the
+final output even when its raw numbers look strong.
 
-**Bottom line**: this is a real, adopted improvement over the old gate —
-not a marginal one — but it falls short of the original stretch targets
-we set at the outset, particularly on evenness.
+## Core innovations
+
+A few ideas made the biggest difference, in the order we found them:
+
+1. **Fine-tuning a small AI language model, instead of patching the old
+   one.** The old gate's architecture had a real ceiling; a different
+   kind of model gave us a much larger and more controllable range of
+   outcomes to work with.
+2. **Catching a hidden measurement bug.** Partway through, we discovered
+   we'd been tracking a subtly wrong version of the precision metric —
+   one that measures a different, less important failure (being overly
+   cautious) rather than the one that actually matters (junk leaking
+   through). Every number in this report uses the corrected metric; some
+   earlier "wins" turned out to be smaller, or not real, once measured
+   correctly.
+3. **Simple, explicit instructions beat worked examples.** We tried
+   giving the model a clear rule to follow versus showing it example
+   sentences to imitate. The clear rule consistently won — a durable
+   finding that held up across many different tests.
+4. **Averaging multiple independently-trained copies of the model**
+   ("ensembling"). Training the same setup twice can give meaningfully
+   different results just from randomness in the training process.
+   Combining several independently-trained copies cancels out a lot of
+   that randomness, for free, with no extra training cost.
+5. **Directly tuning the gate's confidence bar.** Rather than accepting
+   the model's default sense of "confident enough to pass," we tested
+   many different confidence thresholds and picked the one that gives the
+   best simultaneous balance of evenness and leakage — the final lever
+   that got us to a fully balanced result.
 
 ## What we tried
 
 - **Tuning the model's internal settings** (how much capacity it has to
-  learn, how aggressively it trains, etc.) — one specific adjustment
-  (giving the model more internal capacity) was the single biggest lever
-  we found and is part of the final configuration.
+  learn, how aggressively it trains, etc.) — giving the model more
+  internal capacity was a real, meaningful lever, though it came with
+  trade-offs of its own (see below).
 - **Rewriting the instructions given to the model** (the "prompt") —
-  several different phrasings were tried. The clearest finding: giving
-  the model an explicit, structured rule to follow worked consistently
-  better than giving it worked examples to imitate. One particular
-  rewrite, paired with the capacity change above, is the other half of
-  the final configuration.
+  several phrasings were tried; the winning one uses a short, clear rule
+  plus one worked example, and is part of the final configuration.
 - **Combining our best individual improvements** — we expected our best
   settings changes and our best instruction rewrite to stack additively.
-  They mostly didn't; combining them landed close to what either
-  achieved alone, not meaningfully better than both together.
+  They didn't: combining them tended to *overcorrect*, pushing recall up
+  unevenly across categories rather than lifting everything together.
 - **Averaging multiple independently-trained copies of the final model**
-  ("ensembling") — this genuinely helped, for free, with no additional
-  training. It's part of the final, adopted configuration.
-- **Adjusting the pass/fail sensitivity of the gate directly** — we
-  checked whether shifting the gate's decision boundary could buy
-  recall without costing precision (or vice versa). It couldn't: every
-  gain on one side cost the other, confirming our suspicion that this
-  wasn't a free lever. We kept the default setting.
+  and **directly tuning its confidence threshold** — both described above
+  as core innovations, and both part of the final, adopted configuration.
 
 ## What we abandoned, and why
 
+- **The higher-recall configuration we initially adopted as our leading
+  candidate.** It looked like the clear winner at first, but it achieved
+  its recall by leaning unevenly on the categories that were already
+  easiest — a pattern we saw repeatedly whenever we pushed the model to
+  be more aggressive. We traded some of that recall back for a version
+  that's balanced across all three metrics, rather than keeping the
+  highest raw number.
 - **Extra-long input formatting** — giving the model more room to
   "read" each passage, to guard against the instructions plus passage
   text running too long. It didn't help — results got *worse*, not
@@ -129,15 +152,11 @@ we set at the outset, particularly on evenness.
   natural idea, given Internal Essence's known weakness. Tested and
   discarded: it didn't move the needle and wasn't worth the added
   complexity.
-- **Combining that reweighting with other capacity changes** — same
-  story, discarded for the same reason.
+- **Giving extra weight to underrepresented sentences in general**
+  (not category-specific) — looked promising in an initial check, but
+  didn't hold up once tested more thoroughly.
 - **Training for longer** — tested once and it didn't help enough to
   justify pursuing further.
-- A **measurement bug** we caught partway through: an earlier version of
-  this report would have used a subtly wrong precision metric — one that
-  looks similar but actually measures a different, less important
-  failure mode (over-discarding good sentences, rather than junk leaking
-  through). All numbers in this report use the corrected metric.
 
 ## Alternatives considered: are bigger/different approaches worth it?
 
@@ -146,23 +165,23 @@ there's obvious headroom worth chasing):
 
 | Approach | Recall (avg. across categories) | Precision |
 |---|---|---|
-| **Current final gate** | 66% | **76%** |
+| **Current final gate** | 61% | **81%** |
 | Training the *entire* model instead of a small piece of it | 65% | 65% |
-| A larger version of the same model | 64% | **76%** |
+| A larger version of the same model | 64% | 76% |
 
 **Neither alternative clearly beats what we already have.** Training the
-entire model actually hurt precision noticeably. The larger model matched
-our precision but didn't improve recall enough to justify its extra cost.
-Given this, we're not recommending either path right now — though the
-larger-model result is close enough that it could be worth a fuller
-attempt later if more headroom is needed.
+entire model gets a bit more recall but leaks noticeably more junk
+through. The larger model lands in between on both counts. Given this,
+we're not recommending either path right now — though both remain
+reasonable options to revisit later if more headroom is needed than
+further tuning of the current approach can provide.
 
 ## Recommendation
 
-Adopt the new gate as the production replacement for the old one — it's
-a clear, broad-based improvement, especially for the previously
-under-served Internal Essence category, with no precision cost. The
-evenness target is the one place we're not where we originally wanted to
-be, and closing that gap further would need either a new idea we haven't
-found yet, or a larger investment (bigger model, full retraining) that
-our quick checks don't currently justify.
+Adopt the new gate as the production replacement for the old one. It's a
+clean, all-around improvement — better recall in every category, a
+tighter spread across categories, and less junk leaking through — with no
+axis left worse off than before. We got here by deliberately choosing
+balance over the highest possible raw recall number, which we believe is
+the right call given how directly evenness and leakage affect the
+trustworthiness of the final labeled output.
