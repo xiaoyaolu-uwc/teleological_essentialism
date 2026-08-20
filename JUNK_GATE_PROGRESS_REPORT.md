@@ -158,6 +158,30 @@ A few ideas made the biggest difference, in the order we found them:
 - **Training for longer** — tested once and it didn't help enough to
   justify pursuing further.
 
+## Every approach, side by side
+
+| Approach | Recall — DT | Recall — NDT | Recall — IE | Evenness | Precision |
+|---|---|---|---|---|---|
+| Old gate (BERT) — starting point | 48% | 50% | 33% | 16 pts | 75% |
+| Giving the model more internal capacity | 70% | 83% | 61% | 22 pts | 69% |
+| Rewriting the instructions (best version alone) | 66% | 79% | 65% | 13 pts | 72% |
+| Combining capacity + instructions (early leading candidate, later replaced) | 59% | 80% | 59% | 21 pts | 76% |
+| Extra-long input formatting | 59% | 63% | 44% | 18 pts | 76% |
+| Extra weight for the rarest category | 62% | 82% | 52% | 30 pts | 71% |
+| Extra weight for underrepresented sentences generally | 61% | 78% | 54% | 24 pts | 72% |
+| Training for longer | 59% | 75% | 44% | 31 pts | 76% |
+| **Ensembling + confidence tuning — final adopted gate** | **55%** | **69%** | **59%** | **14 pts** | **81%** |
+
+A few things stand out looking at these side by side: giving the model
+more capacity produced the single biggest recall jump of any change we
+tried, but at a real cost to both evenness and precision — exactly the
+lopsided trade-off we ultimately moved away from. Several of the
+abandoned ideas (extra weight for the rarest category, training longer)
+actually made evenness *worse*, not better, despite being designed
+specifically to help the weakest category. The final gate isn't the
+highest-recall row in this table — it's the only one that's strong on
+all three metrics simultaneously, which is why it's the one we adopted.
+
 ## Alternatives considered: are bigger/different approaches worth it?
 
 We ran two quick, one-off checks (not fully tuned — just enough to see if
