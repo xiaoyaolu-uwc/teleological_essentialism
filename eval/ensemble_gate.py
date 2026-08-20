@@ -160,7 +160,7 @@ def main():
     if args.sweep:
         print(f"\n=== Threshold sweep (held-out, ensemble) ===")
         print(f"{'threshold':>9s} | {'DT':>5s} {'NDT':>5s} {'IE':>5s} | {'even':>5s} | {'jprec':>5s} | {'non_junk_prec':>13s}")
-        for t100 in range(30, 71, 5):
+        for t100 in range(30, 81, 5):
             t = t100 / 100.0
             prop, jprec, njprec = evaluate_probs(held_ensemble, held_true_tags, t)
             rec = prop["per_category_recall"]
