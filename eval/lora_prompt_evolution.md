@@ -441,3 +441,59 @@ silently evaluating with the wrong prompt template. Caught before
 trusting the numbers; rerun with the correct flag produced the results
 above. Any future use of `eval/ensemble_gate.py` must pass
 `--prompt-variant` explicitly matching the checkpoints being evaluated.
+
+## Final decision -- superseded again: `fewshot` ensemble at threshold=0.70
+
+The `r32a64`+`A_structured` ensemble above was adopted, then reconsidered:
+marcus asked which already-tested single-lever configs had notably better
+evenness even at some recall cost, without running anything new. Pulled
+directly from stored `metrics.json` files across every run (not through
+`compare_lora_sweep.py`, to avoid any risk of the old precision-column
+bug): `fewshot` (evenness=.089, single seed) and `oversample`
+(evenness=.161, single seed) stood out. Both were reseeded to 3 seeds
+(42/7/123) to check whether either held up:
+
+| config | DT/NDT/IE (3-seed mean) | evenness | non_junk_prec |
+|---|---|---|---|
+| `fewshot` | .655/.785/.654 | **.130** | .716 |
+| `oversample` | .609/.782/.543 | .239 | .717 |
+
+`fewshot` held up -- real evenness improvement, not a lucky seed.
+`oversample` did not -- its promising single-seed numbers were mostly
+noise, landing worse than the (at-the-time) SOTA on both evenness and
+precision once reseeded. No further work done on `oversample`.
+
+Tried hyperparameter tuning on top of `fewshot` (r32=32/alpha=64, the
+lever that worked for `A_structured`): single seed, evenness collapsed to
+.364 (IE .654->.370) -- same overcorrection pattern seen everywhere else
+capacity was added. Not confirmed further, no benefit.
+
+**Ensembling the 3 `fewshot` seeds + a widened threshold sweep (0.30-0.80,
+`eval/ensemble_gate.py`'s hardcoded sweep range was extended from 0.70 to
+0.80 for this) produced the final adopted SOTA:**
+
+| threshold | DT/NDT/IE | evenness | non_junk_prec |
+|---|---|---|---|
+| 0.50 (default) | .69/.82/.63 | .193 | .751 |
+| 0.55 | .66/.78/.63 | .149 | .761 |
+| 0.60 | .66/.76/.63 | .131 | .777 |
+| **0.70 (adopted)** | **.55/.69/.59** | **.139** | **.809** |
+| 0.75 | .52/.66/.56 | .146 | .814 |
+| 0.80 | .48/.62/.41 | .212 | .826 (worse evenness than 0.75 -- dead end) |
+
+Marcus chose **threshold=0.70** as the final operating point -- it
+balances evenness and precision well, clearing BERT's precision floor by
+a wide margin (.809 vs .745) while keeping evenness near its best value
+in the whole curve (.139, close to 0.60's .131). This is the final
+adopted config for the whole project. See `JUNK_GATE_PROGRESS_REPORT.md`
+for the stakeholder-facing writeup (now updated to reflect this, not the
+earlier `r32a64`+`A_structured` ensemble).
+
+**Adopted config, exactly**: base model Qwen3-0.6B, LoRA (r=16/alpha=32,
+attn-only, default -- no rank increase), prompt=`fewshot`, max_length=384,
+trained at seeds 42/7/123, ensembled (average non_junk probability across
+the 3 checkpoints) at inference, non_junk decision threshold=**0.70**
+(not the implicit 0.50 default). Checkpoints: `junk_gate_lora_prompt_fewshot`,
+`junk_gate_lora_prompt_fewshot_seed7`, `junk_gate_lora_prompt_fewshot_seed123`
+under `models/checkpoints/lora/` (also copied to the local machine's copy
+of the same path -- see `models/lora_gate/ADOPTED_MODEL.md`).

@@ -32,3 +32,6 @@ models/checkpoints/*/*
 # local Claude Code tool state, not project history
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+
+# local Python virtualenv for running inference off-cluster
+.venv/
