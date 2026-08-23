@@ -82,8 +82,8 @@ confident" from 16 texts.
 - [x] Write this plan of record
 - [x] P0: add `nonjunk_3way` + `full4way` stages and 3/4-way prompts to `models/lora_gate/train.py`
 - [x] P0: sync code to Marlowe (+ smoke test job 442905 passed)
-- [~] P1: stage-2 config search — **RUNNING**, Marlowe jobs 442916-442931 (16 jobs), ids in `~/search_jobids.txt` on Marlowe
-- [ ] P1: confirm top configs on Darwiniana fold
+- [x] P1: stage-2 config search — done, 16 jobs. Winner: **nonjunk_3way, r32/a64, S2_structured prompt, 4 epochs**.
+- [~] P1: confirmation burst **RUNNING** — jobs 442959-442966: winner on fold3 (Darwiniana) and fold4 (Reign of Law) x {text, deploy_extract} x 2 seeds
 - [ ] P1: pick stage-2 config, record it here
 - [ ] P2: 6-fold training, gate + stage 2 — Marlowe burst 2
 - [ ] P3: pull checkpoints, end-to-end cascade inference on all 16 held-out texts (Vast)
@@ -104,6 +104,46 @@ confident" from 16 texts.
   and `eval/backfill_gate_proportions.py` still import cleanly.
 - 2026-08-23: smoke test (job 442905, 1 epoch, nonjunk_3way, fold4 holdout):
   held-out acc=0.828 macro_f1=0.731, mix tvd=0.065. Pipeline works end to end.
+- 2026-08-23: **P1 COMPLETE.** Full search ranking by dev-text (Reign of Law)
+  mix error, 2 seeds each:
+
+  | config | devTVD | foldTVD | acc | macroF1 |
+  |---|---|---|---|---|
+  | nonjunk_3way r32 S2_structured | **0.030** | **0.025** | **0.859** | **0.796** |
+  | nonjunk_3way r16 none | 0.083 | 0.067 | 0.832 | 0.767 |
+  | nonjunk_3way r32 none | 0.083 | 0.059 | 0.847 | 0.788 |
+  | full4way r16 S2_structured_4way | 0.092 | 0.049 | 0.793 | 0.593 |
+  | full4way r32 S2_structured_4way | 0.092 | 0.052 | 0.782 | 0.604 |
+  | nonjunk_3way r16 S2_structured | 0.098 | 0.049 | 0.836 | 0.766 |
+  | full4way r32 none | 0.149 | 0.055 | 0.815 | 0.607 |
+  | full4way r16 none | 0.176 | 0.086 | 0.814 | 0.612 |
+
+  MacBERTh baseline on the dev text: devTVD=0.047, acc=0.775, macroF1=0.725.
+
+  **The 4-way stage-2 idea is rejected.** Every full4way run loses on accuracy
+  (0.78-0.82 vs 0.86) and collapses on macro-F1 (0.59-0.61 vs 0.80). Reason: a
+  4-way stage 2 must relearn junk rejection from the full 65%-junk corpus,
+  reintroducing exactly the gradient dilution the cascade exists to avoid --
+  the same effect documented in eval/bert_cascade_evolution.md's original
+  hypothesis. Giving stage 2 a junk option does not pay for the signal it costs.
+  Not carried into the 6-fold.
+
+  Rank 32 > rank 16 (matches the junk-gate finding). The S2 prompt moves the
+  MIX a lot while barely moving accuracy -- consistent with the project's
+  standing finding that prompting mainly reshapes which categories survive.
+
+  CAVEAT: seed spread on the winner's devTVD is 0.036, larger than the mean --
+  the dev text has only 169 non-junk rows. Fold-level TVD (570 rows) is the
+  more stable number and the winner leads there too.
+
+- 2026-08-23: P1 partial results (3-way arm complete, 4-way still running).
+  Ranked by mix error on the dev text (Reign of Law), 2 seeds each:
+  `nonjunk_3way_r32_S2_structured` devTVD=0.021 (spread .018) acc=0.854;
+  `..._r32_none` devTVD=0.062 acc=0.853; `..._r16_S2_structured` devTVD=0.098;
+  `..._r16_none` devTVD=0.083. MacBERTh baseline on the same text: devTVD=0.047
+  acc=0.775. So rank 32 > rank 16 (matches the junk-gate finding), the S2
+  prompt helps the MIX substantially while barely moving accuracy, and the best
+  LoRA config roughly halves mix error vs. MacBERTh while adding ~8pp accuracy.
 - 2026-08-23: P1 search burst submitted — 8 configs x 2 seeds (42/7) on fold4:
   {nonjunk_3way, full4way} x {r16a32, r32a64} x {S2 prompt, no prompt}, 4 epochs.
   SLURM job submitter is `~/search.sh` on Marlowe; wrapper `/tmp/smoke.slurm`.
