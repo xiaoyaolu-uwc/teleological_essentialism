@@ -109,6 +109,39 @@ re-thresholding a single seed cannot.
 Darwiniana is also simply hard: the gate keeps only 18% of its true DT and IE
 rows, so its estimate rests on very few survivors.
 
+## Does ensembling the gate help? (2 seeds, tested)
+
+Threshold calibration having failed, the remaining lever was ensembling. A
+**2-seed** gate ensemble (6 extra trainings, not the 30 a 5-seed design would
+need) was trained and evaluated identically — same books, same stage 2, same
+metric, so the gate is the only variable.
+
+| Metric | 1 seed | 2-seed ensemble | Change |
+|---|---|---|---|
+| Junk leakage into kept set | 31.1% | **28.3%** | −2.8 pp |
+| Gate-only distortion (TVD) | 4.86 pp | **3.92 pp** | −0.94 pp |
+| Worst-book TVD | 21.6 pp | **18.2 pp** | −3.4 pp |
+| NDT ±90% band | 14.4 pp | **12.3 pp** | −2.1 pp |
+| IE ±90% band | 12.3 pp | **11.7 pp** | −0.6 pp |
+| DT ±90% band | 8.6 pp | 9.0 pp | +0.5 pp |
+| **Mean TVD, end-to-end** | 7.14 pp | 7.24 pp | +0.10 pp |
+| Within-book ordering | 14/16 | 14/16 | — |
+| Across-book ordering | 90.4% | 90.7% | — |
+
+**The ensemble clearly improves the gate and barely moves the end-to-end
+result.** Leakage falls, gate-only distortion drops by a full point, the worst
+book improves by 3.4 pp, and the widest error band (NDT) tightens by 2 pp — but
+mean TVD is flat, because stage-2 error is unchanged at 5.3 pp and now
+dominates the 3.9 pp gate term.
+
+**Recommendation: adopt the 2-seed ensemble** — it is 6 extra trainings for a
+tighter worst case and a meaningfully narrower NDT band, with no axis
+materially worse (DT widens by 0.5 pp, within noise at n=16). But **do not
+expect much from going to 5 seeds**: the gate is no longer the larger error
+term, so the headroom that remains is in stage 2, not in more gate seeds.
+
+Artifacts: `per_row_predictions_ens2.csv`, `ens2/proportion_metrics.json`.
+
 ## What changed in the model
 
 Stage 2 was replaced: MacBERTh → Qwen3-0.6B LoRA (r32/α64, `S2_structured`

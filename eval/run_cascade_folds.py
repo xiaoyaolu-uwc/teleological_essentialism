@@ -65,6 +65,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--folds", default="eval/folds.json")
     ap.add_argument("--gate-prefix", default="gate_fold")
+    ap.add_argument("--gate-suffixes", nargs="+", default=[""],
+                     help="Checkpoint suffixes to ENSEMBLE over, e.g. '' '_s7' averages "
+                          "gate_fold<N> and gate_fold<N>_s7. Averaging probabilities across "
+                          "independently seeded runs cancels per-seed idiosyncrasy, which "
+                          "re-thresholding a single seed cannot do (see "
+                          "eval/calibrate_gate_threshold.py). One suffix = no ensemble.")
     ap.add_argument("--s2-prefix", default="s2_fold")
     ap.add_argument("--s2-stage", default="nonjunk_3way", choices=["nonjunk_3way", "full4way"])
     ap.add_argument("--gate-prompt", default="A_structured")
@@ -87,12 +93,15 @@ def main():
     for fold_name, works in sorted(folds.items()):
         _, held = load_train_pool(works)
         texts = [r[args.text_column] for r in held]
-        gate_dir = PATHS["lora_checkpoints_dir"] / f"{args.gate_prefix}{fold_name[-1]}"
+        gate_dirs = [PATHS["lora_checkpoints_dir"] / f"{args.gate_prefix}{fold_name[-1]}{sfx}"
+                     for sfx in args.gate_suffixes]
         s2_dir = PATHS["lora_checkpoints_dir"] / f"{args.s2_prefix}{fold_name[-1]}"
-        print(f"[{fold_name}] {len(held)} rows | gate={gate_dir.name} s2={s2_dir.name}", flush=True)
+        print(f"[{fold_name}] {len(held)} rows | gate={[d.name for d in gate_dirs]} "
+              f"s2={s2_dir.name}", flush=True)
 
-        gate_probs = predict(args.model_name, gate_dir, GATE_LABELS, texts,
-                             args.gate_prompt, args.max_length, device)
+        gate_stack = [predict(args.model_name, d, GATE_LABELS, texts,
+                              args.gate_prompt, args.max_length, device) for d in gate_dirs]
+        gate_probs = torch.stack(gate_stack, dim=0).mean(dim=0)
         s2_probs = predict(args.model_name, s2_dir, s2_labels, texts,
                            args.s2_prompt, args.max_length, device)
 

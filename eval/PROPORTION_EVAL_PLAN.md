@@ -102,6 +102,16 @@ confident" from 16 texts.
 
 ## Progress log
 
+- 2026-08-23: **Post-hoc improvements tested, both bounded, both reported.**
+  (a) Gate threshold calibration under nested selection: +0.15pp TVD, i.e.
+      nothing. The gate is not miscalibrated, just not sharp enough.
+  (b) 2-seed gate ensemble (6 extra trainings): improves the GATE clearly
+      (leakage 31.1->28.3%, gate-only TVD 4.86->3.92pp, worst book 21.6->18.2pp,
+      NDT +/-90 band 14.4->12.3pp) but leaves end-to-end mean TVD flat
+      (7.14->7.24pp), because stage-2 error (5.3pp) is now the larger term.
+      Recommended for adoption; going to 5 seeds is NOT recommended -- the
+      remaining headroom is in stage 2.
+
 - 2026-08-23: **COMPLETE.** Results in `eval/PROPORTION_EVAL_RESULTS.md`.
   Headline: no meaningful bias in any category (all means within 1.5pp of 0);
   per-book +/-90% bands DT +/-8.5pp, NDT +/-14.4pp, IE +/-12.3pp; within-book
