@@ -84,15 +84,32 @@ confident" from 16 texts.
 - [x] P0: sync code to Marlowe (+ smoke test job 442905 passed)
 - [x] P1: stage-2 config search — done, 16 jobs. Winner: **nonjunk_3way, r32/a64, S2_structured prompt, 4 epochs**.
 - [x] P1: confirmation burst — done (jobs 442959-442966)
-- [~] P1b: max_length sweep on raw text **RUNNING** — jobs 442972-442979 (512/640 x fold3/fold4 x 2 seeds)
-- [ ] P1: pick stage-2 config, record it here
-- [ ] P2: 6-fold training, gate + stage 2 — Marlowe burst 2
+- [x] P1b: max_length sweep on raw text — done; **640 adopted**
+- [x] P1: **FINAL STAGE-2 CONFIG**: `--stage nonjunk_3way --prompt-variant S2_structured
+      --lora-r 32 --lora-alpha 64 --epochs 4 --text-column text --max-length 640`
+      (Qwen3-0.6B LoRA). Gate uses the same text column and max_length with the
+      junk-gate SOTA prompt `A_structured`, r32/a64, seed 42.
+- [~] P2: 6-fold training **RUNNING** — jobs 442996-443007 (gate_fold0-5, s2_fold0-5)
 - [ ] P3: pull checkpoints, end-to-end cascade inference on all 16 held-out texts (Vast)
 - [ ] P3: stage attribution variants
 - [ ] P4: `eval/evaluate_proportions.py` + results JSON
 - [ ] P5: write-up
 
 ## Progress log
+
+- 2026-08-23: **P1b truncation fix — max_length 640 adopted for raw text.**
+
+  | fold | ml=384 | ml=512 | ml=640 | deploy_extract@384 |
+  |---|---|---|---|---|
+  | f3 acc / foldTVD | 0.808 / 0.077 | 0.831 / 0.036 | **0.852 / 0.048** | 0.870 / 0.083 |
+  | f4 acc / foldTVD | 0.780 / 0.073 | 0.790 / 0.072 | **0.808 / 0.046** | 0.861 / 0.026 |
+
+  Raw text at 640 recovers most of the truncation loss: accuracy up in both
+  folds, fold-level mix error roughly halved (0.075 -> 0.047), now comparable
+  to deploy_extract and better than it on Darwiniana. The residual 2-5pp
+  accuracy gap is the genuine text-shift cost, matching the 2-6pp the junk
+  gate showed. DECISION: train and report on raw `text` at max_length 640 --
+  the deployable setting, since deploy_extract does not exist for a new book.
 
 - 2026-08-23: plan written; folds computed; access to both machines confirmed.
 - 2026-08-23: P0 done. `models/lora_gate/train.py` now takes `--stage`
