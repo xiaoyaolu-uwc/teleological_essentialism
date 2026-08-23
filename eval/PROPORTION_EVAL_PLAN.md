@@ -89,13 +89,37 @@ confident" from 16 texts.
       --lora-r 32 --lora-alpha 64 --epochs 4 --text-column text --max-length 640`
       (Qwen3-0.6B LoRA). Gate uses the same text column and max_length with the
       junk-gate SOTA prompt `A_structured`, r32/a64, seed 42.
-- [~] P2: 6-fold training **RUNNING** — jobs 442996-443007 (gate_fold0-5, s2_fold0-5)
+- [~] P2: 6-fold training **RUNNING (take 2)** — jobs 443074-443085. First
+      attempt (442996-443007) failed: see log. All 6 s2_fold* done; gate_fold*
+      jobs were preempted and requeued by the `preempt` partition, so some are
+      re-running. VALIDATE before inference: every metrics.json must show
+      max_length=640, text_column=text, and the right holdout works, and the
+      matching checkpoint dir must exist.
 - [ ] P3: pull checkpoints, end-to-end cascade inference on all 16 held-out texts (Vast)
 - [ ] P3: stage attribution variants
 - [ ] P4: `eval/evaluate_proportions.py` + results JSON
 - [ ] P5: write-up
 
 ## Progress log
+
+- 2026-08-23: **P2 attempt 1 failed, two bugs, both fixed.**
+  1. Comma-delimited `--holdout-work` split three real titles that CONTAIN
+     commas ('The History of Creation, Vol. 1'; 'On the Creation of Animals
+     (Bridgewater VII), Vol. 1') into nonexistent works, killing folds 0-2.
+     Fixed by adding `--holdout-fold`, which reads titles from eval/folds.json
+     by fold name -- no delimiter involved. `load_train_pool` raised a clear
+     ValueError rather than training on wrong data, so the failure was loud.
+  2. The 20-min SLURM wall limit was sized for max_length=384; at 640 the
+     ~11k-row gate job overruns it and was killed mid-epoch-2. New wrapper
+     `/tmp/train.slurm` uses 3h. (`/tmp/smoke.slurm`, 20 min, still exists for
+     short jobs.)
+  Stale `_resume` checkpoints from the timed-out gates were deleted so nothing
+  half-trained gets picked up.
+
+- 2026-08-23: NOTE on the `preempt` partition: jobs can be preempted and
+  requeued mid-run, so a job may appear RUNNING again after its metrics.json
+  was written. Always confirm the queue is empty AND validate each run's config
+  before consuming its checkpoint.
 
 - 2026-08-23: **P1b truncation fix — max_length 640 adopted for raw text.**
 
