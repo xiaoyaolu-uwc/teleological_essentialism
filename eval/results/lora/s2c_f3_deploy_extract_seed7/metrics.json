@@ -1,0 +1,423 @@
+{
+  "run_name": "s2c_f3_deploy_extract_seed7",
+  "holdout_work": [
+    "Darwiniana",
+    "Essay on Classification",
+    "Natural Theology"
+  ],
+  "model": "Qwen/Qwen3-0.6B",
+  "stage": "nonjunk_3way",
+  "stage_labels": [
+    "divine_teleology",
+    "non_divine_teleology",
+    "internal_essence"
+  ],
+  "text_column": "deploy_extract",
+  "max_length": 384,
+  "lora_r": 32,
+  "lora_alpha": 64,
+  "lora_dropout": 0.05,
+  "target_modules": "attn",
+  "prompt_variant": "S2_structured",
+  "oversample": false,
+  "ie_weight_multiplier": 1.0,
+  "full_finetune": false,
+  "seed": 7,
+  "lr": 0.0002,
+  "epochs_run": 4,
+  "best_epoch": 3,
+  "best_val_macro_f1": 0.8754888931633648,
+  "train_n": 3385,
+  "val_n": 375,
+  "class_weights": [
+    2.2387566566467285,
+    0.8002364039421082,
+    0.7670518755912781
+  ],
+  "epoch_log": [
+    {
+      "epoch": 1,
+      "train_loss": 0.5308741853519712,
+      "val_metrics": {
+        "accuracy": 0.8666666666666667,
+        "macro_f1": 0.8654628441788997,
+        "per_class": {
+          "divine_teleology": {
+            "recall": 0.7857142857142857,
+            "precision": 0.9565217391304348
+          },
+          "non_divine_teleology": {
+            "recall": 0.8589743589743589,
+            "precision": 0.8375
+          },
+          "internal_essence": {
+            "recall": 0.901840490797546,
+            "precision": 0.8698224852071006
+          }
+        },
+        "confusion_matrix": [
+          [
+            44,
+            10,
+            2
+          ],
+          [
+            2,
+            134,
+            20
+          ],
+          [
+            0,
+            16,
+            147
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "divine_teleology",
+          "non_divine_teleology",
+          "internal_essence"
+        ],
+        "n": 375
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.20725144347492255,
+      "val_metrics": {
+        "accuracy": 0.832,
+        "macro_f1": 0.8245240066225166,
+        "per_class": {
+          "divine_teleology": {
+            "recall": 0.9107142857142857,
+            "precision": 0.7083333333333334
+          },
+          "non_divine_teleology": {
+            "recall": 0.782051282051282,
+            "precision": 0.8356164383561644
+          },
+          "internal_essence": {
+            "recall": 0.852760736196319,
+            "precision": 0.8853503184713376
+          }
+        },
+        "confusion_matrix": [
+          [
+            51,
+            4,
+            1
+          ],
+          [
+            17,
+            122,
+            17
+          ],
+          [
+            4,
+            20,
+            139
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "divine_teleology",
+          "non_divine_teleology",
+          "internal_essence"
+        ],
+        "n": 375
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.10840360042067983,
+      "val_metrics": {
+        "accuracy": 0.8666666666666667,
+        "macro_f1": 0.8754888931633648,
+        "per_class": {
+          "divine_teleology": {
+            "recall": 0.8571428571428571,
+            "precision": 0.96
+          },
+          "non_divine_teleology": {
+            "recall": 0.9102564102564102,
+            "precision": 0.8068181818181818
+          },
+          "internal_essence": {
+            "recall": 0.8282208588957055,
+            "precision": 0.9060402684563759
+          }
+        },
+        "confusion_matrix": [
+          [
+            48,
+            6,
+            2
+          ],
+          [
+            2,
+            142,
+            12
+          ],
+          [
+            0,
+            28,
+            135
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "divine_teleology",
+          "non_divine_teleology",
+          "internal_essence"
+        ],
+        "n": 375
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.06541706883032226,
+      "val_metrics": {
+        "accuracy": 0.84,
+        "macro_f1": 0.8276211276748673,
+        "per_class": {
+          "divine_teleology": {
+            "recall": 0.8928571428571429,
+            "precision": 0.704225352112676
+          },
+          "non_divine_teleology": {
+            "recall": 0.7435897435897436,
+            "precision": 0.8923076923076924
+          },
+          "internal_essence": {
+            "recall": 0.9141104294478528,
+            "precision": 0.8563218390804598
+          }
+        },
+        "confusion_matrix": [
+          [
+            50,
+            4,
+            2
+          ],
+          [
+            17,
+            116,
+            23
+          ],
+          [
+            4,
+            10,
+            149
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "divine_teleology",
+          "non_divine_teleology",
+          "internal_essence"
+        ],
+        "n": 375
+      }
+    }
+  ],
+  "holdout_text_metrics": {
+    "accuracy": 0.8581871345029239,
+    "macro_f1": 0.8212892268252125,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.6022727272727273,
+        "precision": 0.8688524590163934
+      },
+      "non_divine_teleology": {
+        "recall": 0.9434523809523809,
+        "precision": 0.8170103092783505
+      },
+      "internal_essence": {
+        "recall": 0.8346153846153846,
+        "precision": 0.9234042553191489
+      }
+    },
+    "confusion_matrix": [
+      [
+        53,
+        28,
+        7
+      ],
+      [
+        8,
+        317,
+        11
+      ],
+      [
+        0,
+        43,
+        217
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence"
+    ],
+    "n": 684
+  },
+  "holdout_mix_metrics": {
+    "true_mix": {
+      "divine_teleology": 0.1286549707602339,
+      "non_divine_teleology": 0.49122807017543857,
+      "internal_essence": 0.38011695906432746
+    },
+    "pred_mix": {
+      "divine_teleology": 0.0891812865497076,
+      "non_divine_teleology": 0.5672514619883041,
+      "internal_essence": 0.3435672514619883
+    },
+    "signed_error": {
+      "divine_teleology": -0.039473684210526314,
+      "non_divine_teleology": 0.07602339181286555,
+      "internal_essence": -0.036549707602339165
+    },
+    "max_abs_error": 0.07602339181286555,
+    "tvd": 0.07602339181286552,
+    "teleology_true": 0.6198830409356725,
+    "teleology_pred": 0.6564327485380117,
+    "teleology_signed_error": 0.03654970760233922,
+    "true_n": 684,
+    "pred_n": 684
+  },
+  "holdout_per_work_mix": {
+    "Darwiniana": {
+      "true_mix": {
+        "divine_teleology": 0.1506849315068493,
+        "non_divine_teleology": 0.547945205479452,
+        "internal_essence": 0.3013698630136986
+      },
+      "pred_mix": {
+        "divine_teleology": 0.1506849315068493,
+        "non_divine_teleology": 0.5342465753424658,
+        "internal_essence": 0.3150684931506849
+      },
+      "signed_error": {
+        "divine_teleology": 0.0,
+        "non_divine_teleology": -0.013698630136986245,
+        "internal_essence": 0.0136986301369863
+      },
+      "max_abs_error": 0.0136986301369863,
+      "tvd": 0.013698630136986273,
+      "teleology_true": 0.6986301369863013,
+      "teleology_pred": 0.6849315068493151,
+      "teleology_signed_error": -0.013698630136986134,
+      "true_n": 73,
+      "pred_n": 73
+    },
+    "Essay on Classification": {
+      "true_mix": {
+        "divine_teleology": 0.06504065040650407,
+        "non_divine_teleology": 0.12195121951219512,
+        "internal_essence": 0.8130081300813008
+      },
+      "pred_mix": {
+        "divine_teleology": 0.036585365853658534,
+        "non_divine_teleology": 0.17886178861788618,
+        "internal_essence": 0.7845528455284553
+      },
+      "signed_error": {
+        "divine_teleology": -0.028455284552845538,
+        "non_divine_teleology": 0.05691056910569106,
+        "internal_essence": -0.028455284552845517
+      },
+      "max_abs_error": 0.05691056910569106,
+      "tvd": 0.05691056910569106,
+      "teleology_true": 0.1869918699186992,
+      "teleology_pred": 0.21544715447154472,
+      "teleology_signed_error": 0.028455284552845517,
+      "true_n": 246,
+      "pred_n": 246
+    },
+    "Natural Theology": {
+      "true_mix": {
+        "divine_teleology": 0.16712328767123288,
+        "non_divine_teleology": 0.7287671232876712,
+        "internal_essence": 0.10410958904109589
+      },
+      "pred_mix": {
+        "divine_teleology": 0.11232876712328767,
+        "non_divine_teleology": 0.8356164383561644,
+        "internal_essence": 0.052054794520547946
+      },
+      "signed_error": {
+        "divine_teleology": -0.054794520547945216,
+        "non_divine_teleology": 0.10684931506849316,
+        "internal_essence": -0.052054794520547946
+      },
+      "max_abs_error": 0.10684931506849316,
+      "tvd": 0.10684931506849316,
+      "teleology_true": 0.8958904109589041,
+      "teleology_pred": 0.947945205479452,
+      "teleology_signed_error": 0.05205479452054795,
+      "true_n": 365,
+      "pred_n": 365
+    }
+  },
+  "golden_eval_metrics": {
+    "accuracy": 0.8333333333333334,
+    "macro_f1": 0.8198589780739883,
+    "per_class": {
+      "divine_teleology": {
+        "recall": 0.6,
+        "precision": 0.8571428571428571
+      },
+      "non_divine_teleology": {
+        "recall": 0.9285714285714286,
+        "precision": 0.8666666666666667
+      },
+      "internal_essence": {
+        "recall": 1.0,
+        "precision": 0.75
+      }
+    },
+    "confusion_matrix": [
+      [
+        6,
+        2,
+        2
+      ],
+      [
+        1,
+        13,
+        0
+      ],
+      [
+        0,
+        0,
+        6
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "divine_teleology",
+      "non_divine_teleology",
+      "internal_essence"
+    ],
+    "n": 30
+  },
+  "golden_mix_metrics": {
+    "true_mix": {
+      "divine_teleology": 0.3333333333333333,
+      "non_divine_teleology": 0.4666666666666667,
+      "internal_essence": 0.2
+    },
+    "pred_mix": {
+      "divine_teleology": 0.23333333333333334,
+      "non_divine_teleology": 0.5,
+      "internal_essence": 0.26666666666666666
+    },
+    "signed_error": {
+      "divine_teleology": -0.09999999999999998,
+      "non_divine_teleology": 0.033333333333333326,
+      "internal_essence": 0.06666666666666665
+    },
+    "max_abs_error": 0.09999999999999998,
+    "tvd": 0.09999999999999998,
+    "teleology_true": 0.8,
+    "teleology_pred": 0.7333333333333334,
+    "teleology_signed_error": -0.06666666666666665,
+    "true_n": 30,
+    "pred_n": 30
+  }
+}

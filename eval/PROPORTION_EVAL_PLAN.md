@@ -83,7 +83,8 @@ confident" from 16 texts.
 - [x] P0: add `nonjunk_3way` + `full4way` stages and 3/4-way prompts to `models/lora_gate/train.py`
 - [x] P0: sync code to Marlowe (+ smoke test job 442905 passed)
 - [x] P1: stage-2 config search — done, 16 jobs. Winner: **nonjunk_3way, r32/a64, S2_structured prompt, 4 epochs**.
-- [~] P1: confirmation burst **RUNNING** — jobs 442959-442966: winner on fold3 (Darwiniana) and fold4 (Reign of Law) x {text, deploy_extract} x 2 seeds
+- [x] P1: confirmation burst — done (jobs 442959-442966)
+- [~] P1b: max_length sweep on raw text **RUNNING** — jobs 442972-442979 (512/640 x fold3/fold4 x 2 seeds)
 - [ ] P1: pick stage-2 config, record it here
 - [ ] P2: 6-fold training, gate + stage 2 — Marlowe burst 2
 - [ ] P3: pull checkpoints, end-to-end cascade inference on all 16 held-out texts (Vast)
@@ -104,6 +105,31 @@ confident" from 16 texts.
   and `eval/backfill_gate_proportions.py` still import cleanly.
 - 2026-08-23: smoke test (job 442905, 1 epoch, nonjunk_3way, fold4 holdout):
   held-out acc=0.828 macro_f1=0.731, mix tvd=0.065. Pipeline works end to end.
+- 2026-08-23: **P1 confirmation.** Winner config, both dev folds, both text columns, 2 seeds:
+
+  | run | acc | macroF1 | foldTVD | devTVD |
+  |---|---|---|---|---|
+  | f4 deploy_extract (Reign of Law) | 0.861 | 0.801 | 0.026 | 0.036 |
+  | f3 deploy_extract (Darwiniana) | 0.870 | 0.838 | 0.083 | 0.041 |
+  | f4 text | 0.780 | 0.670 | 0.073 | 0.071 |
+  | f3 text | 0.808 | 0.762 | 0.077 | 0.082 |
+
+  On `deploy_extract` the LoRA beats MacBERTh on BOTH folds (RoL acc
+  0.861 vs 0.775; Darwiniana 0.870 vs 0.863) and roughly halves mix error on
+  both (0.036 vs 0.047; 0.041 vs 0.082). Confirmed, not a single-text artifact.
+
+  On raw `text` -- the setting that actually applies to an unseen book, since
+  `deploy_extract` is produced by the LLM labeling pass -- accuracy drops 6-8pp
+  and mix error roughly doubles. That is far worse than the 2-6pp text-shift
+  cost measured for the junk gate.
+
+  **Diagnosis: truncation.** 27.8% of raw `text` rows exceed max_length=384
+  once the ~210-token prompt is prepended, vs 2.9% of `deploy_extract` rows
+  (raw text median 74 words, p90 226, max 510). The junk-gate log's finding
+  that longer max_length HURTS was measured on `deploy_extract`, where
+  truncation was never binding, so it does not transfer. max_length 512 (est.
+  ~9% truncated) and 640 (est. 2.8%) are under test as P1b.
+
 - 2026-08-23: **P1 COMPLETE.** Full search ranking by dev-text (Reign of Law)
   mix error, 2 seeds each:
 
