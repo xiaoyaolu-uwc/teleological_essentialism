@@ -85,10 +85,26 @@ The two stages contribute almost equally, and they partly cancel (7.1 < 5.3 +
 
 Overall junk leakage into the kept set is **31%**, i.e. gate precision ≈ 69%.
 The adopted production gate reaches **81%** precision using a 5-seed ensemble
-plus a calibrated decision threshold — both deliberately skipped here, since
-running 5 seeds × 6 folds meant 30 trainings. **Restoring the ensemble and
-threshold calibration is the clearest single improvement available**, and it
-requires no new training method, only more of the same runs.
+plus a calibrated decision threshold — both skipped here, since 5 seeds × 6
+folds means 30 trainings.
+
+**Threshold calibration was then tested, and does not help** (see
+`eval/calibrate_gate_threshold.py`, run under nested selection so the threshold
+for each fold is chosen on the other five and never on the books it is scored
+on). The nested threshold lands on 0.54 for every fold and buys **+0.15 pp of
+TVD** — negligible, improving 10 of 16 books. The pooled sweep is flat near 0.5
+and worse in both directions:
+
+| threshold | 0.30 | 0.40 | **0.50** | 0.60 | 0.70 | 0.80 |
+|---|---|---|---|---|---|---|
+| mean TVD | .081 | .076 | **.071** | .075 | .077 | .088 |
+
+The gate is therefore **not miscalibrated — it is simply not sharp enough**.
+Moving the operating point trades recall for precision at roughly 1:1 in TVD
+terms, so no threshold recovers the leakage. That rules out the cheap half of
+the production gate's recipe and leaves **ensembling** as the remaining lever,
+since averaging several seeds' probabilities reduces variance in a way
+re-thresholding a single seed cannot.
 
 Darwiniana is also simply hard: the gate keeps only 18% of its true DT and IE
 rows, so its estimate rests on very few survivors.
