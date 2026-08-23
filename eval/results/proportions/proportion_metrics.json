@@ -1,0 +1,1717 @@
+{
+  "n_rows": 12823,
+  "n_works": 16,
+  "variants": {
+    "end_to_end": {
+      "per_work": {
+        "The History of Creation, Vol. 1": {
+          "year": "1876",
+          "n_rows": 813,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 189,
+          "true_mix": {
+            "divine_teleology": 0.05325443786982249,
+            "non_divine_teleology": 0.41420118343195267,
+            "internal_essence": 0.5325443786982249
+          },
+          "pred_mix": {
+            "divine_teleology": 0.06349206349206349,
+            "non_divine_teleology": 0.3439153439153439,
+            "internal_essence": 0.5925925925925926
+          },
+          "signed_error": {
+            "divine_teleology": 0.010237625622241002,
+            "non_divine_teleology": -0.07028583951660877,
+            "internal_essence": 0.06004821389436765
+          },
+          "max_abs_error": 0.07028583951660877,
+          "tvd": 0.07028583951660872,
+          "teleology_true": 0.46745562130177515,
+          "teleology_pred": 0.4074074074074074,
+          "teleology_signed_error": -0.06004821389436776
+        },
+        "Evidence as to Man's Place in Nature": {
+          "year": "1863",
+          "n_rows": 345,
+          "true_n_nonjunk": 56,
+          "pred_n_kept": 67,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25,
+            "internal_essence": 0.75
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.31343283582089554,
+            "internal_essence": 0.6865671641791045
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.06343283582089554,
+            "internal_essence": -0.06343283582089554
+          },
+          "max_abs_error": 0.06343283582089554,
+          "tvd": 0.06343283582089554,
+          "teleology_true": 0.25,
+          "teleology_pred": 0.31343283582089554,
+          "teleology_signed_error": 0.06343283582089554
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 1": {
+          "year": "1835",
+          "n_rows": 926,
+          "true_n_nonjunk": 541,
+          "pred_n_kept": 587,
+          "true_mix": {
+            "divine_teleology": 0.3142329020332717,
+            "non_divine_teleology": 0.4879852125693161,
+            "internal_essence": 0.1977818853974122
+          },
+          "pred_mix": {
+            "divine_teleology": 0.31175468483816016,
+            "non_divine_teleology": 0.534923339011925,
+            "internal_essence": 0.15332197614991483
+          },
+          "signed_error": {
+            "divine_teleology": -0.002478217195111543,
+            "non_divine_teleology": 0.04693812644260892,
+            "internal_essence": -0.044459909247497376
+          },
+          "max_abs_error": 0.04693812644260892,
+          "tvd": 0.04693812644260892,
+          "teleology_true": 0.8022181146025877,
+          "teleology_pred": 0.8466780238500852,
+          "teleology_signed_error": 0.04445990924749743
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 2": {
+          "year": "1835",
+          "n_rows": 731,
+          "true_n_nonjunk": 330,
+          "pred_n_kept": 338,
+          "true_mix": {
+            "divine_teleology": 0.44545454545454544,
+            "non_divine_teleology": 0.33636363636363636,
+            "internal_essence": 0.21818181818181817
+          },
+          "pred_mix": {
+            "divine_teleology": 0.4349112426035503,
+            "non_divine_teleology": 0.35502958579881655,
+            "internal_essence": 0.21005917159763313
+          },
+          "signed_error": {
+            "divine_teleology": -0.01054330285099514,
+            "non_divine_teleology": 0.018665949435180185,
+            "internal_essence": -0.008122646584185045
+          },
+          "max_abs_error": 0.018665949435180185,
+          "tvd": 0.018665949435180185,
+          "teleology_true": 0.7818181818181817,
+          "teleology_pred": 0.7899408284023668,
+          "teleology_signed_error": 0.008122646584185045
+        },
+        "Zoological Philosophy": {
+          "year": "1809",
+          "n_rows": 1157,
+          "true_n_nonjunk": 489,
+          "pred_n_kept": 545,
+          "true_mix": {
+            "divine_teleology": 0.00408997955010225,
+            "non_divine_teleology": 0.2740286298568507,
+            "internal_essence": 0.721881390593047
+          },
+          "pred_mix": {
+            "divine_teleology": 0.005504587155963303,
+            "non_divine_teleology": 0.3357798165137615,
+            "internal_essence": 0.6587155963302752
+          },
+          "signed_error": {
+            "divine_teleology": 0.0014146076058610532,
+            "non_divine_teleology": 0.06175118665691076,
+            "internal_essence": -0.0631657942627718
+          },
+          "max_abs_error": 0.0631657942627718,
+          "tvd": 0.0631657942627718,
+          "teleology_true": 0.278118609406953,
+          "teleology_pred": 0.3412844036697248,
+          "teleology_signed_error": 0.0631657942627718
+        },
+        "Physico-Theology": {
+          "year": "1713",
+          "n_rows": 892,
+          "true_n_nonjunk": 389,
+          "pred_n_kept": 494,
+          "true_mix": {
+            "divine_teleology": 0.3264781491002571,
+            "non_divine_teleology": 0.6195372750642674,
+            "internal_essence": 0.05398457583547558
+          },
+          "pred_mix": {
+            "divine_teleology": 0.2773279352226721,
+            "non_divine_teleology": 0.6295546558704453,
+            "internal_essence": 0.0931174089068826
+          },
+          "signed_error": {
+            "divine_teleology": -0.049150213877585,
+            "non_divine_teleology": 0.010017380806177978,
+            "internal_essence": 0.03913283307140702
+          },
+          "max_abs_error": 0.049150213877585,
+          "tvd": 0.049150213877585,
+          "teleology_true": 0.9460154241645244,
+          "teleology_pred": 0.9068825910931174,
+          "teleology_signed_error": -0.039132833071407025
+        },
+        "The History of Creation, Vol. 2": {
+          "year": "1876",
+          "n_rows": 775,
+          "true_n_nonjunk": 294,
+          "pred_n_kept": 309,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.2108843537414966,
+            "internal_essence": 0.7891156462585034
+          },
+          "pred_mix": {
+            "divine_teleology": 0.003236245954692557,
+            "non_divine_teleology": 0.1262135922330097,
+            "internal_essence": 0.8705501618122977
+          },
+          "signed_error": {
+            "divine_teleology": 0.003236245954692557,
+            "non_divine_teleology": -0.0846707615084869,
+            "internal_essence": 0.08143451555379433
+          },
+          "max_abs_error": 0.0846707615084869,
+          "tvd": 0.08467076150848689,
+          "teleology_true": 0.2108843537414966,
+          "teleology_pred": 0.12944983818770225,
+          "teleology_signed_error": -0.08143451555379436
+        },
+        "On the Genesis of Species": {
+          "year": "1871",
+          "n_rows": 584,
+          "true_n_nonjunk": 104,
+          "pred_n_kept": 110,
+          "true_mix": {
+            "divine_teleology": 0.04807692307692308,
+            "non_divine_teleology": 0.47115384615384615,
+            "internal_essence": 0.4807692307692308
+          },
+          "pred_mix": {
+            "divine_teleology": 0.02727272727272727,
+            "non_divine_teleology": 0.43636363636363634,
+            "internal_essence": 0.5363636363636364
+          },
+          "signed_error": {
+            "divine_teleology": -0.020804195804195808,
+            "non_divine_teleology": -0.0347902097902098,
+            "internal_essence": 0.055594405594405594
+          },
+          "max_abs_error": 0.055594405594405594,
+          "tvd": 0.0555944055944056,
+          "teleology_true": 0.5192307692307693,
+          "teleology_pred": 0.4636363636363636,
+          "teleology_signed_error": -0.05559440559440565
+        },
+        "Essay on Classification": {
+          "year": "1859",
+          "n_rows": 867,
+          "true_n_nonjunk": 246,
+          "pred_n_kept": 223,
+          "true_mix": {
+            "divine_teleology": 0.06504065040650407,
+            "non_divine_teleology": 0.12195121951219512,
+            "internal_essence": 0.8130081300813008
+          },
+          "pred_mix": {
+            "divine_teleology": 0.008968609865470852,
+            "non_divine_teleology": 0.1210762331838565,
+            "internal_essence": 0.8699551569506726
+          },
+          "signed_error": {
+            "divine_teleology": -0.05607204054103322,
+            "non_divine_teleology": -0.0008749863283386144,
+            "internal_essence": 0.05694702686937181
+          },
+          "max_abs_error": 0.05694702686937181,
+          "tvd": 0.05694702686937182,
+          "teleology_true": 0.1869918699186992,
+          "teleology_pred": 0.13004484304932737,
+          "teleology_signed_error": -0.056947026869371836
+        },
+        "Darwiniana": {
+          "year": "1876",
+          "n_rows": 717,
+          "true_n_nonjunk": 73,
+          "pred_n_kept": 60,
+          "true_mix": {
+            "divine_teleology": 0.1506849315068493,
+            "non_divine_teleology": 0.547945205479452,
+            "internal_essence": 0.3013698630136986
+          },
+          "pred_mix": {
+            "divine_teleology": 0.15,
+            "non_divine_teleology": 0.7,
+            "internal_essence": 0.15
+          },
+          "signed_error": {
+            "divine_teleology": -0.0006849315068493123,
+            "non_divine_teleology": 0.15205479452054793,
+            "internal_essence": -0.15136986301369862
+          },
+          "max_abs_error": 0.15205479452054793,
+          "tvd": 0.15205479452054793,
+          "teleology_true": 0.6986301369863013,
+          "teleology_pred": 0.85,
+          "teleology_signed_error": 0.1513698630136987
+        },
+        "Natural Theology": {
+          "year": "1802",
+          "n_rows": 775,
+          "true_n_nonjunk": 365,
+          "pred_n_kept": 352,
+          "true_mix": {
+            "divine_teleology": 0.16712328767123288,
+            "non_divine_teleology": 0.7287671232876712,
+            "internal_essence": 0.10410958904109589
+          },
+          "pred_mix": {
+            "divine_teleology": 0.13920454545454544,
+            "non_divine_teleology": 0.7386363636363636,
+            "internal_essence": 0.12215909090909091
+          },
+          "signed_error": {
+            "divine_teleology": -0.027918742216687442,
+            "non_divine_teleology": 0.00986924034869241,
+            "internal_essence": 0.01804950186799502
+          },
+          "max_abs_error": 0.027918742216687442,
+          "tvd": 0.027918742216687435,
+          "teleology_true": 0.8958904109589041,
+          "teleology_pred": 0.8778409090909091,
+          "teleology_signed_error": -0.018049501867995033
+        },
+        "The Reign of Law": {
+          "year": "1867",
+          "n_rows": 469,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 189,
+          "true_mix": {
+            "divine_teleology": 0.17159763313609466,
+            "non_divine_teleology": 0.6686390532544378,
+            "internal_essence": 0.15976331360946747
+          },
+          "pred_mix": {
+            "divine_teleology": 0.1693121693121693,
+            "non_divine_teleology": 0.6666666666666666,
+            "internal_essence": 0.164021164021164
+          },
+          "signed_error": {
+            "divine_teleology": -0.00228546382392536,
+            "non_divine_teleology": -0.0019723865877712132,
+            "internal_essence": 0.0042578504116965454
+          },
+          "max_abs_error": 0.0042578504116965454,
+          "tvd": 0.004257850411696559,
+          "teleology_true": 0.8402366863905325,
+          "teleology_pred": 0.8359788359788359,
+          "teleology_signed_error": -0.004257850411696573
+        },
+        "On the Origin of Species": {
+          "year": "1859",
+          "n_rows": 1275,
+          "true_n_nonjunk": 179,
+          "pred_n_kept": 267,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.8491620111731844,
+            "internal_essence": 0.15083798882681565
+          },
+          "pred_mix": {
+            "divine_teleology": 0.03745318352059925,
+            "non_divine_teleology": 0.6329588014981273,
+            "internal_essence": 0.3295880149812734
+          },
+          "signed_error": {
+            "divine_teleology": 0.03745318352059925,
+            "non_divine_teleology": -0.21620320967505702,
+            "internal_essence": 0.17875002615445773
+          },
+          "max_abs_error": 0.21620320967505702,
+          "tvd": 0.216203209675057,
+          "teleology_true": 0.8491620111731844,
+          "teleology_pred": 0.6704119850187266,
+          "teleology_signed_error": -0.1787500261544578
+        },
+        "The Wisdom of God Manifested in the Works of the Creation": {
+          "year": "1691",
+          "n_rows": 444,
+          "true_n_nonjunk": 222,
+          "pred_n_kept": 291,
+          "true_mix": {
+            "divine_teleology": 0.2747747747747748,
+            "non_divine_teleology": 0.6036036036036037,
+            "internal_essence": 0.12162162162162163
+          },
+          "pred_mix": {
+            "divine_teleology": 0.4536082474226804,
+            "non_divine_teleology": 0.44673539518900346,
+            "internal_essence": 0.09965635738831616
+          },
+          "signed_error": {
+            "divine_teleology": 0.1788334726479056,
+            "non_divine_teleology": -0.1568682084146002,
+            "internal_essence": -0.02196526423330547
+          },
+          "max_abs_error": 0.1788334726479056,
+          "tvd": 0.17883347264790564,
+          "teleology_true": 0.8783783783783785,
+          "teleology_pred": 0.9003436426116839,
+          "teleology_signed_error": 0.02196526423330536
+        },
+        "The Animal Kingdom": {
+          "year": "1831",
+          "n_rows": 1739,
+          "true_n_nonjunk": 653,
+          "pred_n_kept": 710,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25880551301684535,
+            "internal_essence": 0.7411944869831547
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0014084507042253522,
+            "non_divine_teleology": 0.24366197183098592,
+            "internal_essence": 0.7549295774647887
+          },
+          "signed_error": {
+            "divine_teleology": 0.0014084507042253522,
+            "non_divine_teleology": -0.015143541185859422,
+            "internal_essence": 0.013735090481634016
+          },
+          "max_abs_error": 0.015143541185859422,
+          "tvd": 0.015143541185859396,
+          "teleology_true": 0.25880551301684535,
+          "teleology_pred": 0.24507042253521127,
+          "teleology_signed_error": -0.013735090481634071
+        },
+        "On the Nature of Limbs": {
+          "year": "1849",
+          "n_rows": 314,
+          "true_n_nonjunk": 165,
+          "pred_n_kept": 178,
+          "true_mix": {
+            "divine_teleology": 0.06060606060606061,
+            "non_divine_teleology": 0.3212121212121212,
+            "internal_essence": 0.6181818181818182
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0449438202247191,
+            "non_divine_teleology": 0.29775280898876405,
+            "internal_essence": 0.6573033707865169
+          },
+          "signed_error": {
+            "divine_teleology": -0.015662240381341508,
+            "non_divine_teleology": -0.023459312223357176,
+            "internal_essence": 0.03912155260469874
+          },
+          "max_abs_error": 0.03912155260469874,
+          "tvd": 0.03912155260469871,
+          "teleology_true": 0.38181818181818183,
+          "teleology_pred": 0.34269662921348315,
+          "teleology_signed_error": -0.039121552604698684
+        }
+      },
+      "bias": {
+        "divine_teleology": {
+          "mean_signed_error": 0.0029365148661125305,
+          "sd": 0.05196526925199491,
+          "mean_abs_error": 0.026136433390828072,
+          "max_abs_error": 0.1788334726479056,
+          "n_works": 16,
+          "predict_90pct": 0.08548286791953164
+        },
+        "non_divine_teleology": {
+          "mean_signed_error": -0.015096183824954711,
+          "sd": 0.08775572678429905,
+          "mean_abs_error": 0.06043737307883143,
+          "max_abs_error": 0.21620320967505702,
+          "n_works": 16,
+          "predict_90pct": 0.14435817056017194
+        },
+        "internal_essence": {
+          "mean_signed_error": 0.012159668958842162,
+          "sd": 0.07447727779064278,
+          "mean_abs_error": 0.05622420810413639,
+          "max_abs_error": 0.17875002615445773,
+          "n_works": 16,
+          "predict_90pct": 0.12251512196560738
+        },
+        "teleology": {
+          "mean_signed_error": -0.012159668958842181,
+          "sd": 0.07447727779064281,
+          "mean_abs_error": 0.05622420810413642,
+          "max_abs_error": 0.1787500261544578,
+          "n_works": 16,
+          "predict_90pct": 0.12251512196560742
+        }
+      },
+      "mean_tvd": 0.07139900728689795,
+      "max_tvd": 0.216203209675057,
+      "within_work_ranking": {
+        "full_order_correct": 14,
+        "n_works": 16,
+        "rate": 0.875,
+        "ci": [
+          0.6397666856325173,
+          0.9650232506629428
+        ],
+        "pairwise_by_gap": [
+          {
+            "gap_lo": 0.0,
+            "gap_hi": 0.025,
+            "n": 2,
+            "correct": 2,
+            "rate": 1.0,
+            "ci_lo": 0.34237195288961925,
+            "ci_hi": 1.0
+          },
+          {
+            "gap_lo": 0.05,
+            "gap_hi": 0.1,
+            "n": 2,
+            "correct": 2,
+            "rate": 1.0,
+            "ci_lo": 0.34237195288961925,
+            "ci_hi": 1.0
+          },
+          {
+            "gap_lo": 0.1,
+            "gap_hi": 0.2,
+            "n": 8,
+            "correct": 8,
+            "rate": 1.0,
+            "ci_lo": 0.6755843804891231,
+            "ci_hi": 1.0
+          },
+          {
+            "gap_lo": 0.2,
+            "gap_hi": 1.01,
+            "n": 36,
+            "correct": 35,
+            "rate": 0.9722222222222222,
+            "ci_lo": 0.8582996626496918,
+            "ci_hi": 0.9950797197044302
+          }
+        ],
+        "pairwise_overall": {
+          "correct": 47,
+          "n": 48,
+          "rate": 0.9791666666666666,
+          "ci": [
+            0.8910053086246883,
+            0.9963129840206002
+          ]
+        }
+      },
+      "across_work_ranking": {
+        "divine_teleology": {
+          "correct": 102,
+          "n": 114,
+          "rate": 0.8947368421052632,
+          "ci": [
+            0.8249833564660207,
+            0.9387537278912861
+          ],
+          "by_gap": [
+            {
+              "gap_lo": 0.0,
+              "gap_hi": 0.025,
+              "n": 14,
+              "correct": 7,
+              "rate": 0.5,
+              "ci_lo": 0.2679886791947528,
+              "ci_hi": 0.7320113208052472
+            },
+            {
+              "gap_lo": 0.025,
+              "gap_hi": 0.05,
+              "n": 7,
+              "correct": 5,
+              "rate": 0.7142857142857143,
+              "ci_lo": 0.35892909014821267,
+              "ci_hi": 0.9177828342909844
+            },
+            {
+              "gap_lo": 0.05,
+              "gap_hi": 0.1,
+              "n": 18,
+              "correct": 16,
+              "rate": 0.8888888888888888,
+              "ci_lo": 0.6719975513339578,
+              "ci_hi": 0.9689811315464172
+            },
+            {
+              "gap_lo": 0.1,
+              "gap_hi": 0.2,
+              "n": 36,
+              "correct": 35,
+              "rate": 0.9722222222222222,
+              "ci_lo": 0.8582996626496918,
+              "ci_hi": 0.9950797197044302
+            },
+            {
+              "gap_lo": 0.2,
+              "gap_hi": 1.01,
+              "n": 39,
+              "correct": 39,
+              "rate": 1.0,
+              "ci_lo": 0.9103301463997611,
+              "ci_hi": 1.0
+            }
+          ]
+        },
+        "non_divine_teleology": {
+          "correct": 109,
+          "n": 120,
+          "rate": 0.9083333333333333,
+          "ci": [
+            0.843290092093749,
+            0.9480433532105753
+          ],
+          "by_gap": [
+            {
+              "gap_lo": 0.0,
+              "gap_hi": 0.025,
+              "n": 6,
+              "correct": 5,
+              "rate": 0.8333333333333334,
+              "ci_lo": 0.43649056343635395,
+              "ci_hi": 0.9699474141282697
+            },
+            {
+              "gap_lo": 0.025,
+              "gap_hi": 0.05,
+              "n": 4,
+              "correct": 3,
+              "rate": 0.75,
+              "ci_lo": 0.3006360524426366,
+              "ci_hi": 0.9544139373553637
+            },
+            {
+              "gap_lo": 0.05,
+              "gap_hi": 0.1,
+              "n": 17,
+              "correct": 13,
+              "rate": 0.7647058823529411,
+              "ci_lo": 0.5273775411082839,
+              "ci_hi": 0.9044511092832406
+            },
+            {
+              "gap_lo": 0.1,
+              "gap_hi": 0.2,
+              "n": 28,
+              "correct": 24,
+              "rate": 0.8571428571428571,
+              "ci_lo": 0.6850982695512267,
+              "ci_hi": 0.9430108706929821
+            },
+            {
+              "gap_lo": 0.2,
+              "gap_hi": 1.01,
+              "n": 65,
+              "correct": 64,
+              "rate": 0.9846153846153847,
+              "ci_lo": 0.9178652058620286,
+              "ci_hi": 0.9972791254725134
+            }
+          ]
+        },
+        "internal_essence": {
+          "correct": 109,
+          "n": 120,
+          "rate": 0.9083333333333333,
+          "ci": [
+            0.843290092093749,
+            0.9480433532105753
+          ],
+          "by_gap": [
+            {
+              "gap_lo": 0.0,
+              "gap_hi": 0.025,
+              "n": 6,
+              "correct": 2,
+              "rate": 0.3333333333333333,
+              "ci_lo": 0.09676933255921683,
+              "ci_hi": 0.7000116786584712
+            },
+            {
+              "gap_lo": 0.025,
+              "gap_hi": 0.05,
+              "n": 8,
+              "correct": 6,
+              "rate": 0.75,
+              "ci_lo": 0.40926987910258916,
+              "ci_hi": 0.9285223111419724
+            },
+            {
+              "gap_lo": 0.05,
+              "gap_hi": 0.1,
+              "n": 16,
+              "correct": 14,
+              "rate": 0.875,
+              "ci_lo": 0.6397666856325173,
+              "ci_hi": 0.9650232506629428
+            },
+            {
+              "gap_lo": 0.1,
+              "gap_hi": 0.2,
+              "n": 17,
+              "correct": 14,
+              "rate": 0.8235294117647058,
+              "ci_lo": 0.5897007098262422,
+              "ci_hi": 0.9380898628745101
+            },
+            {
+              "gap_lo": 0.2,
+              "gap_hi": 1.01,
+              "n": 73,
+              "correct": 73,
+              "rate": 1.0,
+              "ci_lo": 0.950006246616416,
+              "ci_hi": 0.9999999999999999
+            }
+          ]
+        },
+        "teleology": {
+          "correct": 109,
+          "n": 120,
+          "rate": 0.9083333333333333,
+          "ci": [
+            0.843290092093749,
+            0.9480433532105753
+          ],
+          "by_gap": [
+            {
+              "gap_lo": 0.0,
+              "gap_hi": 0.025,
+              "n": 6,
+              "correct": 2,
+              "rate": 0.3333333333333333,
+              "ci_lo": 0.09676933255921683,
+              "ci_hi": 0.7000116786584712
+            },
+            {
+              "gap_lo": 0.025,
+              "gap_hi": 0.05,
+              "n": 8,
+              "correct": 6,
+              "rate": 0.75,
+              "ci_lo": 0.40926987910258916,
+              "ci_hi": 0.9285223111419724
+            },
+            {
+              "gap_lo": 0.05,
+              "gap_hi": 0.1,
+              "n": 16,
+              "correct": 14,
+              "rate": 0.875,
+              "ci_lo": 0.6397666856325173,
+              "ci_hi": 0.9650232506629428
+            },
+            {
+              "gap_lo": 0.1,
+              "gap_hi": 0.2,
+              "n": 17,
+              "correct": 14,
+              "rate": 0.8235294117647058,
+              "ci_lo": 0.5897007098262422,
+              "ci_hi": 0.9380898628745101
+            },
+            {
+              "gap_lo": 0.2,
+              "gap_hi": 1.01,
+              "n": 73,
+              "correct": 73,
+              "rate": 1.0,
+              "ci_lo": 0.950006246616416,
+              "ci_hi": 0.9999999999999999
+            }
+          ]
+        },
+        "_pooled_3cat": {
+          "correct": 320,
+          "n": 354,
+          "rate": 0.903954802259887,
+          "ci": [
+            0.8687820380106606,
+            0.9304542721332689
+          ],
+          "by_gap": [
+            {
+              "gap_lo": 0.0,
+              "gap_hi": 0.025,
+              "n": 26,
+              "correct": 14,
+              "rate": 0.5384615384615384,
+              "ci_lo": 0.3545763620443012,
+              "ci_hi": 0.712444173047651
+            },
+            {
+              "gap_lo": 0.025,
+              "gap_hi": 0.05,
+              "n": 19,
+              "correct": 14,
+              "rate": 0.7368421052631579,
+              "ci_lo": 0.5120803155892935,
+              "ci_hi": 0.8819376166045982
+            },
+            {
+              "gap_lo": 0.05,
+              "gap_hi": 0.1,
+              "n": 51,
+              "correct": 43,
+              "rate": 0.8431372549019608,
+              "ci_lo": 0.7198929160164018,
+              "ci_hi": 0.9183087411197868
+            },
+            {
+              "gap_lo": 0.1,
+              "gap_hi": 0.2,
+              "n": 81,
+              "correct": 73,
+              "rate": 0.9012345679012346,
+              "ci_lo": 0.8170331024146836,
+              "ci_hi": 0.9491004924255834
+            },
+            {
+              "gap_lo": 0.2,
+              "gap_hi": 1.01,
+              "n": 177,
+              "correct": 176,
+              "rate": 0.9943502824858758,
+              "ci_lo": 0.9686956832179844,
+              "ci_hi": 0.9990020146568407
+            }
+          ]
+        }
+      }
+    },
+    "perfect_gate": {
+      "per_work": {
+        "The History of Creation, Vol. 1": {
+          "year": "1876",
+          "n_rows": 813,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 169,
+          "true_mix": {
+            "divine_teleology": 0.05325443786982249,
+            "non_divine_teleology": 0.41420118343195267,
+            "internal_essence": 0.5325443786982249
+          },
+          "pred_mix": {
+            "divine_teleology": 0.07692307692307693,
+            "non_divine_teleology": 0.3727810650887574,
+            "internal_essence": 0.5502958579881657
+          },
+          "signed_error": {
+            "divine_teleology": 0.02366863905325444,
+            "non_divine_teleology": -0.041420118343195256,
+            "internal_essence": 0.017751479289940808
+          },
+          "max_abs_error": 0.041420118343195256,
+          "tvd": 0.041420118343195256,
+          "teleology_true": 0.46745562130177515,
+          "teleology_pred": 0.44970414201183434,
+          "teleology_signed_error": -0.017751479289940808
+        },
+        "Evidence as to Man's Place in Nature": {
+          "year": "1863",
+          "n_rows": 345,
+          "true_n_nonjunk": 56,
+          "pred_n_kept": 56,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25,
+            "internal_essence": 0.75
+          },
+          "pred_mix": {
+            "divine_teleology": 0.017857142857142856,
+            "non_divine_teleology": 0.25,
+            "internal_essence": 0.7321428571428571
+          },
+          "signed_error": {
+            "divine_teleology": 0.017857142857142856,
+            "non_divine_teleology": 0.0,
+            "internal_essence": -0.017857142857142905
+          },
+          "max_abs_error": 0.017857142857142905,
+          "tvd": 0.01785714285714288,
+          "teleology_true": 0.25,
+          "teleology_pred": 0.26785714285714285,
+          "teleology_signed_error": 0.01785714285714285
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 1": {
+          "year": "1835",
+          "n_rows": 926,
+          "true_n_nonjunk": 541,
+          "pred_n_kept": 541,
+          "true_mix": {
+            "divine_teleology": 0.3142329020332717,
+            "non_divine_teleology": 0.4879852125693161,
+            "internal_essence": 0.1977818853974122
+          },
+          "pred_mix": {
+            "divine_teleology": 0.3345656192236599,
+            "non_divine_teleology": 0.5231053604436229,
+            "internal_essence": 0.1423290203327172
+          },
+          "signed_error": {
+            "divine_teleology": 0.020332717190388205,
+            "non_divine_teleology": 0.035120147874306784,
+            "internal_essence": -0.05545286506469502
+          },
+          "max_abs_error": 0.05545286506469502,
+          "tvd": 0.055452865064695,
+          "teleology_true": 0.8022181146025877,
+          "teleology_pred": 0.8576709796672828,
+          "teleology_signed_error": 0.055452865064695045
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 2": {
+          "year": "1835",
+          "n_rows": 731,
+          "true_n_nonjunk": 330,
+          "pred_n_kept": 330,
+          "true_mix": {
+            "divine_teleology": 0.44545454545454544,
+            "non_divine_teleology": 0.33636363636363636,
+            "internal_essence": 0.21818181818181817
+          },
+          "pred_mix": {
+            "divine_teleology": 0.4636363636363636,
+            "non_divine_teleology": 0.3333333333333333,
+            "internal_essence": 0.20303030303030303
+          },
+          "signed_error": {
+            "divine_teleology": 0.018181818181818188,
+            "non_divine_teleology": -0.00303030303030305,
+            "internal_essence": -0.015151515151515138
+          },
+          "max_abs_error": 0.018181818181818188,
+          "tvd": 0.018181818181818188,
+          "teleology_true": 0.7818181818181817,
+          "teleology_pred": 0.7969696969696969,
+          "teleology_signed_error": 0.015151515151515138
+        },
+        "Zoological Philosophy": {
+          "year": "1809",
+          "n_rows": 1157,
+          "true_n_nonjunk": 489,
+          "pred_n_kept": 489,
+          "true_mix": {
+            "divine_teleology": 0.00408997955010225,
+            "non_divine_teleology": 0.2740286298568507,
+            "internal_essence": 0.721881390593047
+          },
+          "pred_mix": {
+            "divine_teleology": 0.010224948875255624,
+            "non_divine_teleology": 0.3047034764826176,
+            "internal_essence": 0.6850715746421268
+          },
+          "signed_error": {
+            "divine_teleology": 0.006134969325153374,
+            "non_divine_teleology": 0.03067484662576686,
+            "internal_essence": -0.036809815950920255
+          },
+          "max_abs_error": 0.036809815950920255,
+          "tvd": 0.03680981595092025,
+          "teleology_true": 0.278118609406953,
+          "teleology_pred": 0.3149284253578732,
+          "teleology_signed_error": 0.0368098159509202
+        },
+        "Physico-Theology": {
+          "year": "1713",
+          "n_rows": 892,
+          "true_n_nonjunk": 389,
+          "pred_n_kept": 389,
+          "true_mix": {
+            "divine_teleology": 0.3264781491002571,
+            "non_divine_teleology": 0.6195372750642674,
+            "internal_essence": 0.05398457583547558
+          },
+          "pred_mix": {
+            "divine_teleology": 0.2544987146529563,
+            "non_divine_teleology": 0.6555269922879178,
+            "internal_essence": 0.08997429305912596
+          },
+          "signed_error": {
+            "divine_teleology": -0.07197943444730076,
+            "non_divine_teleology": 0.03598971722365041,
+            "internal_essence": 0.03598971722365039
+          },
+          "max_abs_error": 0.07197943444730076,
+          "tvd": 0.07197943444730077,
+          "teleology_true": 0.9460154241645244,
+          "teleology_pred": 0.9100257069408741,
+          "teleology_signed_error": -0.0359897172236503
+        },
+        "The History of Creation, Vol. 2": {
+          "year": "1876",
+          "n_rows": 775,
+          "true_n_nonjunk": 294,
+          "pred_n_kept": 294,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.2108843537414966,
+            "internal_essence": 0.7891156462585034
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.12585034013605442,
+            "internal_essence": 0.8741496598639455
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": -0.08503401360544219,
+            "internal_essence": 0.08503401360544216
+          },
+          "max_abs_error": 0.08503401360544219,
+          "tvd": 0.08503401360544217,
+          "teleology_true": 0.2108843537414966,
+          "teleology_pred": 0.12585034013605442,
+          "teleology_signed_error": -0.08503401360544219
+        },
+        "On the Genesis of Species": {
+          "year": "1871",
+          "n_rows": 584,
+          "true_n_nonjunk": 104,
+          "pred_n_kept": 104,
+          "true_mix": {
+            "divine_teleology": 0.04807692307692308,
+            "non_divine_teleology": 0.47115384615384615,
+            "internal_essence": 0.4807692307692308
+          },
+          "pred_mix": {
+            "divine_teleology": 0.04807692307692308,
+            "non_divine_teleology": 0.34615384615384615,
+            "internal_essence": 0.6057692307692307
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": -0.125,
+            "internal_essence": 0.12499999999999994
+          },
+          "max_abs_error": 0.125,
+          "tvd": 0.12499999999999997,
+          "teleology_true": 0.5192307692307693,
+          "teleology_pred": 0.3942307692307692,
+          "teleology_signed_error": -0.12500000000000006
+        },
+        "Essay on Classification": {
+          "year": "1859",
+          "n_rows": 867,
+          "true_n_nonjunk": 246,
+          "pred_n_kept": 246,
+          "true_mix": {
+            "divine_teleology": 0.06504065040650407,
+            "non_divine_teleology": 0.12195121951219512,
+            "internal_essence": 0.8130081300813008
+          },
+          "pred_mix": {
+            "divine_teleology": 0.028455284552845527,
+            "non_divine_teleology": 0.12601626016260162,
+            "internal_essence": 0.8455284552845529
+          },
+          "signed_error": {
+            "divine_teleology": -0.03658536585365854,
+            "non_divine_teleology": 0.004065040650406498,
+            "internal_essence": 0.0325203252032521
+          },
+          "max_abs_error": 0.03658536585365854,
+          "tvd": 0.03658536585365857,
+          "teleology_true": 0.1869918699186992,
+          "teleology_pred": 0.15447154471544713,
+          "teleology_signed_error": -0.03252032520325207
+        },
+        "Darwiniana": {
+          "year": "1876",
+          "n_rows": 717,
+          "true_n_nonjunk": 73,
+          "pred_n_kept": 73,
+          "true_mix": {
+            "divine_teleology": 0.1506849315068493,
+            "non_divine_teleology": 0.547945205479452,
+            "internal_essence": 0.3013698630136986
+          },
+          "pred_mix": {
+            "divine_teleology": 0.1506849315068493,
+            "non_divine_teleology": 0.5205479452054794,
+            "internal_essence": 0.3287671232876712
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": -0.0273972602739726,
+            "internal_essence": 0.0273972602739726
+          },
+          "max_abs_error": 0.0273972602739726,
+          "tvd": 0.0273972602739726,
+          "teleology_true": 0.6986301369863013,
+          "teleology_pred": 0.6712328767123288,
+          "teleology_signed_error": -0.02739726027397249
+        },
+        "Natural Theology": {
+          "year": "1802",
+          "n_rows": 775,
+          "true_n_nonjunk": 365,
+          "pred_n_kept": 365,
+          "true_mix": {
+            "divine_teleology": 0.16712328767123288,
+            "non_divine_teleology": 0.7287671232876712,
+            "internal_essence": 0.10410958904109589
+          },
+          "pred_mix": {
+            "divine_teleology": 0.13150684931506848,
+            "non_divine_teleology": 0.7561643835616438,
+            "internal_essence": 0.11232876712328767
+          },
+          "signed_error": {
+            "divine_teleology": -0.035616438356164404,
+            "non_divine_teleology": 0.0273972602739726,
+            "internal_essence": 0.008219178082191775
+          },
+          "max_abs_error": 0.035616438356164404,
+          "tvd": 0.03561643835616439,
+          "teleology_true": 0.8958904109589041,
+          "teleology_pred": 0.8876712328767123,
+          "teleology_signed_error": -0.008219178082191747
+        },
+        "The Reign of Law": {
+          "year": "1867",
+          "n_rows": 469,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 169,
+          "true_mix": {
+            "divine_teleology": 0.17159763313609466,
+            "non_divine_teleology": 0.6686390532544378,
+            "internal_essence": 0.15976331360946747
+          },
+          "pred_mix": {
+            "divine_teleology": 0.1893491124260355,
+            "non_divine_teleology": 0.6686390532544378,
+            "internal_essence": 0.14201183431952663
+          },
+          "signed_error": {
+            "divine_teleology": 0.017751479289940836,
+            "non_divine_teleology": 0.0,
+            "internal_essence": -0.017751479289940836
+          },
+          "max_abs_error": 0.017751479289940836,
+          "tvd": 0.017751479289940836,
+          "teleology_true": 0.8402366863905325,
+          "teleology_pred": 0.8579881656804733,
+          "teleology_signed_error": 0.017751479289940808
+        },
+        "On the Origin of Species": {
+          "year": "1859",
+          "n_rows": 1275,
+          "true_n_nonjunk": 179,
+          "pred_n_kept": 179,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.8491620111731844,
+            "internal_essence": 0.15083798882681565
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0223463687150838,
+            "non_divine_teleology": 0.7821229050279329,
+            "internal_essence": 0.19553072625698323
+          },
+          "signed_error": {
+            "divine_teleology": 0.0223463687150838,
+            "non_divine_teleology": -0.06703910614525144,
+            "internal_essence": 0.04469273743016758
+          },
+          "max_abs_error": 0.06703910614525144,
+          "tvd": 0.06703910614525141,
+          "teleology_true": 0.8491620111731844,
+          "teleology_pred": 0.8044692737430167,
+          "teleology_signed_error": -0.04469273743016766
+        },
+        "The Wisdom of God Manifested in the Works of the Creation": {
+          "year": "1691",
+          "n_rows": 444,
+          "true_n_nonjunk": 222,
+          "pred_n_kept": 222,
+          "true_mix": {
+            "divine_teleology": 0.2747747747747748,
+            "non_divine_teleology": 0.6036036036036037,
+            "internal_essence": 0.12162162162162163
+          },
+          "pred_mix": {
+            "divine_teleology": 0.45045045045045046,
+            "non_divine_teleology": 0.4369369369369369,
+            "internal_essence": 0.11261261261261261
+          },
+          "signed_error": {
+            "divine_teleology": 0.17567567567567566,
+            "non_divine_teleology": -0.16666666666666674,
+            "internal_essence": -0.009009009009009014
+          },
+          "max_abs_error": 0.17567567567567566,
+          "tvd": 0.1756756756756757,
+          "teleology_true": 0.8783783783783785,
+          "teleology_pred": 0.8873873873873874,
+          "teleology_signed_error": 0.009009009009008917
+        },
+        "The Animal Kingdom": {
+          "year": "1831",
+          "n_rows": 1739,
+          "true_n_nonjunk": 653,
+          "pred_n_kept": 653,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25880551301684535,
+            "internal_essence": 0.7411944869831547
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0015313935681470138,
+            "non_divine_teleology": 0.23736600306278713,
+            "internal_essence": 0.7611026033690659
+          },
+          "signed_error": {
+            "divine_teleology": 0.0015313935681470138,
+            "non_divine_teleology": -0.021439509954058217,
+            "internal_essence": 0.019908116385911168
+          },
+          "max_abs_error": 0.021439509954058217,
+          "tvd": 0.0214395099540582,
+          "teleology_true": 0.25880551301684535,
+          "teleology_pred": 0.23889739663093415,
+          "teleology_signed_error": -0.019908116385911195
+        },
+        "On the Nature of Limbs": {
+          "year": "1849",
+          "n_rows": 314,
+          "true_n_nonjunk": 165,
+          "pred_n_kept": 165,
+          "true_mix": {
+            "divine_teleology": 0.06060606060606061,
+            "non_divine_teleology": 0.3212121212121212,
+            "internal_essence": 0.6181818181818182
+          },
+          "pred_mix": {
+            "divine_teleology": 0.06060606060606061,
+            "non_divine_teleology": 0.30303030303030304,
+            "internal_essence": 0.6363636363636364
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": -0.018181818181818188,
+            "internal_essence": 0.018181818181818188
+          },
+          "max_abs_error": 0.018181818181818188,
+          "tvd": 0.018181818181818188,
+          "teleology_true": 0.38181818181818183,
+          "teleology_pred": 0.36363636363636365,
+          "teleology_signed_error": -0.018181818181818188
+        }
+      },
+      "bias": {
+        "divine_teleology": {
+          "mean_signed_error": 0.009956185324967542,
+          "sd": 0.05134298382232236,
+          "mean_abs_error": 0.027978840157108005,
+          "max_abs_error": 0.17567567567567566,
+          "n_works": 16,
+          "predict_90pct": 0.08445920838772028
+        },
+        "non_divine_teleology": {
+          "mean_signed_error": -0.02637261147203778,
+          "sd": 0.05859578136736646,
+          "mean_abs_error": 0.04302848805305068,
+          "max_abs_error": 0.16666666666666674,
+          "n_works": 16,
+          "predict_90pct": 0.09639006034931784
+        },
+        "internal_essence": {
+          "mean_signed_error": 0.016416426147070222,
+          "sd": 0.0448173836735677,
+          "mean_abs_error": 0.03542040456247312,
+          "max_abs_error": 0.12499999999999994,
+          "n_works": 16,
+          "predict_90pct": 0.07372459614301886
+        },
+        "teleology": {
+          "mean_signed_error": -0.016416426147070236,
+          "sd": 0.04481738367356771,
+          "mean_abs_error": 0.035420404562473105,
+          "max_abs_error": 0.12500000000000006,
+          "n_works": 16,
+          "predict_90pct": 0.07372459614301889
+        }
+      },
+      "mean_tvd": 0.0532138663863159,
+      "max_tvd": 0.1756756756756757
+    },
+    "perfect_stage2": {
+      "per_work": {
+        "The History of Creation, Vol. 1": {
+          "year": "1876",
+          "n_rows": 813,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 105,
+          "true_mix": {
+            "divine_teleology": 0.05325443786982249,
+            "non_divine_teleology": 0.41420118343195267,
+            "internal_essence": 0.5325443786982249
+          },
+          "pred_mix": {
+            "divine_teleology": 0.02857142857142857,
+            "non_divine_teleology": 0.41904761904761906,
+            "internal_essence": 0.5523809523809524
+          },
+          "signed_error": {
+            "divine_teleology": -0.024683009298393916,
+            "non_divine_teleology": 0.004846435615666389,
+            "internal_essence": 0.01983657368272751
+          },
+          "max_abs_error": 0.024683009298393916,
+          "tvd": 0.024683009298393906,
+          "teleology_true": 0.46745562130177515,
+          "teleology_pred": 0.44761904761904764,
+          "teleology_signed_error": -0.01983657368272751
+        },
+        "Evidence as to Man's Place in Nature": {
+          "year": "1863",
+          "n_rows": 345,
+          "true_n_nonjunk": 56,
+          "pred_n_kept": 31,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25,
+            "internal_essence": 0.75
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.2903225806451613,
+            "internal_essence": 0.7096774193548387
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.04032258064516131,
+            "internal_essence": -0.040322580645161255
+          },
+          "max_abs_error": 0.04032258064516131,
+          "tvd": 0.04032258064516128,
+          "teleology_true": 0.25,
+          "teleology_pred": 0.2903225806451613,
+          "teleology_signed_error": 0.04032258064516131
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 1": {
+          "year": "1835",
+          "n_rows": 926,
+          "true_n_nonjunk": 541,
+          "pred_n_kept": 471,
+          "true_mix": {
+            "divine_teleology": 0.3142329020332717,
+            "non_divine_teleology": 0.4879852125693161,
+            "internal_essence": 0.1977818853974122
+          },
+          "pred_mix": {
+            "divine_teleology": 0.3248407643312102,
+            "non_divine_teleology": 0.49256900212314225,
+            "internal_essence": 0.18259023354564755
+          },
+          "signed_error": {
+            "divine_teleology": 0.010607862297938475,
+            "non_divine_teleology": 0.004583789553826156,
+            "internal_essence": -0.01519165185176466
+          },
+          "max_abs_error": 0.01519165185176466,
+          "tvd": 0.015191651851764645,
+          "teleology_true": 0.8022181146025877,
+          "teleology_pred": 0.8174097664543525,
+          "teleology_signed_error": 0.015191651851764743
+        },
+        "On the Creation of Animals (Bridgewater VII), Vol. 2": {
+          "year": "1835",
+          "n_rows": 731,
+          "true_n_nonjunk": 330,
+          "pred_n_kept": 258,
+          "true_mix": {
+            "divine_teleology": 0.44545454545454544,
+            "non_divine_teleology": 0.33636363636363636,
+            "internal_essence": 0.21818181818181817
+          },
+          "pred_mix": {
+            "divine_teleology": 0.4496124031007752,
+            "non_divine_teleology": 0.3449612403100775,
+            "internal_essence": 0.2054263565891473
+          },
+          "signed_error": {
+            "divine_teleology": 0.004157857646229779,
+            "non_divine_teleology": 0.008597603946441157,
+            "internal_essence": -0.01275546159267088
+          },
+          "max_abs_error": 0.01275546159267088,
+          "tvd": 0.012755461592670908,
+          "teleology_true": 0.7818181818181817,
+          "teleology_pred": 0.7945736434108528,
+          "teleology_signed_error": 0.012755461592671047
+        },
+        "Zoological Philosophy": {
+          "year": "1809",
+          "n_rows": 1157,
+          "true_n_nonjunk": 489,
+          "pred_n_kept": 402,
+          "true_mix": {
+            "divine_teleology": 0.00408997955010225,
+            "non_divine_teleology": 0.2740286298568507,
+            "internal_essence": 0.721881390593047
+          },
+          "pred_mix": {
+            "divine_teleology": 0.004975124378109453,
+            "non_divine_teleology": 0.2860696517412935,
+            "internal_essence": 0.7089552238805971
+          },
+          "signed_error": {
+            "divine_teleology": 0.0008851448280072028,
+            "non_divine_teleology": 0.012041021884442782,
+            "internal_essence": -0.012926166712449949
+          },
+          "max_abs_error": 0.012926166712449949,
+          "tvd": 0.012926166712449966,
+          "teleology_true": 0.278118609406953,
+          "teleology_pred": 0.29104477611940294,
+          "teleology_signed_error": 0.012926166712449949
+        },
+        "Physico-Theology": {
+          "year": "1713",
+          "n_rows": 892,
+          "true_n_nonjunk": 389,
+          "pred_n_kept": 330,
+          "true_mix": {
+            "divine_teleology": 0.3264781491002571,
+            "non_divine_teleology": 0.6195372750642674,
+            "internal_essence": 0.05398457583547558
+          },
+          "pred_mix": {
+            "divine_teleology": 0.3515151515151515,
+            "non_divine_teleology": 0.6212121212121212,
+            "internal_essence": 0.02727272727272727
+          },
+          "signed_error": {
+            "divine_teleology": 0.025037002414894427,
+            "non_divine_teleology": 0.0016748461478538479,
+            "internal_essence": -0.026711848562748306
+          },
+          "max_abs_error": 0.026711848562748306,
+          "tvd": 0.02671184856274829,
+          "teleology_true": 0.9460154241645244,
+          "teleology_pred": 0.9727272727272727,
+          "teleology_signed_error": 0.02671184856274822
+        },
+        "The History of Creation, Vol. 2": {
+          "year": "1876",
+          "n_rows": 775,
+          "true_n_nonjunk": 294,
+          "pred_n_kept": 223,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.2108843537414966,
+            "internal_essence": 0.7891156462585034
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.20179372197309417,
+            "internal_essence": 0.7982062780269058
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": -0.00909063176840244,
+            "internal_essence": 0.009090631768402413
+          },
+          "max_abs_error": 0.00909063176840244,
+          "tvd": 0.009090631768402427,
+          "teleology_true": 0.2108843537414966,
+          "teleology_pred": 0.20179372197309417,
+          "teleology_signed_error": -0.00909063176840244
+        },
+        "On the Genesis of Species": {
+          "year": "1871",
+          "n_rows": 584,
+          "true_n_nonjunk": 104,
+          "pred_n_kept": 53,
+          "true_mix": {
+            "divine_teleology": 0.04807692307692308,
+            "non_divine_teleology": 0.47115384615384615,
+            "internal_essence": 0.4807692307692308
+          },
+          "pred_mix": {
+            "divine_teleology": 0.018867924528301886,
+            "non_divine_teleology": 0.5849056603773585,
+            "internal_essence": 0.39622641509433965
+          },
+          "signed_error": {
+            "divine_teleology": -0.029208998548621194,
+            "non_divine_teleology": 0.11375181422351233,
+            "internal_essence": -0.08454281567489114
+          },
+          "max_abs_error": 0.11375181422351233,
+          "tvd": 0.11375181422351233,
+          "teleology_true": 0.5192307692307693,
+          "teleology_pred": 0.6037735849056604,
+          "teleology_signed_error": 0.08454281567489108
+        },
+        "Essay on Classification": {
+          "year": "1859",
+          "n_rows": 867,
+          "true_n_nonjunk": 246,
+          "pred_n_kept": 159,
+          "true_mix": {
+            "divine_teleology": 0.06504065040650407,
+            "non_divine_teleology": 0.12195121951219512,
+            "internal_essence": 0.8130081300813008
+          },
+          "pred_mix": {
+            "divine_teleology": 0.025157232704402517,
+            "non_divine_teleology": 0.13836477987421383,
+            "internal_essence": 0.8364779874213837
+          },
+          "signed_error": {
+            "divine_teleology": -0.039883417702101555,
+            "non_divine_teleology": 0.016413560362018714,
+            "internal_essence": 0.02346985734008289
+          },
+          "max_abs_error": 0.039883417702101555,
+          "tvd": 0.039883417702101576,
+          "teleology_true": 0.1869918699186992,
+          "teleology_pred": 0.16352201257861634,
+          "teleology_signed_error": -0.02346985734008286
+        },
+        "Darwiniana": {
+          "year": "1876",
+          "n_rows": 717,
+          "true_n_nonjunk": 73,
+          "pred_n_kept": 25,
+          "true_mix": {
+            "divine_teleology": 0.1506849315068493,
+            "non_divine_teleology": 0.547945205479452,
+            "internal_essence": 0.3013698630136986
+          },
+          "pred_mix": {
+            "divine_teleology": 0.08,
+            "non_divine_teleology": 0.76,
+            "internal_essence": 0.16
+          },
+          "signed_error": {
+            "divine_teleology": -0.0706849315068493,
+            "non_divine_teleology": 0.21205479452054798,
+            "internal_essence": -0.1413698630136986
+          },
+          "max_abs_error": 0.21205479452054798,
+          "tvd": 0.21205479452054796,
+          "teleology_true": 0.6986301369863013,
+          "teleology_pred": 0.84,
+          "teleology_signed_error": 0.1413698630136987
+        },
+        "Natural Theology": {
+          "year": "1802",
+          "n_rows": 775,
+          "true_n_nonjunk": 365,
+          "pred_n_kept": 267,
+          "true_mix": {
+            "divine_teleology": 0.16712328767123288,
+            "non_divine_teleology": 0.7287671232876712,
+            "internal_essence": 0.10410958904109589
+          },
+          "pred_mix": {
+            "divine_teleology": 0.1647940074906367,
+            "non_divine_teleology": 0.7827715355805244,
+            "internal_essence": 0.052434456928838954
+          },
+          "signed_error": {
+            "divine_teleology": -0.002329280180596194,
+            "non_divine_teleology": 0.05400441229285313,
+            "internal_essence": -0.05167513211225694
+          },
+          "max_abs_error": 0.05400441229285313,
+          "tvd": 0.05400441229285313,
+          "teleology_true": 0.8958904109589041,
+          "teleology_pred": 0.947565543071161,
+          "teleology_signed_error": 0.05167513211225694
+        },
+        "The Reign of Law": {
+          "year": "1867",
+          "n_rows": 469,
+          "true_n_nonjunk": 169,
+          "pred_n_kept": 130,
+          "true_mix": {
+            "divine_teleology": 0.17159763313609466,
+            "non_divine_teleology": 0.6686390532544378,
+            "internal_essence": 0.15976331360946747
+          },
+          "pred_mix": {
+            "divine_teleology": 0.17692307692307693,
+            "non_divine_teleology": 0.7076923076923077,
+            "internal_essence": 0.11538461538461539
+          },
+          "signed_error": {
+            "divine_teleology": 0.00532544378698227,
+            "non_divine_teleology": 0.03905325443786989,
+            "internal_essence": -0.044378698224852076
+          },
+          "max_abs_error": 0.044378698224852076,
+          "tvd": 0.04437869822485212,
+          "teleology_true": 0.8402366863905325,
+          "teleology_pred": 0.8846153846153847,
+          "teleology_signed_error": 0.04437869822485219
+        },
+        "On the Origin of Species": {
+          "year": "1859",
+          "n_rows": 1275,
+          "true_n_nonjunk": 179,
+          "pred_n_kept": 129,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.8491620111731844,
+            "internal_essence": 0.15083798882681565
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.8527131782945736,
+            "internal_essence": 0.14728682170542637
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.0035511671213892537,
+            "internal_essence": -0.0035511671213892815
+          },
+          "max_abs_error": 0.0035511671213892815,
+          "tvd": 0.0035511671213892676,
+          "teleology_true": 0.8491620111731844,
+          "teleology_pred": 0.8527131782945736,
+          "teleology_signed_error": 0.0035511671213892537
+        },
+        "The Wisdom of God Manifested in the Works of the Creation": {
+          "year": "1691",
+          "n_rows": 444,
+          "true_n_nonjunk": 222,
+          "pred_n_kept": 196,
+          "true_mix": {
+            "divine_teleology": 0.2747747747747748,
+            "non_divine_teleology": 0.6036036036036037,
+            "internal_essence": 0.12162162162162163
+          },
+          "pred_mix": {
+            "divine_teleology": 0.2857142857142857,
+            "non_divine_teleology": 0.6377551020408163,
+            "internal_essence": 0.07653061224489796
+          },
+          "signed_error": {
+            "divine_teleology": 0.0109395109395109,
+            "non_divine_teleology": 0.03415149843721266,
+            "internal_essence": -0.04509100937672367
+          },
+          "max_abs_error": 0.04509100937672367,
+          "tvd": 0.04509100937672361,
+          "teleology_true": 0.8783783783783785,
+          "teleology_pred": 0.923469387755102,
+          "teleology_signed_error": 0.0450910093767235
+        },
+        "The Animal Kingdom": {
+          "year": "1831",
+          "n_rows": 1739,
+          "true_n_nonjunk": 653,
+          "pred_n_kept": 479,
+          "true_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.25880551301684535,
+            "internal_essence": 0.7411944869831547
+          },
+          "pred_mix": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.302713987473904,
+            "internal_essence": 0.697286012526096
+          },
+          "signed_error": {
+            "divine_teleology": 0.0,
+            "non_divine_teleology": 0.043908474457058644,
+            "internal_essence": -0.0439084744570587
+          },
+          "max_abs_error": 0.0439084744570587,
+          "tvd": 0.04390847445705867,
+          "teleology_true": 0.25880551301684535,
+          "teleology_pred": 0.302713987473904,
+          "teleology_signed_error": 0.043908474457058644
+        },
+        "On the Nature of Limbs": {
+          "year": "1849",
+          "n_rows": 314,
+          "true_n_nonjunk": 165,
+          "pred_n_kept": 125,
+          "true_mix": {
+            "divine_teleology": 0.06060606060606061,
+            "non_divine_teleology": 0.3212121212121212,
+            "internal_essence": 0.6181818181818182
+          },
+          "pred_mix": {
+            "divine_teleology": 0.056,
+            "non_divine_teleology": 0.4,
+            "internal_essence": 0.544
+          },
+          "signed_error": {
+            "divine_teleology": -0.004606060606060607,
+            "non_divine_teleology": 0.0787878787878788,
+            "internal_essence": -0.07418181818181813
+          },
+          "max_abs_error": 0.0787878787878788,
+          "tvd": 0.07878787878787877,
+          "teleology_true": 0.38181818181818183,
+          "teleology_pred": 0.456,
+          "teleology_signed_error": 0.07418181818181818
+        }
+      },
+      "bias": {
+        "divine_teleology": {
+          "mean_signed_error": -0.007152679745566232,
+          "sd": 0.023328114567195277,
+          "mean_abs_error": 0.014271782484761615,
+          "max_abs_error": 0.0706849315068493,
+          "n_works": 16,
+          "predict_90pct": 0.038374748463036235
+        },
+        "non_divine_teleology": {
+          "mean_signed_error": 0.04116578129158316,
+          "sd": 0.055852772775221556,
+          "mean_abs_error": 0.04230211026263347,
+          "max_abs_error": 0.21205479452054798,
+          "n_works": 16,
+          "predict_90pct": 0.09187781121523945
+        },
+        "internal_essence": {
+          "mean_signed_error": -0.03401310154601692,
+          "sd": 0.042163280731368546,
+          "mean_abs_error": 0.040562734394918525,
+          "max_abs_error": 0.1413698630136986,
+          "n_works": 16,
+          "predict_90pct": 0.06935859680310126
+        },
+        "teleology": {
+          "mean_signed_error": 0.03401310154601693,
+          "sd": 0.04216328073136855,
+          "mean_abs_error": 0.04056273439491853,
+          "max_abs_error": 0.1413698630136987,
+          "n_works": 16,
+          "predict_90pct": 0.06935859680310127
+        }
+      },
+      "mean_tvd": 0.048568313571156804,
+      "max_tvd": 0.21205479452054796
+    }
+  },
+  "junk": {
+    "true_junk_rate": 0.6534352335646885,
+    "leakage_into_kept": 0.310857608474231,
+    "kept_n": 4909
+  }
+}

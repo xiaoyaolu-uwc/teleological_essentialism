@@ -89,18 +89,28 @@ confident" from 16 texts.
       --lora-r 32 --lora-alpha 64 --epochs 4 --text-column text --max-length 640`
       (Qwen3-0.6B LoRA). Gate uses the same text column and max_length with the
       junk-gate SOTA prompt `A_structured`, r32/a64, seed 42.
-- [~] P2: 6-fold training **RUNNING (take 2)** — jobs 443074-443085. First
+- [x] P2: 6-fold training — DONE, all 12 runs validated. (First
       attempt (442996-443007) failed: see log. All 6 s2_fold* done; gate_fold*
       jobs were preempted and requeued by the `preempt` partition, so some are
       re-running. VALIDATE before inference: every metrics.json must show
       max_length=640, text_column=text, and the right holdout works, and the
       matching checkpoint dir must exist.
-- [ ] P3: pull checkpoints, end-to-end cascade inference on all 16 held-out texts (Vast)
-- [ ] P3: stage attribution variants
-- [ ] P4: `eval/evaluate_proportions.py` + results JSON
-- [ ] P5: write-up
+- [x] P3: cascade inference on Vast A4000 — 12,823 rows, all 16 works
+- [x] P3: stage attribution variants
+- [x] P4: `eval/evaluate_proportions.py` + `proportion_metrics.json` + figures
+- [x] P5: write-up — `eval/PROPORTION_EVAL_RESULTS.md`
 
 ## Progress log
+
+- 2026-08-23: **COMPLETE.** Results in `eval/PROPORTION_EVAL_RESULTS.md`.
+  Headline: no meaningful bias in any category (all means within 1.5pp of 0);
+  per-book +/-90% bands DT +/-8.5pp, NDT +/-14.4pp, IE +/-12.3pp; within-book
+  ordering right in 14/16 books; across-book ordering 90% overall and 99% once
+  the true gap exceeds 20pp. Stage attribution: gate 4.9pp, stage-2 5.3pp,
+  end-to-end 7.1pp TVD -- the two stages now contribute about equally.
+  Dominant remaining error is gate junk leakage (31% of the kept set); the
+  production gate's 5-seed ensemble + threshold calibration (81% precision vs
+  69% here) is the clearest available fix and needs no new method.
 
 - 2026-08-23: **P2 attempt 1 failed, two bugs, both fixed.**
   1. Comma-delimited `--holdout-work` split three real titles that CONTAIN
