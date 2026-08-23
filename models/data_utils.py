@@ -30,16 +30,23 @@ def norm(s):
 
 
 def load_train_pool(holdout_work):
+    """holdout_work may be a single work title or a list/tuple of titles --
+    the 6-fold design (eval/folds.json) holds out 2-3 works at once, so every
+    work still gets an out-of-sample prediction while only 6 pipelines are
+    trained instead of 16."""
     with open(PATHS["sentences_train_csv"], newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     rows = [r for r in rows if r["deploy_tag"] in LABEL2ID and r["deploy_extract"].strip()]
 
     held_out = []
     if holdout_work:
-        held_out = [r for r in rows if r["work"] == holdout_work]
-        rows = [r for r in rows if r["work"] != holdout_work]
-        if not held_out:
-            raise ValueError(f"No rows found for holdout work {holdout_work!r}")
+        works = [holdout_work] if isinstance(holdout_work, str) else list(holdout_work)
+        missing = [w for w in works if not any(r["work"] == w for r in rows)]
+        if missing:
+            raise ValueError(f"No rows found for holdout work(s) {missing!r}")
+        wset = set(works)
+        held_out = [r for r in rows if r["work"] in wset]
+        rows = [r for r in rows if r["work"] not in wset]
     return rows, held_out
 
 
@@ -181,6 +188,57 @@ def gate_proportion_metrics_from_4way_confusion(confusion_matrix, labels):
         if true_label != "junk":
             category_survived[true_label] = row_total - row[junk_idx]
     return _gate_proportion_summary(category_total, category_survived, predicted_junk_total, total_n)
+
+
+def category_mix_metrics(true_tags, pred_tags):
+    """The stage-2 counterpart to gate_proportion_metrics: compares the
+    DT/NDT/IE *mix* a classifier produces against the true mix for the same
+    rows, which is what the blog post reports and what selection between
+    stage-2 candidates should be decided on. Pooled accuracy can look healthy
+    while the mix is skewed (errors that cancel row-for-row do not cancel in a
+    proportion), so this is reported alongside, not instead of, accuracy.
+
+    Junk is excluded from both sides so they share a basis. A full4way stage 2
+    can predict junk; those rows are dropped from the predicted mix exactly as
+    a real deployment would drop them -- which is the entire point of giving
+    stage 2 a junk option, so it is not forced to assign leaked junk to a real
+    category.
+
+    signed_error is (predicted share - true share) per category: its mean
+    across texts is the bias we disclose, its spread is the error bar.
+    """
+    true_counts = {c: 0 for c in NONJUNK_LABELS}
+    pred_counts = {c: 0 for c in NONJUNK_LABELS}
+    for t in true_tags:
+        if t in true_counts:
+            true_counts[t] += 1
+    for p in pred_tags:
+        if p in pred_counts:
+            pred_counts[p] += 1
+    true_n, pred_n = sum(true_counts.values()), sum(pred_counts.values())
+    true_mix = {c: (true_counts[c] / true_n if true_n else None) for c in NONJUNK_LABELS}
+    pred_mix = {c: (pred_counts[c] / pred_n if pred_n else None) for c in NONJUNK_LABELS}
+    if not true_n or not pred_n:
+        return {"true_mix": true_mix, "pred_mix": pred_mix, "signed_error": None,
+                "max_abs_error": None, "tvd": None, "true_n": true_n, "pred_n": pred_n}
+
+    signed = {c: pred_mix[c] - true_mix[c] for c in NONJUNK_LABELS}
+    # Teleology (DT+NDT) vs essentialism (IE) -- the binary the blog post
+    # most likely leads with, and a visibly tighter estimate than the 3-way.
+    tel_true = true_mix["divine_teleology"] + true_mix["non_divine_teleology"]
+    tel_pred = pred_mix["divine_teleology"] + pred_mix["non_divine_teleology"]
+    return {
+        "true_mix": true_mix,
+        "pred_mix": pred_mix,
+        "signed_error": signed,
+        "max_abs_error": max(abs(v) for v in signed.values()),
+        "tvd": 0.5 * sum(abs(v) for v in signed.values()),
+        "teleology_true": tel_true,
+        "teleology_pred": tel_pred,
+        "teleology_signed_error": tel_pred - tel_true,
+        "true_n": true_n,
+        "pred_n": pred_n,
+    }
 
 
 def metrics_from_preds(preds, labels, label_names):

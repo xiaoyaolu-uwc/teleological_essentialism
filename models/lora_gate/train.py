@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config.config import PATHS
 from models.data_utils import (
     load_train_pool, load_golden_eval, stratified_val_split, metrics_from_preds,
-    gate_proportion_metrics,
+    gate_proportion_metrics, category_mix_metrics,
 )
 from models.train_bert import STAGE_LABELS, stage_tag, get_device, evaluate, compute_class_weights
 from models.lora_gate.model import (
@@ -168,6 +168,48 @@ PROMPT_VARIANTS = {
     # Round 1 of the prompt-iteration loop (see eval/lora_prompt_evolution.md).
     # Each variant below tests one independent hypothesis for fixing the
     # NDT-rockets/IE-collapses pattern -- not a phrasing tweak of another.
+    # --- stage-2 prompts (nonjunk_3way / full4way) -------------------------
+    # Same structural recipe as A_structured, which was the winning junk-gate
+    # prompt: numbered steps, explicit category definitions lifted from the
+    # r6a deployment prompt that actually produced deploy_tag, and an explicit
+    # anti-heuristic note (the junk-gate loop's durable finding was that the
+    # model over-reads purpose-language as the only signal, starving IE).
+    "S2_structured": (
+        "Classify this passage from a historical natural-history text by how it "
+        "characterizes an animal or animal part.\n\n"
+        "divine_teleology: the animal (or part) is characterized by a purpose that is "
+        "ordained, designed, or intended by a creator -- the end it serves is presented as "
+        "given by God or by design.\n"
+        "non_divine_teleology: the animal (or part) is characterized by the function or end "
+        "it serves, with no appeal to a designer -- adaptation, ecological role, utility to "
+        "the organism, or a natural end.\n"
+        "internal_essence: the animal (or part) is characterized purely by its internal "
+        "organization, composition, structure, or type -- with no reference to purpose or "
+        "function at all.\n\n"
+        "Note: internal_essence passages use no purpose or function language by definition. "
+        "Absence of purpose language is a positive signal for internal_essence, not a reason "
+        "to hesitate. Do not treat mention of a creator as decisive on its own -- what "
+        "matters is whether the animal's character is grounded in a divinely given end.\n\n"
+        "Passage: {text}"
+    ),
+    "S2_structured_4way": (
+        "Classify this passage from a historical natural-history text by how it "
+        "characterizes an animal or animal part.\n\n"
+        "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a "
+        "specific animal (or animal part) fundamentally is, or what kind it belongs to? If no "
+        "such claim is made -- it merely describes, mentions, or narrates -- it is junk.\n\n"
+        "Step 2: If yes, ground that claim in one of three ways:\n"
+        "- divine_teleology: characterized by a purpose ordained, designed, or intended by a "
+        "creator.\n"
+        "- non_divine_teleology: characterized by the function or end it serves, with no "
+        "appeal to a designer -- adaptation, ecological role, natural utility.\n"
+        "- internal_essence: characterized purely by internal organization, composition, "
+        "structure, or type -- with no reference to purpose or function at all.\n\n"
+        "Note: internal_essence passages use no purpose or function language by definition. "
+        "Absence of purpose language is a positive signal for internal_essence, not evidence "
+        "of junk.\n\n"
+        "Passage: {text}"
+    ),
     "A_structured": (
         "Classify this passage from a historical natural-history text as junk or non_junk.\n\n"
         "Step 1: Does the passage make a DEFINITIONAL or CATEGORICAL claim about what a specific "
@@ -300,6 +342,15 @@ class PromptedTagDataset(Dataset):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-name", required=True)
+    ap.add_argument("--stage", default=STAGE, choices=list(STAGE_LABELS.keys()),
+                     help="Label space to train in. junk_gate: binary {junk, non_junk}. "
+                          "nonjunk_3way: DT/NDT/IE, junk rows dropped from train/held-out/"
+                          "golden entirely. full4way: all four, intended as a stage-2 that "
+                          "can reject junk the gate leaked rather than being forced to "
+                          "assign every leaked row to a real category.")
+    ap.add_argument("--holdout-work", default=HOLDOUT_WORK,
+                     help="Work title to hold out, or a comma-separated list of titles "
+                          "for a merged fold (see eval/folds.json).")
     ap.add_argument("--model-name", default="Qwen/Qwen3-0.6B")
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--batch-size", type=int, default=16)
@@ -342,21 +393,39 @@ def main():
 
     seed_everything(args.seed)
     device = get_device()
+    # Stage and holdout are per-run now (a 6-fold design needs both to vary),
+    # but the module-level STAGE / HOLDOUT_WORK constants stay as the defaults
+    # so eval/ensemble_gate.py and eval/backfill_gate_proportions.py, which
+    # import HOLDOUT_WORK directly, keep working unchanged.
+    stage = args.stage
+    stage_label_list = STAGE_LABELS[stage]
+    stage_label2id = {l: i for i, l in enumerate(stage_label_list)}
+    holdout_works = [w.strip() for w in args.holdout_work.split(",") if w.strip()]
     print(f"[{args.run_name}] device={device} model={args.model_name} "
-          f"holdout={HOLDOUT_WORK!r} stage={STAGE} seed={args.seed} "
+          f"holdout={holdout_works!r} stage={stage} seed={args.seed} "
           f"full_finetune={args.full_finetune}", flush=True)
 
-    train_pool, held_out = load_train_pool(HOLDOUT_WORK)
+    train_pool, held_out = load_train_pool(holdout_works)
+    if stage == "nonjunk_3way":
+        # Junk has no cell in this label space; it must be removed from every
+        # split, not just training, or scoring silently maps it onto a real
+        # category. Deliberate: this stage is only ever run on rows the gate
+        # already passed.
+        n_before = (len(train_pool), len(held_out))
+        train_pool = [r for r in train_pool if r["deploy_tag"] != "junk"]
+        held_out = [r for r in held_out if r["deploy_tag"] != "junk"]
+        print(f"[{args.run_name}] nonjunk_3way: dropped junk rows "
+              f"{n_before} -> ({len(train_pool)}, {len(held_out)})", flush=True)
     train_rows, val_rows = stratified_val_split(train_pool)
     print(f"[{args.run_name}] train={len(train_rows)} val={len(val_rows)} held_out={len(held_out)}", flush=True)
 
     if args.full_finetune:
         model, tokenizer = build_full_finetune_model_and_tokenizer(
-            args.model_name, num_labels=len(STAGE_LABEL_LIST),
+            args.model_name, num_labels=len(stage_label_list),
         )
     else:
         model, tokenizer = build_model_and_tokenizer(
-            args.model_name, num_labels=len(STAGE_LABEL_LIST),
+            args.model_name, num_labels=len(stage_label_list),
             lora_r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
             target_modules=TARGET_MODULE_PRESETS[args.target_modules],
         )
@@ -364,11 +433,11 @@ def main():
     if not args.full_finetune:
         model.print_trainable_parameters()
 
-    train_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in train_rows]
-    class_weights = compute_class_weights(train_labels, len(STAGE_LABEL_LIST)).to(device)
+    train_labels = [stage_label2id[stage_tag(r["deploy_tag"], stage)] for r in train_rows]
+    class_weights = compute_class_weights(train_labels, len(stage_label_list)).to(device)
     print(f"[{args.run_name}] class_weights={class_weights.tolist()}", flush=True)
 
-    val_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in val_rows]
+    val_labels = [stage_label2id[stage_tag(r["deploy_tag"], stage)] for r in val_rows]
     ie_sample_weights = [
         args.ie_weight_multiplier if r["deploy_tag"] == "internal_essence" else 1.0
         for r in train_rows
@@ -380,7 +449,7 @@ def main():
         # Same rationale as train_bert.py's --oversample: draw rare classes
         # (non_junk, here) into more batches per epoch than their raw share
         # would produce under uniform shuffling.
-        cpu_class_weights = compute_class_weights(train_labels, len(STAGE_LABEL_LIST))
+        cpu_class_weights = compute_class_weights(train_labels, len(stage_label_list))
         sample_weights = [cpu_class_weights[l].item() for l in train_labels]
         sampler = WeightedRandomSampler(sample_weights, num_samples=len(train_rows), replacement=True)
         train_loader = DataLoader(train_ds, batch_size=args.batch_size, sampler=sampler)
@@ -460,7 +529,7 @@ def main():
             total_loss += loss.item()
 
         val_preds, val_labels_out = evaluate(model, val_loader, device)
-        val_metrics = metrics_from_preds(val_preds, val_labels_out, STAGE_LABEL_LIST)
+        val_metrics = metrics_from_preds(val_preds, val_labels_out, stage_label_list)
         avg_loss = total_loss / len(train_loader)
         print(f"[{args.run_name}] epoch {epoch}: train_loss={avg_loss:.4f} "
               f"val_acc={val_metrics['accuracy']:.4f} val_macro_f1={val_metrics['macro_f1']:.4f}", flush=True)
@@ -490,16 +559,16 @@ def main():
     print(f"[{args.run_name}] best epoch={best_epoch} val_macro_f1={best_f1:.4f} "
           f"-- reloading best adapter for final eval", flush=True)
     if args.full_finetune:
-        best_model, _ = load_full_finetune_model(ckpt_dir, len(STAGE_LABEL_LIST), device)
+        best_model, _ = load_full_finetune_model(ckpt_dir, len(stage_label_list), device)
     else:
-        best_model, _ = load_trained_model(args.model_name, ckpt_dir, len(STAGE_LABEL_LIST), device)
+        best_model, _ = load_trained_model(args.model_name, ckpt_dir, len(stage_label_list), device)
 
     report = {
         "run_name": args.run_name,
-        "holdout_work": HOLDOUT_WORK,
+        "holdout_work": holdout_works,
         "model": args.model_name,
-        "stage": STAGE,
-        "stage_labels": STAGE_LABEL_LIST,
+        "stage": stage,
+        "stage_labels": stage_label_list,
         "text_column": args.text_column,
         "max_length": args.max_length,
         "lora_r": args.lora_r,
@@ -521,15 +590,14 @@ def main():
         "epoch_log": epoch_log,
     }
 
-    held_labels = [STAGE_LABEL2ID[stage_tag(r["deploy_tag"], STAGE)] for r in held_out]
+    held_labels = [stage_label2id[stage_tag(r["deploy_tag"], stage)] for r in held_out]
     held_ds = PromptedTagDataset([r[args.text_column] for r in held_out], held_labels, tokenizer, args.max_length, args.prompt_variant)
     held_loader = DataLoader(held_ds, batch_size=args.batch_size)
     held_preds, held_labels_out = evaluate(best_model, held_loader, device)
-    held_metrics = metrics_from_preds(held_preds, held_labels_out, STAGE_LABEL_LIST)
+    held_metrics = metrics_from_preds(held_preds, held_labels_out, stage_label_list)
     report["holdout_text_metrics"] = held_metrics
-    print(f"[{args.run_name}] HELD-OUT TEXT ({HOLDOUT_WORK}): "
-          f"acc={held_metrics['accuracy']:.4f} macro_f1={held_metrics['macro_f1']:.4f} "
-          f"non_junk_recall={held_metrics['per_class']['non_junk']['recall']:.4f}", flush=True)
+    print(f"[{args.run_name}] HELD-OUT TEXT ({holdout_works}): "
+          f"acc={held_metrics['accuracy']:.4f} macro_f1={held_metrics['macro_f1']:.4f}", flush=True)
 
     # Category-level view (see LORA_JUNK_GATE_PLAN.md discussion): pooled
     # non_junk recall above hides whether DT/NDT/IE survive the gate at
@@ -537,32 +605,64 @@ def main():
     # category proportions come out right. true_tag is the row's original
     # 4-way label (not the binary one used for training/scoring above).
     held_true_tags = [r["deploy_tag"] for r in held_out]
-    held_gate_preds = [STAGE_LABEL_LIST[p] for p in held_preds]
-    held_prop_metrics = gate_proportion_metrics(held_true_tags, held_gate_preds)
-    report["holdout_proportion_metrics"] = held_prop_metrics
-    print(f"[{args.run_name}] HELD-OUT per-category recall: "
-          f"{ {k: round(v, 3) for k, v in held_prop_metrics['per_category_recall'].items()} } "
-          f"evenness={held_prop_metrics['recall_evenness']:.3f}", flush=True)
+    held_stage_preds = [stage_label_list[p] for p in held_preds]
+    if stage == "junk_gate":
+        held_prop_metrics = gate_proportion_metrics(held_true_tags, held_stage_preds)
+        report["holdout_proportion_metrics"] = held_prop_metrics
+        print(f"[{args.run_name}] HELD-OUT per-category recall: "
+              f"{ {k: round(v, 3) for k, v in held_prop_metrics['per_category_recall'].items()} } "
+              f"evenness={held_prop_metrics['recall_evenness']:.3f}", flush=True)
+    else:
+        # For a stage-2 label space the quantity that matters is the category
+        # MIX it produces vs. the text's true mix -- pooled accuracy can look
+        # fine while the mix is skewed, and the mix is what the blog post
+        # reports. Junk is excluded from both sides so the two are on the same
+        # basis (full4way predicts junk; those rows are dropped from the mix
+        # exactly as a real deployment would drop them).
+        held_mix = category_mix_metrics(held_true_tags, held_stage_preds)
+        report["holdout_mix_metrics"] = held_mix
+        # Per-work as well as pooled: a fold holds out 2-3 works, and the
+        # unit of analysis for the proportion evaluation is the WORK (each
+        # book is one observation of "how far off is the mix"), so the pooled
+        # fold number is not the quantity being estimated.
+        per_work = {}
+        for wname in sorted({r["work"] for r in held_out}):
+            idx = [i for i, r in enumerate(held_out) if r["work"] == wname]
+            per_work[wname] = category_mix_metrics(
+                [held_true_tags[i] for i in idx], [held_stage_preds[i] for i in idx])
+            pw = per_work[wname]
+            if pw["max_abs_error"] is not None:
+                print(f"[{args.run_name}]   {wname[:34]:36s} n={pw['true_n']:4d} "
+                      f"max_abs_err={pw['max_abs_error']:.3f} tvd={pw['tvd']:.3f} "
+                      f"tel_err={pw['teleology_signed_error']:+.3f}", flush=True)
+        report["holdout_per_work_mix"] = per_work
+        print(f"[{args.run_name}] HELD-OUT mix true={ {k: round(v,3) for k,v in held_mix['true_mix'].items()} }",
+              flush=True)
+        print(f"[{args.run_name}] HELD-OUT mix pred={ {k: round(v,3) for k,v in held_mix['pred_mix'].items()} } "
+              f"max_abs_err={held_mix['max_abs_error']:.3f} tvd={held_mix['tvd']:.3f}", flush=True)
 
     golden = load_golden_eval(args.text_column)
-    golden_labels = [STAGE_LABEL2ID[stage_tag(r["tag"], STAGE)] for r in golden]
+    if stage == "nonjunk_3way":
+        golden = [r for r in golden if r["tag"] != "junk"]
+    golden_labels = [stage_label2id[stage_tag(r["tag"], stage)] for r in golden]
     golden_ds = PromptedTagDataset([r["text"] for r in golden], golden_labels, tokenizer, args.max_length, args.prompt_variant)
     golden_loader = DataLoader(golden_ds, batch_size=args.batch_size)
     golden_preds, golden_labels_out = evaluate(best_model, golden_loader, device)
-    golden_metrics = metrics_from_preds(golden_preds, golden_labels_out, STAGE_LABEL_LIST)
+    golden_metrics = metrics_from_preds(golden_preds, golden_labels_out, stage_label_list)
     report["golden_eval_metrics"] = golden_metrics
     print(f"[{args.run_name}] GOLDEN EVAL SET: acc={golden_metrics['accuracy']:.4f} "
-          f"macro_f1={golden_metrics['macro_f1']:.4f} "
-          f"non_junk_recall={golden_metrics['per_class']['non_junk']['recall']:.4f} "
-          f"n={golden_metrics['n']}", flush=True)
+          f"macro_f1={golden_metrics['macro_f1']:.4f} n={golden_metrics['n']}", flush=True)
 
     golden_true_tags = [r["tag"] for r in golden]
-    golden_gate_preds = [STAGE_LABEL_LIST[p] for p in golden_preds]
-    golden_prop_metrics = gate_proportion_metrics(golden_true_tags, golden_gate_preds)
-    report["golden_proportion_metrics"] = golden_prop_metrics
-    print(f"[{args.run_name}] GOLDEN per-category recall: "
-          f"{ {k: round(v, 3) for k, v in golden_prop_metrics['per_category_recall'].items()} } "
-          f"evenness={golden_prop_metrics['recall_evenness']:.3f}", flush=True)
+    golden_stage_preds = [stage_label_list[p] for p in golden_preds]
+    if stage == "junk_gate":
+        golden_prop_metrics = gate_proportion_metrics(golden_true_tags, golden_stage_preds)
+        report["golden_proportion_metrics"] = golden_prop_metrics
+        print(f"[{args.run_name}] GOLDEN per-category recall: "
+              f"{ {k: round(v, 3) for k, v in golden_prop_metrics['per_category_recall'].items()} } "
+              f"evenness={golden_prop_metrics['recall_evenness']:.3f}", flush=True)
+    else:
+        report["golden_mix_metrics"] = category_mix_metrics(golden_true_tags, golden_stage_preds)
 
     with open(results_dir / "metrics.json", "w") as f:
         json.dump(report, f, indent=2)
