@@ -349,8 +349,14 @@ def main():
                           "can reject junk the gate leaked rather than being forced to "
                           "assign every leaked row to a real category.")
     ap.add_argument("--holdout-work", default=HOLDOUT_WORK,
-                     help="Work title to hold out, or a comma-separated list of titles "
-                          "for a merged fold (see eval/folds.json).")
+                     help="A single work title to hold out. For a merged fold use "
+                          "--holdout-fold instead: several work titles contain commas "
+                          "(e.g. 'The History of Creation, Vol. 1'), so a delimited list "
+                          "on the command line is not safe.")
+    ap.add_argument("--holdout-fold", default=None,
+                     help="Fold name from eval/folds.json (e.g. fold0). Takes precedence "
+                          "over --holdout-work. Reading the titles from the file avoids "
+                          "the comma-in-title problem entirely.")
     ap.add_argument("--model-name", default="Qwen/Qwen3-0.6B")
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--batch-size", type=int, default=16)
@@ -400,7 +406,11 @@ def main():
     stage = args.stage
     stage_label_list = STAGE_LABELS[stage]
     stage_label2id = {l: i for i, l in enumerate(stage_label_list)}
-    holdout_works = [w.strip() for w in args.holdout_work.split(",") if w.strip()]
+    if args.holdout_fold:
+        folds_path = PATHS["repo_root"] / "eval" / "folds.json"
+        holdout_works = json.load(open(folds_path))[args.holdout_fold]
+    else:
+        holdout_works = [args.holdout_work]
     print(f"[{args.run_name}] device={device} model={args.model_name} "
           f"holdout={holdout_works!r} stage={stage} seed={args.seed} "
           f"full_finetune={args.full_finetune}", flush=True)

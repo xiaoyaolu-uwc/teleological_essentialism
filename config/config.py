@@ -21,6 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 PATHS = {
+    "repo_root":      REPO_ROOT,
     "data_dir":       REPO_ROOT / "data",
     "clean_texts":    REPO_ROOT / "data" / "texts" / "clean_texts",
     "raw_texts":      REPO_ROOT / "data" / "texts" / "raw_texts",
