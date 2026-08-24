@@ -1,7 +1,7 @@
 openai>=1.0.0
 scikit-learn>=1.3.0
 
-# LoRA junk-gate training/inference (see models/lora_gate/ADOPTED_MODEL.md).
+# LoRA junk-gate training/inference (see models/lora/ADOPTED_MODEL.md).
 # Marlowe trains against torch==2.6.0+cu124; this installs the plain
 # (CPU/MPS) build for local inference -- same package versions otherwise.
 torch==2.6.0
