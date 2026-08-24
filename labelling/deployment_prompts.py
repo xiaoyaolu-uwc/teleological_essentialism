@@ -44,7 +44,7 @@ d_v2 — two targeted fixes for format-caused regressions identified in d_v1:
 # ---------------------------------------------------------------------------
 # Import the r6a system prompt as the classification backbone
 # ---------------------------------------------------------------------------
-from archive.prompt_phase.prompts import PROMPT_VERSIONS as _PV, PASSAGE_TEMPLATE_TEXT_ONLY
+from labelling.prompts import PROMPT_VERSIONS as _PV, PASSAGE_TEMPLATE_TEXT_ONLY
 
 _R6A_SYSTEM = _PV["r6a"]["system"]
 

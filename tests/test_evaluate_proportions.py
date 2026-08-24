@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from evaluation.evaluate_proportions import (
     mix, wilson, variant_labels, per_work_errors, bias_table, within_work_ranking,
+    across_work_ranking, cluster_bootstrap_ci, binned,
 )
 
 DT, NDT, IE, JUNK = "divine_teleology", "non_divine_teleology", "internal_essence", "junk"
@@ -100,3 +101,69 @@ def test_wilson_brackets_the_point_estimate():
 def test_wilson_handles_the_boundary():
     lo, hi = wilson(10, 10)          # normal approximation would give (1, 1)
     assert lo < 1.0 and hi == 1.0
+
+
+# --- the across-book ranking claim -------------------------------------------
+# "ordering two texts is correct 90% of the time, and ~99% once the true gap
+# exceeds 20pp" is the claim the decade chart rests on, so it gets its own
+# coverage rather than riding on the within-book tests.
+
+def _works(spec):
+    """spec: {work: (true_mix, pred_mix)} -> rows that produce exactly those mixes."""
+    out = {}
+    for w, (t, p) in spec.items():
+        rows = []
+        for cat, n in zip((DT, NDT, IE), t):
+            rows += [row(cat, "junk", cat, work=w)] * n      # true side, gate drops them
+        for cat, n in zip((DT, NDT, IE), p):
+            rows += [row(JUNK, "non_junk", cat, work=w)] * n  # predicted side
+        out[w] = rows
+    return out
+
+
+def test_across_work_ranking_scores_every_ordered_pair():
+    # A has more DT than B, less NDT, less IE -- and the model agrees on all three.
+    # No category may be tied between the books, or that pair is (correctly) skipped.
+    pw = per_work_errors(_works({"A": ((8, 1, 1), (8, 1, 1)),
+                                 "B": ((2, 6, 2), (2, 6, 2))}), "end_to_end")
+    r = across_work_ranking(pw)
+    assert r["_pooled_3cat"]["n"] == 3          # 1 pair x 3 untied categories
+    assert r["_pooled_3cat"]["correct"] == 3    # all orderings recovered
+
+
+def test_across_work_ranking_catches_an_inverted_ordering():
+    # A truly has more DT than B, but the model predicts the reverse
+    pw = per_work_errors(_works({"A": ((8, 1, 1), (2, 7, 1)),
+                                 "B": ((2, 7, 1), (8, 1, 1))}), "end_to_end")
+    assert across_work_ranking(pw)["divine_teleology"]["correct"] == 0
+
+
+def test_across_work_ranking_skips_exact_ties():
+    # identical true mixes -> no ordering exists, so nothing should be scored
+    pw = per_work_errors(_works({"A": ((5, 3, 2), (5, 3, 2)),
+                                 "B": ((5, 3, 2), (3, 5, 2))}), "end_to_end")
+    assert across_work_ranking(pw)["_pooled_3cat"]["n"] == 0
+
+
+def test_cluster_bootstrap_is_wider_than_wilson():
+    """The load-bearing correction: pairwise comparisons come from a handful of
+    books and are dependent, so resampling books must give a wider interval
+    than a Wilson interval that assumes 354 independent observations."""
+    spec = {}
+    for i in range(8):                       # 8 books, one of them mis-ordered
+        t = (8 - i, i, 2)
+        p = (i, 8 - i, 2) if i == 3 else t
+        spec[f"W{i}"] = (t, p)
+    pw = per_work_errors(_works(spec), "end_to_end")
+    r = across_work_ranking(pw)
+    w_lo, w_hi = r["_pooled_3cat"]["ci"]
+    c_lo, c_hi = r["_pooled_3cat"]["ci_cluster_bootstrap"]
+    assert c_lo is not None
+    assert (c_hi - c_lo) > (w_hi - w_lo), "cluster bootstrap must not be narrower than Wilson"
+
+
+def test_binned_puts_each_gap_in_the_right_bucket():
+    obs = [(0.01, True), (0.30, True), (0.30, False)]
+    b = {(x["gap_lo"], x["gap_hi"]): x for x in binned(obs)}
+    assert b[(0.0, 0.025)]["n"] == 1 and b[(0.0, 0.025)]["rate"] == 1.0
+    assert b[(0.20, 1.01)]["n"] == 2 and b[(0.20, 1.01)]["rate"] == 0.5

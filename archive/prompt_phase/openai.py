@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from archive.prompt_phase.base import ModelAdapter
-from archive.prompt_phase.prompts import PROMPT_VERSIONS
+from labelling.prompts import PROMPT_VERSIONS
 
 
 class OpenAIModel(ModelAdapter):

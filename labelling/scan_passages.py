@@ -44,7 +44,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.config import PATHS
-from archive.prompt_phase.prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE, PASSAGE_TEMPLATE, VALID_TAGS
+from labelling.prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE, PASSAGE_TEMPLATE, VALID_TAGS
 
 # ---------------------------------------------------------------------------
 # Load .env from repo root

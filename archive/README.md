@@ -9,14 +9,17 @@ the code is and what replaced it.
 
 ## `prompt_phase/`
 
-Building and scoring the LLM labelling prompt (`d_v3`, ~91% against the 49-row
-human golden set), which produced the `deploy_tag` column every later phase
-treats as ground truth. Includes the OpenAI adapters, the prompt libraries, the
-two-layer prompt experiment, and the evaluation harness for all of it.
+The harness that built and scored the LLM labelling prompt `d_v3` (~91% against
+the 49-row human golden set), which produced the `deploy_tag` column every later
+phase treats as ground truth. OpenAI adapters plus the evaluation scripts.
 
-Still relevant because `labelling/` imports these prompts — the labelling step
-genuinely depends on this phase's output. Superseded only in the sense that the
-prompt is now fixed and no longer being iterated.
+The prompts themselves are **not** here — `prompts.py` and
+`deployment_prompts.py` live in `labelling/`, because that step is live and
+should not import from an archive.
+
+Deleted rather than archived: the two-layer prompt experiment (tested,
+underperformed the single-pass prompt at 61.2% vs ~70%, recorded in
+`docs/history/two_layer_evolution.md`) and the unused `bert.py` stub.
 
 ## `bert_phase/`
 
@@ -31,12 +34,12 @@ the cascade hypothesis this project still rests on; its shared helpers were
 extracted to `models/labels.py` and `models/torch_utils.py` so the live path no
 longer imports from it.
 
-## `tests/`
-
-Unit tests for the prompt-phase harness. They test superseded code, so they
-were archived with it rather than deleted.
-
 ## `results/`
 
-Metrics from the prompt and BERT phases. Only `metrics.json` files are tracked;
-the bulk CSV output was always gitignored.
+Kept: `final_prompt_refinement/` and `deployment/` — the iteration that produced
+`d_v3`, i.e. the provenance of the labels everything else is scored against —
+plus the BERT-phase metrics.
+
+Deleted: ~15 MB of superseded prompt-iteration output (`gen4`–`gen7`,
+`single_54`, `single_54mini`, `two_layer`). All of it was untracked local CSV;
+the findings are preserved in the tracked logs under `docs/history/`.

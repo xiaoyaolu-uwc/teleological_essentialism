@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.config import PATHS
 from archive.prompt_phase.openai import OpenAIModel
-from archive.prompt_phase.prompts import PROMPT_VERSIONS
+from labelling.prompts import PROMPT_VERSIONS
 
 
 def load_dotenv():

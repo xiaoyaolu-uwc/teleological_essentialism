@@ -9,7 +9,7 @@ import json
 import os
 
 from archive.prompt_phase.base import ModelAdapter
-from archive.prompt_phase.deployment_prompts import DEPLOYMENT_PROMPT_VERSIONS
+from labelling.deployment_prompts import DEPLOYMENT_PROMPT_VERSIONS
 
 
 class DeploymentModel(ModelAdapter):
