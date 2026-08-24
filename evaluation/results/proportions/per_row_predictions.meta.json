@@ -1,0 +1,13 @@
+{
+  "folds": "eval/folds.json",
+  "gate_prefix": "gate_fold",
+  "s2_prefix": "s2_fold",
+  "s2_stage": "nonjunk_3way",
+  "gate_prompt": "A_structured",
+  "s2_prompt": "S2_structured",
+  "model_name": "Qwen/Qwen3-0.6B",
+  "max_length": 640,
+  "text_column": "text",
+  "gate_threshold": 0.5,
+  "out": "eval/results/proportions/per_row_predictions.csv"
+}

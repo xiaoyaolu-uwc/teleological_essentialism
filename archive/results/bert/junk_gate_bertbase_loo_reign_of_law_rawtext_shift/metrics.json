@@ -1,0 +1,33 @@
+{
+  "checkpoint": "junk_gate_bertbase_loo_reign_of_law",
+  "holdout_work": "The Reign of Law",
+  "stage": "junk_gate",
+  "eval_text_column": "text",
+  "accuracy": 0.7334754797441365,
+  "macro_f1": 0.7173568222469711,
+  "per_class": {
+    "junk": {
+      "recall": 0.76,
+      "precision": 0.8113879003558719
+    },
+    "non_junk": {
+      "recall": 0.6863905325443787,
+      "precision": 0.6170212765957447
+    }
+  },
+  "confusion_matrix": [
+    [
+      228,
+      72
+    ],
+    [
+      53,
+      116
+    ]
+  ],
+  "confusion_matrix_labels": [
+    "junk",
+    "non_junk"
+  ],
+  "n": 469
+}

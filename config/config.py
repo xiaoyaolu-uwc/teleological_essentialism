@@ -32,10 +32,12 @@ PATHS = {
     "sentences_labeled_csv": REPO_ROOT / "data" / "sentences_labeled.csv",
     "sentences_train_csv":   REPO_ROOT / "data" / "sentences_train.csv",
     "bert_checkpoints_dir":  REPO_ROOT / "models" / "checkpoints",
-    "bert_results_dir":      REPO_ROOT / "eval" / "results" / "bert",
-    "bert_cascade_results_dir": REPO_ROOT / "eval" / "results" / "bert_cascade",
+    "bert_results_dir":      REPO_ROOT / "archive" / "results" / "bert",
+    "bert_cascade_results_dir": REPO_ROOT / "archive" / "results" / "bert_cascade",
     "lora_checkpoints_dir":  REPO_ROOT / "models" / "checkpoints" / "lora",
-    "lora_results_dir":      REPO_ROOT / "eval" / "results" / "lora",
+    "proportions_dir":       REPO_ROOT / "evaluation" / "results" / "proportions",
+    "folds_json":            REPO_ROOT / "evaluation" / "folds.json",
+    "lora_results_dir":      REPO_ROOT / "evaluation" / "results" / "lora",
     "env_file":       REPO_ROOT / ".env",
 }
 

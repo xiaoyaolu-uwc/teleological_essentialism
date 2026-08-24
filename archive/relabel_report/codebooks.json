@@ -1,0 +1,197 @@
+{
+  "internal_essence->junk": {
+    "subtypes": [
+      {
+        "name": "descriptive observation",
+        "definition": "The passage merely lists or describes anatomical features without claiming any essence.",
+        "signals": [
+          "descriptive",
+          "observational",
+          "catalog",
+          "specimen",
+          "features"
+        ]
+      },
+      {
+        "name": "comparative analysis",
+        "definition": "The passage compares species or parts but does not generalize to a defining essence.",
+        "signals": [
+          "comparative",
+          "contrast",
+          "differences",
+          "variation",
+          "between"
+        ]
+      },
+      {
+        "name": "no generalization",
+        "definition": "The passage fails to generalize or define a kind, lacking a claim about what animals fundamentally are.",
+        "signals": [
+          "does not generalize",
+          "not a definition",
+          "no essence",
+          "does not define",
+          "not a claim"
+        ]
+      },
+      {
+        "name": "explanatory mechanism",
+        "definition": "The passage explains a mechanism or process but does not define the essence of the animal or part.",
+        "signals": [
+          "mechanism",
+          "explanation",
+          "maintaining",
+          "irritability",
+          "process"
+        ]
+      }
+    ]
+  },
+  "divine_teleology->junk": {
+    "subtypes": [
+      {
+        "name": "divine causation without purpose",
+        "definition": "The passage describes divine creation or causation but does not attribute a specific purpose to the animals.",
+        "signals": [
+          "divine creation",
+          "sequence of emergence",
+          "created by god",
+          "divine causation",
+          "without purpose"
+        ]
+      },
+      {
+        "name": "epistemological argument from design",
+        "definition": "Animal features are cited as evidence for a designer, but no claim is made about the animals\u2019 purpose or nature.",
+        "signals": [
+          "evidence for designer",
+          "design argument",
+          "adaptations prove",
+          "designer evidence",
+          "epistemological"
+        ]
+      },
+      {
+        "name": "animals as occasions for human contemplation",
+        "definition": "Animals are used as examples for moral or spiritual reflection, not as beings defined by purpose or essence.",
+        "signals": [
+          "human contemplation",
+          "spiritual instruction",
+          "moral use",
+          "used as examples",
+          "human reflection"
+        ]
+      },
+      {
+        "name": "lack of explicit animal reference",
+        "definition": "The passage does not name any animal or part and therefore does not provide an ontological characterization.",
+        "signals": [
+          "no explicit animal",
+          "fragment",
+          "no animal named",
+          "no clear ontological",
+          "no animal part"
+        ]
+      }
+    ]
+  },
+  "junk->non_divine_teleology": {
+    "subtypes": [
+      {
+        "name": "functional organ description",
+        "definition": "Describes an animal part by its function or use.",
+        "signals": [
+          "suit for",
+          "adapted to",
+          "propel",
+          "used for",
+          "function of"
+        ]
+      },
+      {
+        "name": "functional/ecological class definition",
+        "definition": "Classifies animals by their ecological role or function.",
+        "signals": [
+          "parasitic",
+          "carnivorous",
+          "herbivorous",
+          "decomposer",
+          "domestic animals"
+        ]
+      },
+      {
+        "name": "behavioral role description",
+        "definition": "Describes animal behavior or role in a functional context.",
+        "signals": [
+          "seeking prey",
+          "bringing it to",
+          "role in",
+          "purposeful",
+          "functionally defined"
+        ]
+      },
+      {
+        "name": "functionally defined class term",
+        "definition": "Uses a class term that defines animals by function.",
+        "signals": [
+          "class term",
+          "functionally defined",
+          "defined by",
+          "named by",
+          "functionally defined class"
+        ]
+      }
+    ]
+  },
+  "non_divine_teleology->junk": {
+    "raw": ""
+  },
+  "internal_essence->non_divine_teleology": {
+    "subtypes": [
+      {
+        "name": "functional description",
+        "definition": "The passage describes an animal part or whole by its function or use rather than its intrinsic essence.",
+        "signals": [
+          "characterizes by function",
+          "serving as",
+          "used for",
+          "function of",
+          "role of"
+        ]
+      },
+      {
+        "name": "behavioral classification",
+        "definition": "The passage categorizes animals based on instinctive habits or natural behaviors.",
+        "signals": [
+          "instinctive habits",
+          "natural mode of life",
+          "behaviors as",
+          "habitual"
+        ]
+      },
+      {
+        "name": "purpose\u2011driven explanation",
+        "definition": "The passage explains an animal part by what it is adapted to do or its intended purpose.",
+        "signals": [
+          "adapted to",
+          "purpose of",
+          "to serve",
+          "to perform"
+        ]
+      },
+      {
+        "name": "structural\u2011functional emphasis",
+        "definition": "The passage notes structural differences but centers on the functional operation of the part.",
+        "signals": [
+          "structural difference",
+          "functionally",
+          "operational",
+          "respiratory operation"
+        ]
+      }
+    ]
+  },
+  "junk->internal_essence": {
+    "raw": ""
+  }
+}

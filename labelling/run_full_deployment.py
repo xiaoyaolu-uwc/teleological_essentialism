@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.config import PATHS
-from models.deployment_prompts import DEPLOYMENT_PROMPT_VERSIONS
+from archive.prompt_phase.deployment_prompts import DEPLOYMENT_PROMPT_VERSIONS
 
 
 def load_dotenv():

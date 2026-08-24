@@ -14,16 +14,23 @@ __pycache__/
 .vscode/
 *.swp
 
-# eval results (generated outputs, not source)
-eval/results/**/*.csv
+# generated outputs, not source -- with two deliberate exceptions below
+evaluation/results/**/*.csv
+archive/results/**/*.csv
+
+# ...except the per-row predictions, which ARE committed: every published
+# confidence claim is recomputed from them, so they must be reproducible
+# without a GPU. See evaluation/README.md.
+!evaluation/results/proportions/per_row_predictions.csv
+!evaluation/results/proportions/per_row_predictions_ens2.csv
 
 # relabel report (generated binaries/temp, not source)
-eval/relabel_report/*.docx
-eval/relabel_report/*.pdf
-eval/relabel_report/*.jpg
-eval/relabel_report/*.tmp
-eval/relabel_report/.~lock.*
-eval/relabel_report/*.csv
+archive/relabel_report/*.docx
+archive/relabel_report/*.pdf
+archive/relabel_report/*.jpg
+archive/relabel_report/*.tmp
+archive/relabel_report/.~lock.*
+archive/relabel_report/*.csv
 
 # BERT checkpoints (weights are large binaries, not source; keep metadata.json)
 models/checkpoints/*/*

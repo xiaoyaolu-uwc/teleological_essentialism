@@ -1,114 +1,118 @@
 # Teleological Essentialism
 
-A computational pipeline for classifying how historical scientific texts conceptualize animals — by divine purpose, naturalized function, internal structure, or mechanism. The end goal is a fine-tuned BERT classifier that can scan a large corpus of historical biology texts and track how explanatory style shifts over time.
+A pipeline that reads historical scientific texts and measures **how they
+explain animals** — by divine purpose, by naturalized function, or by internal
+structure — and tracks how that mix shifts across the 18th and 19th centuries.
 
-For full project context, research questions, and timeline, see `PROJECT_DESC.md`.
-
----
-
-## Repo Structure
-
-```
-config/
-    config.py               shared paths, text metadata, keyword lists
-
-extraction/
-    find_animal_chunks.py   step 1: chunk texts → passages.csv
-    extract_sentences.py    step 2: passages.csv → sentences.csv
-
-labelling/
-    scan_passages.py        step 3: LLM classification of sentences.csv
-    prompts.py              versioned prompt templates
-
-eval/
-    evaluate.py             run a model+prompt against the evaluation set
-    models/                 model adapters (OpenAI, BERT stub)
-    results/                output CSVs: eval_{model}_{prompt_version}.csv
-
-training/                   (future) fine-tune BERT on labelled sentences
-
-data/
-    evaluation_set.csv      49 hand-labelled passages, used to score models
-    sentences.csv           ~12,900 passages with LLM labels
-    passages.csv            ~6,100 raw chunks (step 1 output)
-    promising_passages.csv  non-junk subset extracted from sentences.csv
-    texts/
-        raw_texts/          16 original OCR text files
-        clean_texts/        16 cleaned text files
-```
+Research context, taxonomy, and timeline: [`PROJECT_DESC.md`](PROJECT_DESC.md).
+What the model can and cannot be trusted to do:
+[`docs/PROPORTION_EVAL_RESULTS.md`](docs/PROPORTION_EVAL_RESULTS.md).
 
 ---
 
-## Setup
+## The pipeline
+
+```
+        texts on disk
+             │
+   ┌─────────▼─────────┐
+   │ 1. corpus/        │  chunk texts, keep animal-relevant passages,
+   │                   │  split into sentence-level rows
+   └─────────┬─────────┘
+             │  data/sentences.csv
+   ┌─────────▼─────────┐
+   │ 2. labelling/     │  GPT-5.4 assigns DT / NDT / IE / junk
+   │                   │  → the training + evaluation ground truth
+   └─────────┬─────────┘
+             │  data/sentences_train.csv   (deploy_tag = the label)
+   ┌─────────▼─────────┐
+   │ 3. models/lora/   │  fine-tune two Qwen3-0.6B LoRA adapters per fold:
+   │                   │    junk gate     (junk vs non_junk)
+   │                   │    stage 2       (DT vs NDT vs IE)
+   └─────────┬─────────┘
+             │  models/checkpoints/lora/{gate,s2}_fold*
+   ┌─────────▼─────────┐
+   │ 4. evaluation/    │  run the cascade on held-out books, then turn the
+   │                   │  per-row predictions into proportion + ranking claims
+   └───────────────────┘
+             │  evaluation/results/proportions/
+             ▼
+      docs/PROPORTION_EVAL_RESULTS.md
+```
+
+**Two stages, because junk is 65% of the corpus.** A single 4-way classifier
+lets junk dominate the gradient and smother the distinction that matters. A
+gate strips junk first; stage 2 then separates the three real categories on a
+near-balanced problem. See
+[`docs/history/bert_cascade_evolution.md`](docs/history/bert_cascade_evolution.md).
+
+---
+
+## Layout
+
+| Directory | What lives there |
+|---|---|
+| `config/` | paths, text metadata, animal/thematic keyword lists |
+| `corpus/` | text → passages → sentences; plus BHL scanning-corpus discovery |
+| `labelling/` | the LLM labelling pass that produces ground truth |
+| `models/` | label spaces, data loading, and the LoRA trainer |
+| `evaluation/` | the live evaluation workflow — 5 scripts, nothing else |
+| `scripts/` | SLURM wrappers and job-submission helpers |
+| `docs/` | current plan + results; `docs/history/` for superseded phases |
+| `archive/` | code from finished phases, kept runnable — see `archive/README.md` |
+| `data/` | corpus CSVs and cleaned texts |
+
+### `models/`
+
+- `labels.py` — the label spaces. **Deliberately free of torch**, so the whole
+  analysis path runs on a laptop with no ML stack installed.
+- `data.py` — loading, fold splits, and the scoring functions
+  (`category_mix_metrics`, `gate_proportion_metrics`). Also torch-free.
+- `torch_utils.py` — device, eval loop, class weights, plain dataset.
+- `lora/train.py` — trains any stage (`junk_gate`, `nonjunk_3way`, `full4way`)
+  for any fold. One trainer for both cascade stages.
+
+---
+
+## Running it
+
+**Recompute every published claim** from the committed predictions. No GPU, no
+torch, a few seconds:
 
 ```bash
-pip install -r requirements.txt
-cp .env.example .env
+python3 evaluation/evaluate_proportions.py
 ```
 
-Fill in `.env`:
+**Regenerate predictions** from the trained adapters (needs a GPU):
 
+```bash
+python3 evaluation/run_cascade_folds.py --text-column text --max-length 640
 ```
-OPENAI_API_KEY=sk-...
-SCAN_MODEL=gpt-5.4-mini
-SCAN_BATCH_SIZE=10
+
+**Train one fold** (SLURM):
+
+```bash
+sbatch scripts/train.slurm --run-name s2_fold4 --stage nonjunk_3way --holdout-fold fold4 --prompt-variant S2_structured --lora-r 32 --lora-alpha 64 --epochs 4 --seed 42 --text-column text --max-length 640
+```
+
+**Train all six folds**, both stages, as one parallel burst:
+
+```bash
+bash scripts/submit_folds.sh
 ```
 
 ---
 
-## Data Pipeline
+## Current status
 
-Run steps in order. Each step reads the previous step's output.
+The evaluation is complete. On 16 held-out books there is no meaningful
+proportion bias in any category, and category *ordering* is far more reliable
+than category *magnitude* — which is what the research questions actually
+depend on. Numbers, caveats, and the honest error bars are in
+[`docs/PROPORTION_EVAL_RESULTS.md`](docs/PROPORTION_EVAL_RESULTS.md); the
+method and every locked decision are in
+[`docs/PROPORTION_EVAL_PLAN.md`](docs/PROPORTION_EVAL_PLAN.md).
 
-**Step 1 — Chunk texts into passages**
-```bash
-python3 extraction/find_animal_chunks.py
-```
-Reads the 16 cleaned texts in `data/texts/clean_texts/`, splits into ~300-word chunks, keeps only those mentioning animals. Writes `data/passages.csv` (~6,100 rows).
-
-**Step 2 — Extract sentence-level passages**
-```bash
-python3 extraction/extract_sentences.py
-```
-Reads `data/passages.csv`, refines each chunk to focused sentence-level passages by pulling seed sentences (animal mentions) plus thematically relevant neighbours. Writes `data/sentences.csv` (~12,900 rows).
-
-**Step 3 — LLM classification**
-```bash
-python3 labelling/scan_passages.py --chunks 100 --parallel 5
-python3 labelling/scan_passages.py --report          # check progress
-python3 labelling/scan_passages.py --extract         # write promising_passages.csv
-```
-Reads `data/sentences.csv`, sends passages to the model in parallel batches, writes `scan_tag` and `scan_reasoning` back into the same file in-place. Re-runnable — picks up where it left off.
-
----
-
-## Evaluation Harness
-
-Tests a model and prompt version against the 49 hand-labelled passages in `data/evaluation_set.csv`.
-
-**To run:**
-```bash
-python3 eval/evaluate.py                          # single run
-python3 eval/evaluate.py --runs 5                 # batch of 5 runs
-python3 eval/evaluate.py --run-dir my-experiment  # isolate output in a subdirectory
-```
-
-Use `--run-dir` to keep results from different configurations separate. The subdirectory is created under `eval/results/` if it doesn't exist.
-
-**To switch model or prompt**, edit the two variables at the top of `eval/evaluate.py`:
-```python
-MODEL          = "gpt-5.4-mini"
-PROMPT_VERSION = "v1"
-```
-
-**Output:**
-- `eval/results/[run-dir/]eval_{model}_{prompt_version}.csv` — one row per passage: text, correct label, your rationale, predicted label, model reasoning
-- CLI summary: overall accuracy, per-class precision/recall/F1, confusion matrix
-- On `--runs > 1`: cross-run error analysis written to `eval/results/[run-dir/]analysis/error_analysis.csv`
-
-**To analyse errors across runs:**
-```bash
-python3 eval/analyze_errors.py --run-dir my-experiment   # reads all CSVs in that subdir
-python3 eval/analyze_errors.py                           # reads all CSVs in eval/results/
-python3 eval/analyze_errors.py eval/results/run-a/*.csv  # explicit files
-```
+Known next lever: **stage 2**, not the gate. The gate has been tuned to a
+plateau — threshold calibration and seed ensembling were both tested and are
+documented as negative results.
