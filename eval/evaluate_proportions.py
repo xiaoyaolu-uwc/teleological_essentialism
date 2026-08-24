@@ -45,6 +45,31 @@ SHORT = {"divine_teleology": "DT", "non_divine_teleology": "NDT", "internal_esse
 GAP_BINS = [(0.0, 0.025), (0.025, 0.05), (0.05, 0.10), (0.10, 0.20), (0.20, 1.01)]
 
 
+def cluster_bootstrap_ci(pw, scorer, n_boot=4000, seed=0):
+    """95% CI that resamples BOOKS, not comparisons.
+
+    The pairwise ranking statistics below are computed over 120 book-pairs
+    (354 category comparisons) derived from only 16 books, so each book appears
+    in 15 pairs and the comparisons are strongly dependent. A Wilson interval on
+    354 "observations" assumes independence and is therefore too narrow --
+    it understates the uncertainty. Resampling whole books with replacement
+    respects the dependence and is the honest interval to quote.
+    """
+    import random
+    rng = random.Random(seed)
+    works = sorted(pw)
+    vals = []
+    for _ in range(n_boot):
+        sample = [rng.choice(works) for _ in works]
+        v = scorer(sample)
+        if v is not None:
+            vals.append(v)
+    if not vals:
+        return (None, None)
+    vals.sort()
+    return (vals[int(.025 * len(vals))], vals[int(.975 * len(vals))])
+
+
 def wilson(k, n, z=1.96):
     """95% Wilson score interval for a binomial rate. Used instead of the
     normal approximation because several of these cells have small n or
@@ -126,6 +151,13 @@ def bias_table(pw):
             # Interval for a NEW book, not for the mean -- this is a
             # prediction interval, which is what the blog post needs.
             "predict_90pct": 1.645 * sd,
+            # The band above is parametric (normal). With n=16 and a few large
+            # outliers that assumption is not guaranteed, so the empirical
+            # 90th percentile of |error| is reported alongside it -- where the
+            # empirical figure is larger, the parametric band is optimistic.
+            "empirical_p90_abs": sorted(abs(v) for v in vals)[int(.9 * len(vals))],
+            "coverage_of_parametric_band": sum(
+                1 for v in vals if abs(v - statistics.fmean(vals)) <= 1.645 * sd) / len(vals),
         }
     return out
 
@@ -186,8 +218,28 @@ def across_work_ranking(pw):
         if c != "teleology":
             allobs += obs
     k, n = sum(c_ for _, c_ in allobs), len(allobs)
-    per_cat["_pooled_3cat"] = {"correct": k, "n": n, "rate": k / n if n else None,
-                               "ci": wilson(k, n), "by_gap": binned(allobs)}
+
+    def scorer(sample):
+        ok = tot = 0
+        for x, y in combinations(range(len(sample)), 2):
+            a, b = sample[x], sample[y]
+            if a == b:
+                continue
+            for c in CATS:
+                ta, tb = pw[a]["true_mix"][c], pw[b]["true_mix"][c]
+                if ta == tb:
+                    continue
+                pa, pb = pw[a]["pred_mix"][c], pw[b]["pred_mix"][c]
+                ok += (ta > tb) == (pa > pb)
+                tot += 1
+        return ok / tot if tot else None
+
+    per_cat["_pooled_3cat"] = {
+        "correct": k, "n": n, "rate": k / n if n else None,
+        "ci": wilson(k, n),
+        "ci_cluster_bootstrap": cluster_bootstrap_ci(pw, scorer),
+        "by_gap": binned(allobs),
+    }
     return per_cat
 
 
@@ -248,10 +300,12 @@ def main():
               + f" | {100*v['max_abs_error']:5.1f}")
 
     print("\nBIAS AND ERROR BAR (signed error = predicted - true share)")
-    print(f"{'category':14s} {'bias':>7s} {'sd':>7s} {'meanAbs':>8s} {'worst':>7s} {'+/-90%':>7s}")
+    print(f"{'category':14s} {'bias':>7s} {'sd':>7s} {'meanAbs':>8s} {'worst':>7s} {'+/-90%':>7s} "
+          f"{'emp.p90':>8s} {'cover':>6s}")
     for c, m in e2e["bias"].items():
         print(f"{SHORT.get(c,c):14s} {100*m['mean_signed_error']:+7.1f} {100*m['sd']:7.1f} "
-              f"{100*m['mean_abs_error']:8.1f} {100*m['max_abs_error']:7.1f} {100*m['predict_90pct']:7.1f}")
+              f"{100*m['mean_abs_error']:8.1f} {100*m['max_abs_error']:7.1f} {100*m['predict_90pct']:7.1f} "
+              f"{100*m['empirical_p90_abs']:8.1f} {100*m['coverage_of_parametric_band']:5.0f}%")
 
     print("\nSTAGE ATTRIBUTION (mean TVD across works, percentage points)")
     for v in ["perfect_gate", "perfect_stage2", "end_to_end"]:
@@ -274,6 +328,14 @@ def main():
         m = ar[c]
         print(f"  {SHORT.get(c,c):14s} {m['correct']:4d}/{m['n']:<4d} {100*m['rate']:5.0f}%  "
               f"95% CI {100*m['ci'][0]:.0f}-{100*m['ci'][1]:.0f}%")
+    cb = ar["_pooled_3cat"].get("ci_cluster_bootstrap")
+    if cb and cb[0] is not None:
+        print(f"\n  NOTE: the Wilson intervals above assume the 354 comparisons are")
+        print(f"  independent. They are not -- they come from 16 books, each appearing in")
+        print(f"  15 pairs. Cluster bootstrap over books (the honest interval):")
+        print(f"    pooled 3-category {100*ar['_pooled_3cat']['rate']:.1f}%  "
+              f"95% CI {100*cb[0]:.1f}-{100*cb[1]:.1f}%  (Wilson said "
+              f"{100*ar['_pooled_3cat']['ci'][0]:.1f}-{100*ar['_pooled_3cat']['ci'][1]:.1f}%)")
     print(f"\n  pooled 3-category, by true gap:")
     print(f"  {'true gap':>14s} {'n':>4s} {'correct':>8s} {'rate':>6s}  95% CI")
     for b in ar["_pooled_3cat"]["by_gap"]:

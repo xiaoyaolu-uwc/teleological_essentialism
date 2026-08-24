@@ -12,12 +12,23 @@ Run 2026-08-23. Method and locked decisions: `eval/PROPORTION_EVAL_PLAN.md`.
 Across **16 held-out books (12,823 sentences)**, evaluated by 6-fold
 leave-works-out so every book is scored by a model that never saw it:
 
-| Category | Bias | Spread (sd) | Mean abs. error | Worst book | **±90% for a new book** |
-|---|---|---|---|---|---|
-| Divine teleology | +0.3 pp | 5.2 | 2.6 pp | 17.9 pp | **±8.5 pp** |
-| Non-divine teleology | −1.5 pp | 8.8 | 6.0 pp | 21.6 pp | **±14.4 pp** |
-| Internal essence | +1.2 pp | 7.4 | 5.6 pp | 17.9 pp | **±12.3 pp** |
-| *Teleology (DT+NDT) vs essence* | −1.2 pp | 7.4 | 5.6 pp | 17.9 pp | **±12.3 pp** |
+| Category | Bias | Spread (sd) | Mean abs. error | Worst book | ±90% (parametric) | Empirical p90 of \|err\| |
+|---|---|---|---|---|---|---|
+| Divine teleology | +0.3 pp | 5.2 | 2.6 pp | 17.9 pp | ±8.5 pp | 5.6 pp |
+| Non-divine teleology | −1.5 pp | 8.8 | 6.0 pp | 21.6 pp | ±14.4 pp | **15.7 pp** |
+| Internal essence | +1.2 pp | 7.4 | 5.6 pp | 17.9 pp | ±12.3 pp | **15.1 pp** |
+
+The ±90% column is **parametric** (1.645 × sd, assuming normality). With n=16
+that assumption is not guaranteed, so the empirical 90th percentile of absolute
+error is shown beside it. For NDT and IE the empirical tail is *fatter* than the
+parametric band (15.7 vs 14.4; 15.1 vs 12.3), so **quote the empirical figure
+when being careful**. Measured coverage of the parametric band is 94% / 88% /
+88% against a nominal 90%.
+
+*Note:* "teleology (DT+NDT) vs essentialism" is **not** an independent result —
+among non-junk rows DT+NDT = 1 − IE exactly, so its error is algebraically the
+mirror of IE's (bias −1.2 pp, sd 7.4). An earlier design note predicted the
+binary would be "visibly tighter"; it cannot be.
 
 **There is essentially no systematic bias** — every category's mean signed
 error is within 1.5 pp of zero. The error is noise around the right answer,
@@ -31,7 +42,14 @@ built from it is not being bent in a fixed direction.
   (88%, 95% CI 64–97%). Pairwise, **47 of 48** comparisons are correct (98%).
 - Comparing the *same* category across two books — the operation every
   research question actually performs — is correct in **320 of 354** cases
-  (90%, 95% CI 87–93%).
+  (90%, **95% CI 83.5–95.8%**).
+
+  That interval is a **cluster bootstrap over books**, not a Wilson interval.
+  The 354 comparisons come from only 16 books, each appearing in 15 pairs, so
+  they are strongly dependent; a Wilson interval treats them as independent and
+  returns 87–93%, which is too narrow. An earlier version of this report quoted
+  the Wilson figure. Per-category rows below still show Wilson intervals and
+  are subject to the same caveat.
 
 ## When can two texts be ordered? (the resolving-power result)
 

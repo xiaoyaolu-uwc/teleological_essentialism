@@ -428,7 +428,9 @@
           "mean_abs_error": 0.026136433390828072,
           "max_abs_error": 0.1788334726479056,
           "n_works": 16,
-          "predict_90pct": 0.08548286791953164
+          "predict_90pct": 0.08548286791953164,
+          "empirical_p90_abs": 0.05607204054103322,
+          "coverage_of_parametric_band": 0.9375
         },
         "non_divine_teleology": {
           "mean_signed_error": -0.015096183824954711,
@@ -436,7 +438,9 @@
           "mean_abs_error": 0.06043737307883143,
           "max_abs_error": 0.21620320967505702,
           "n_works": 16,
-          "predict_90pct": 0.14435817056017194
+          "predict_90pct": 0.14435817056017194,
+          "empirical_p90_abs": 0.1568682084146002,
+          "coverage_of_parametric_band": 0.875
         },
         "internal_essence": {
           "mean_signed_error": 0.012159668958842162,
@@ -444,7 +448,9 @@
           "mean_abs_error": 0.05622420810413639,
           "max_abs_error": 0.17875002615445773,
           "n_works": 16,
-          "predict_90pct": 0.12251512196560738
+          "predict_90pct": 0.12251512196560738,
+          "empirical_p90_abs": 0.15136986301369862,
+          "coverage_of_parametric_band": 0.875
         },
         "teleology": {
           "mean_signed_error": -0.012159668958842181,
@@ -452,7 +458,9 @@
           "mean_abs_error": 0.05622420810413642,
           "max_abs_error": 0.1787500261544578,
           "n_works": 16,
-          "predict_90pct": 0.12251512196560742
+          "predict_90pct": 0.12251512196560742,
+          "empirical_p90_abs": 0.1513698630136987,
+          "coverage_of_parametric_band": 0.875
         }
       },
       "mean_tvd": 0.07139900728689795,
@@ -745,6 +753,10 @@
           "ci": [
             0.8687820380106606,
             0.9304542721332689
+          ],
+          "ci_cluster_bootstrap": [
+            0.8348348348348348,
+            0.9579579579579579
           ],
           "by_gap": [
             {
@@ -1222,7 +1234,9 @@
           "mean_abs_error": 0.027978840157108005,
           "max_abs_error": 0.17567567567567566,
           "n_works": 16,
-          "predict_90pct": 0.08445920838772028
+          "predict_90pct": 0.08445920838772028,
+          "empirical_p90_abs": 0.07197943444730076,
+          "coverage_of_parametric_band": 0.9375
         },
         "non_divine_teleology": {
           "mean_signed_error": -0.02637261147203778,
@@ -1230,7 +1244,9 @@
           "mean_abs_error": 0.04302848805305068,
           "max_abs_error": 0.16666666666666674,
           "n_works": 16,
-          "predict_90pct": 0.09639006034931784
+          "predict_90pct": 0.09639006034931784,
+          "empirical_p90_abs": 0.125,
+          "coverage_of_parametric_band": 0.875
         },
         "internal_essence": {
           "mean_signed_error": 0.016416426147070222,
@@ -1238,7 +1254,9 @@
           "mean_abs_error": 0.03542040456247312,
           "max_abs_error": 0.12499999999999994,
           "n_works": 16,
-          "predict_90pct": 0.07372459614301886
+          "predict_90pct": 0.07372459614301886,
+          "empirical_p90_abs": 0.08503401360544216,
+          "coverage_of_parametric_band": 0.9375
         },
         "teleology": {
           "mean_signed_error": -0.016416426147070236,
@@ -1246,7 +1264,9 @@
           "mean_abs_error": 0.035420404562473105,
           "max_abs_error": 0.12500000000000006,
           "n_works": 16,
-          "predict_90pct": 0.07372459614301889
+          "predict_90pct": 0.07372459614301889,
+          "empirical_p90_abs": 0.08503401360544219,
+          "coverage_of_parametric_band": 0.9375
         }
       },
       "mean_tvd": 0.0532138663863159,
@@ -1678,7 +1698,9 @@
           "mean_abs_error": 0.014271782484761615,
           "max_abs_error": 0.0706849315068493,
           "n_works": 16,
-          "predict_90pct": 0.038374748463036235
+          "predict_90pct": 0.038374748463036235,
+          "empirical_p90_abs": 0.039883417702101555,
+          "coverage_of_parametric_band": 0.9375
         },
         "non_divine_teleology": {
           "mean_signed_error": 0.04116578129158316,
@@ -1686,7 +1708,9 @@
           "mean_abs_error": 0.04230211026263347,
           "max_abs_error": 0.21205479452054798,
           "n_works": 16,
-          "predict_90pct": 0.09187781121523945
+          "predict_90pct": 0.09187781121523945,
+          "empirical_p90_abs": 0.11375181422351233,
+          "coverage_of_parametric_band": 0.9375
         },
         "internal_essence": {
           "mean_signed_error": -0.03401310154601692,
@@ -1694,7 +1718,9 @@
           "mean_abs_error": 0.040562734394918525,
           "max_abs_error": 0.1413698630136986,
           "n_works": 16,
-          "predict_90pct": 0.06935859680310126
+          "predict_90pct": 0.06935859680310126,
+          "empirical_p90_abs": 0.08454281567489114,
+          "coverage_of_parametric_band": 0.9375
         },
         "teleology": {
           "mean_signed_error": 0.03401310154601693,
@@ -1702,7 +1728,9 @@
           "mean_abs_error": 0.04056273439491853,
           "max_abs_error": 0.1413698630136987,
           "n_works": 16,
-          "predict_90pct": 0.06935859680310127
+          "predict_90pct": 0.06935859680310127,
+          "empirical_p90_abs": 0.08454281567489108,
+          "coverage_of_parametric_band": 0.9375
         }
       },
       "mean_tvd": 0.048568313571156804,
