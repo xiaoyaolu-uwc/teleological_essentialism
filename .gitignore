@@ -42,3 +42,13 @@ models/checkpoints/*/*
 
 # local Python virtualenv for running inference off-cluster
 .venv/
+
+# scanning corpus: bulk-downloaded raw OCR (~2GB for 2,665 volumes).
+# Regenerable from corpus/bhl/derived/scan_pool.csv via corpus/download_texts.py,
+# so the selection is versioned and the payload is not.
+data/texts/scan_raw/
+data/texts/download.log
+
+# per-run resume manifest; rewritten every few seconds while a download runs.
+# Commit a frozen copy once the run finishes if you want failure provenance.
+data/texts/scan_download_status.csv
