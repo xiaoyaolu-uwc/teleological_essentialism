@@ -165,6 +165,9 @@ SUBFIELD_RULES = [
             "ecology",
             "bionomics",
             "field notes",
+    "field notebook",
+    "field book",
+    "field-book",
         ],
     ),
     (
@@ -293,8 +296,58 @@ def period_for(year: int | None) -> str:
     return "1950_plus"
 
 
-def genre_for(title_text: str, item_text: str) -> str:
+ARCHIVAL_TERMS = [
+    "correspondence",
+    "letters from",
+    "letters to",
+    "letters of",
+    "field notes",
+    "field notebook",
+    "field book",
+    "field-book",
+    "diary of",
+    "diaries",
+    "notebooks",
+    "papers of",
+    "scrapbook",
+]
+
+REPORT_TERMS = [
+    "annual report",
+    "report of",
+    "report on",
+    "report upon",
+    "reports of",
+    "reports on",
+]
+
+# Cheap function-word test. BHL's LanguageCode is per-title and unreliable:
+# French and German titles appear tagged ENG.
+NON_ENGLISH_MARKERS = [
+    " des ", " du ", " sur ", " dans ", " et ", " les ", " une ", " methodique",
+    " der ", " die ", " und ", " ueber ", " zur ", " naturgeschichte",
+    " di ", " della ", " nella ", " sobre ", " historia ",
+]
+
+
+def looks_non_english(title: str) -> bool:
+    padded = f" {title.lower()} "
+    return any(marker in padded for marker in NON_ENGLISH_MARKERS)
+
+
+def genre_for(title_text: str, item_text: str, subjects_text: str = "") -> str:
+    subjects_lower = subjects_text.lower()
+    # Checked before anything else: a "Periodicals" subject heading marks a
+    # serial run, whatever the title looks like.
+    if "periodicals" in subjects_lower:
+        return "serial_or_periodical"
+    if "juvenile" in subjects_lower:
+        return "juvenile"
     text = f"{title_text} {item_text}".lower()
+    # Checked first: archival material and institutional reports are catalogued
+    # as ordinary titles in BHL but are not authored scientific prose.
+    if any(term in text for term in ARCHIVAL_TERMS + REPORT_TERMS):
+        return "archival_or_report"
     if any(term in text for term in ["journal", "proceedings", "transactions", "annals", "bulletin", "memoirs"]):
         return "journal_or_proceedings_volume"
     if any(term in text for term in ["manual", "handbook", "text-book", "textbook", "introduction to"]):
@@ -411,7 +464,8 @@ def build_candidates() -> list[dict[str, str]]:
                 "language": first_present(title_row, ["LanguageCode"]),
                 "year": "" if year is None else str(year),
                 "period": period_for(year),
-                "genre": genre_for(title, item_text),
+                "genre": genre_for(title, item_text, " ".join(subjects)),
+                "non_english_title": "1" if looks_non_english(title) else "0",
                 "subfield": subfield_for(classification_text),
                 "biology_hits": biology_hits,
                 "subjects": "; ".join(subjects),

@@ -1,6 +1,6 @@
 # BHL Biology Metadata Summary
 
-Generated: 2026-08-20 20:46:02
+Generated: 2026-08-26 00:04:30
 Candidate item rows: 44,513
 English candidate item rows: 32,406
 English public-domain candidate item rows: 6,309
@@ -33,11 +33,14 @@ Year range: 1601-2026
 
 | bucket | count |
 |---|---:|
-| catalogue_list | 996 |
-| journal_or_proceedings_volume | 7052 |
-| monograph_or_book | 34947 |
-| popular_or_essay | 512 |
-| textbook_manual | 1006 |
+| archival_or_report | 2281 |
+| catalogue_list | 959 |
+| journal_or_proceedings_volume | 1489 |
+| juvenile | 87 |
+| monograph_or_book | 22645 |
+| popular_or_essay | 498 |
+| serial_or_periodical | 15552 |
+| textbook_manual | 1002 |
 
 ## Subfield Counts
 
@@ -46,9 +49,9 @@ Year range: 1601-2026
 | comparative_anatomy_morphology | 1280 |
 | embryology_development | 790 |
 | evolution_adaptation | 1173 |
-| general_or_unknown | 17398 |
-| natural_history_ecology_behavior | 13045 |
-| paleontology | 4984 |
+| general_or_unknown | 17396 |
+| natural_history_ecology_behavior | 13079 |
+| paleontology | 4952 |
 | physiology | 405 |
 | taxonomy_systematics | 5438 |
 
