@@ -1,0 +1,15 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,1,0.00076,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,2,0.00958,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,3,0.00264,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,4,0.02581,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,5,0.69903,non_junk,non_divine_teleology,0.04625,0.94217,0.01158
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,6,0.00182,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,7,0.00164,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,8,0.00551,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,9,0.0009,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,10,0.00377,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,11,0.06843,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,12,0.00068,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,13,0.00795,junk,,,,
+ia_bim_eighteenth-century_syllabus-of-a-course-of-_moyes-henry_1790,14,0.00317,junk,,,,

@@ -1,0 +1,16 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_paper-doi-10_1098_rstl_1768_0034,1,5e-05,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,2,0.01358,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,3,0.61466,non_junk,non_divine_teleology,0.02048,0.49433,0.4852
+ia_paper-doi-10_1098_rstl_1768_0034,4,0.00681,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,5,0.38794,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,6,0.17405,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,7,0.17405,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,8,0.01225,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,9,0.00638,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,10,0.12189,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,11,0.23177,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,12,0.29213,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,13,0.01118,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,14,0.0002,junk,,,,
+ia_paper-doi-10_1098_rstl_1768_0034,15,0.04605,junk,,,,

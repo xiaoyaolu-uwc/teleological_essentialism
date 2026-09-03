@@ -25,6 +25,7 @@ Usage:
     python3 models/lora/train.py --run-name junk_gate_lora_v1
 """
 import argparse
+import time
 import json
 import sys
 from pathlib import Path
@@ -354,6 +355,9 @@ def main():
                           "--holdout-fold instead: several work titles contain commas "
                           "(e.g. 'The History of Creation, Vol. 1'), so a delimited list "
                           "on the command line is not safe.")
+    ap.add_argument("--no-holdout", action="store_true",
+                     help="Train on all 16 works, leaving no held-out set. For the "
+                          "deployment model only; makes the run unreportable.")
     ap.add_argument("--holdout-fold", default=None,
                      help="Fold name from evaluation/folds.json (e.g. fold0). Takes precedence "
                           "over --holdout-work. Reading the titles from the file avoids "
@@ -361,6 +365,9 @@ def main():
     ap.add_argument("--model-name", default="Qwen/Qwen3-0.6B")
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--batch-size", type=int, default=16)
+    ap.add_argument("--grad-accum-steps", type=int, default=1,
+                     help="Micro-batches per optimizer step. --batch-size x this must "
+                          "equal the batch size the config was selected at (16).")
     ap.add_argument("--lr", type=float, default=2e-4,
                      help="LoRA typically wants a higher LR than full fine-tuning "
                           "(train_bert.py uses 2e-5) since far fewer params are updated")
@@ -407,9 +414,13 @@ def main():
     stage = args.stage
     stage_label_list = STAGE_LABELS[stage]
     stage_label2id = {l: i for i, l in enumerate(stage_label_list)}
-    if args.holdout_fold:
-        folds_path = PATHS["repo_root"] / "eval" / "folds.json"
-        holdout_works = json.load(open(folds_path))[args.holdout_fold]
+    if args.no_holdout:
+        # Deployment training: every anchor work goes into the pool. Only valid
+        # for the model we actually ship, never for anything we report a
+        # number from -- there is no out-of-sample set left to measure on.
+        holdout_works = []
+    elif args.holdout_fold:
+        holdout_works = json.load(open(PATHS["folds_json"]))[args.holdout_fold]
     else:
         holdout_works = [args.holdout_work]
     print(f"[{args.run_name}] device={device} model={args.model_name} "
@@ -525,19 +536,32 @@ def main():
     for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         total_loss = 0.0
-        for batch in train_loader:
+        # Gradient accumulation exists so an A4000 can reproduce a config tuned
+        # on a larger card: micro-batch x accum steps must equal the batch size
+        # the config was selected at. There is no LR scheduler and sample
+        # weights are uniform unless --oversample/--ie-weight-multiplier are
+        # set, so accumulating is equivalent to one large batch.
+        optimizer.zero_grad()
+        epoch_started = time.time()
+        for step, batch in enumerate(train_loader, 1):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
             sample_weight = batch["weight"].to(device)
 
-            optimizer.zero_grad()
             logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
             per_sample_loss = loss_fn(logits, labels)
             loss = (per_sample_loss * sample_weight).sum() / sample_weight.sum()
-            loss.backward()
-            optimizer.step()
+            (loss / args.grad_accum_steps).backward()
+            if step % args.grad_accum_steps == 0 or step == len(train_loader):
+                optimizer.step()
+                optimizer.zero_grad()
             total_loss += loss.item()
+            if step % 200 == 0:
+                per_step = (time.time() - epoch_started) / step
+                remaining = per_step * (len(train_loader) - step)
+                print(f"[{args.run_name}] epoch {epoch} step {step}/{len(train_loader)} "
+                      f"{per_step:.3f}s/step eta_epoch={remaining/60:.1f}min", flush=True)
 
         val_preds, val_labels_out = evaluate(model, val_loader, device)
         val_metrics = metrics_from_preds(val_preds, val_labels_out, stage_label_list)
@@ -601,56 +625,61 @@ def main():
         "epoch_log": epoch_log,
     }
 
-    held_labels = [stage_label2id[stage_tag(r["deploy_tag"], stage)] for r in held_out]
-    held_ds = PromptedTagDataset([r[args.text_column] for r in held_out], held_labels, tokenizer, args.max_length, args.prompt_variant)
-    held_loader = DataLoader(held_ds, batch_size=args.batch_size)
-    held_preds, held_labels_out = evaluate(best_model, held_loader, device)
-    held_metrics = metrics_from_preds(held_preds, held_labels_out, stage_label_list)
-    report["holdout_text_metrics"] = held_metrics
-    print(f"[{args.run_name}] HELD-OUT TEXT ({holdout_works}): "
-          f"acc={held_metrics['accuracy']:.4f} macro_f1={held_metrics['macro_f1']:.4f}", flush=True)
-
-    # Category-level view (see docs/history/LORA_JUNK_GATE_PLAN.md discussion): pooled
-    # non_junk recall above hides whether DT/NDT/IE survive the gate at
-    # equal rates, which is what actually determines whether downstream
-    # category proportions come out right. true_tag is the row's original
-    # 4-way label (not the binary one used for training/scoring above).
-    held_true_tags = [r["deploy_tag"] for r in held_out]
-    held_stage_preds = [stage_label_list[p] for p in held_preds]
-    if stage == "junk_gate":
-        held_prop_metrics = gate_proportion_metrics(held_true_tags, held_stage_preds)
-        report["holdout_proportion_metrics"] = held_prop_metrics
-        print(f"[{args.run_name}] HELD-OUT per-category recall: "
-              f"{ {k: round(v, 3) for k, v in held_prop_metrics['per_category_recall'].items()} } "
-              f"evenness={held_prop_metrics['recall_evenness']:.3f}", flush=True)
+    # --no-holdout leaves nothing to score against; the val split still gates
+    # checkpoint selection, so the run is complete without this block.
+    if not held_out:
+        print(f"[{args.run_name}] no holdout set; skipping held-out evaluation", flush=True)
     else:
-        # For a stage-2 label space the quantity that matters is the category
-        # MIX it produces vs. the text's true mix -- pooled accuracy can look
-        # fine while the mix is skewed, and the mix is what the blog post
-        # reports. Junk is excluded from both sides so the two are on the same
-        # basis (full4way predicts junk; those rows are dropped from the mix
-        # exactly as a real deployment would drop them).
-        held_mix = category_mix_metrics(held_true_tags, held_stage_preds)
-        report["holdout_mix_metrics"] = held_mix
-        # Per-work as well as pooled: a fold holds out 2-3 works, and the
-        # unit of analysis for the proportion evaluation is the WORK (each
-        # book is one observation of "how far off is the mix"), so the pooled
-        # fold number is not the quantity being estimated.
-        per_work = {}
-        for wname in sorted({r["work"] for r in held_out}):
-            idx = [i for i, r in enumerate(held_out) if r["work"] == wname]
-            per_work[wname] = category_mix_metrics(
-                [held_true_tags[i] for i in idx], [held_stage_preds[i] for i in idx])
-            pw = per_work[wname]
-            if pw["max_abs_error"] is not None:
-                print(f"[{args.run_name}]   {wname[:34]:36s} n={pw['true_n']:4d} "
-                      f"max_abs_err={pw['max_abs_error']:.3f} tvd={pw['tvd']:.3f} "
-                      f"tel_err={pw['teleology_signed_error']:+.3f}", flush=True)
-        report["holdout_per_work_mix"] = per_work
-        print(f"[{args.run_name}] HELD-OUT mix true={ {k: round(v,3) for k,v in held_mix['true_mix'].items()} }",
-              flush=True)
-        print(f"[{args.run_name}] HELD-OUT mix pred={ {k: round(v,3) for k,v in held_mix['pred_mix'].items()} } "
-              f"max_abs_err={held_mix['max_abs_error']:.3f} tvd={held_mix['tvd']:.3f}", flush=True)
+        held_labels = [stage_label2id[stage_tag(r["deploy_tag"], stage)] for r in held_out]
+        held_ds = PromptedTagDataset([r[args.text_column] for r in held_out], held_labels, tokenizer, args.max_length, args.prompt_variant)
+        held_loader = DataLoader(held_ds, batch_size=args.batch_size)
+        held_preds, held_labels_out = evaluate(best_model, held_loader, device)
+        held_metrics = metrics_from_preds(held_preds, held_labels_out, stage_label_list)
+        report["holdout_text_metrics"] = held_metrics
+        print(f"[{args.run_name}] HELD-OUT TEXT ({holdout_works}): "
+              f"acc={held_metrics['accuracy']:.4f} macro_f1={held_metrics['macro_f1']:.4f}", flush=True)
+
+        # Category-level view (see docs/history/LORA_JUNK_GATE_PLAN.md discussion): pooled
+        # non_junk recall above hides whether DT/NDT/IE survive the gate at
+        # equal rates, which is what actually determines whether downstream
+        # category proportions come out right. true_tag is the row's original
+        # 4-way label (not the binary one used for training/scoring above).
+        held_true_tags = [r["deploy_tag"] for r in held_out]
+        held_stage_preds = [stage_label_list[p] for p in held_preds]
+        if stage == "junk_gate":
+            held_prop_metrics = gate_proportion_metrics(held_true_tags, held_stage_preds)
+            report["holdout_proportion_metrics"] = held_prop_metrics
+            print(f"[{args.run_name}] HELD-OUT per-category recall: "
+                  f"{ {k: round(v, 3) for k, v in held_prop_metrics['per_category_recall'].items()} } "
+                  f"evenness={held_prop_metrics['recall_evenness']:.3f}", flush=True)
+        else:
+            # For a stage-2 label space the quantity that matters is the category
+            # MIX it produces vs. the text's true mix -- pooled accuracy can look
+            # fine while the mix is skewed, and the mix is what the blog post
+            # reports. Junk is excluded from both sides so the two are on the same
+            # basis (full4way predicts junk; those rows are dropped from the mix
+            # exactly as a real deployment would drop them).
+            held_mix = category_mix_metrics(held_true_tags, held_stage_preds)
+            report["holdout_mix_metrics"] = held_mix
+            # Per-work as well as pooled: a fold holds out 2-3 works, and the
+            # unit of analysis for the proportion evaluation is the WORK (each
+            # book is one observation of "how far off is the mix"), so the pooled
+            # fold number is not the quantity being estimated.
+            per_work = {}
+            for wname in sorted({r["work"] for r in held_out}):
+                idx = [i for i, r in enumerate(held_out) if r["work"] == wname]
+                per_work[wname] = category_mix_metrics(
+                    [held_true_tags[i] for i in idx], [held_stage_preds[i] for i in idx])
+                pw = per_work[wname]
+                if pw["max_abs_error"] is not None:
+                    print(f"[{args.run_name}]   {wname[:34]:36s} n={pw['true_n']:4d} "
+                          f"max_abs_err={pw['max_abs_error']:.3f} tvd={pw['tvd']:.3f} "
+                          f"tel_err={pw['teleology_signed_error']:+.3f}", flush=True)
+            report["holdout_per_work_mix"] = per_work
+            print(f"[{args.run_name}] HELD-OUT mix true={ {k: round(v,3) for k,v in held_mix['true_mix'].items()} }",
+                  flush=True)
+            print(f"[{args.run_name}] HELD-OUT mix pred={ {k: round(v,3) for k,v in held_mix['pred_mix'].items()} } "
+                  f"max_abs_err={held_mix['max_abs_error']:.3f} tvd={held_mix['tvd']:.3f}", flush=True)
 
     golden = load_golden_eval(args.text_column)
     if stage == "nonjunk_3way":

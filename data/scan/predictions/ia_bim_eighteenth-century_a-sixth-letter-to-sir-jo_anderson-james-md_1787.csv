@@ -1,0 +1,8 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,1,0.00369,junk,,,,
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,2,0.18165,junk,,,,
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,3,0.16371,junk,,,,
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,4,0.0028,junk,,,,
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,5,0.65014,non_junk,non_divine_teleology,0.01793,0.9565,0.02557
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,6,0.62686,non_junk,non_divine_teleology,0.01683,0.97317,0.01
+ia_bim_eighteenth-century_a-sixth-letter-to-sir-jo_anderson-james-md_1787,7,0.0042,junk,,,,

@@ -337,17 +337,203 @@ regress to a narrower interval than the one it replaced.
 
 ---
 
-## Not built yet
+# Part 3 — The scan
 
-**Corpus generation** — the scanning corpus this model is meant to be pointed at.
-`corpus/bhl/` holds the first pass at discovering candidate texts in the
-Biodiversity Heritage Library. The decade-by-decade sampling design, the download
-and cleaning pipeline, and the actual scan are still to come. This section will be
-filled in when that lands.
+## The corpus
+
+The scanning corpus was assembled from two sources and is fully reproducible
+from the scripts in `corpus/`.
+
+**Biodiversity Heritage Library.** `corpus/bhl/build_bhl_metadata.py` downloads
+BHL's public metadata tables and filters 324,356 items down to English,
+public-domain, animal-biology candidates. `corpus/bhl/build_scan_pool.py` then
+selects the works actually scanned: monographs, textbooks and essays only,
+1750–1929, dropping serial runs longer than ten volumes.
+
+**Internet Archive.** BHL yields only 44 distinct works for 1750–1799, too few
+to characterise the period that carries the divine-teleology peak.
+`corpus/ia/build_ia_candidates.py` supplements it with 353 further works,
+deduplicated against BHL.
+
+Filtering decisions that materially changed the corpus, all made after
+inspecting samples rather than in the abstract:
+
+| Excluded | Why |
+|---|---|
+| Catalogues, journals, serials | Not authored scientific prose |
+| Archival material and reports | 407 of one ornithologist's private letters were catalogued as individual books |
+| Periodical-tagged items | 14% of the pool, invisible to the genre field |
+| Non-English titles tagged ENG | BHL's language code is per-title and unreliable |
+| Multi-volume runs over 10 | One serial would otherwise carry the weight of 80 books |
+
+**Result: 2,599 volumes downloaded, 2,575 usable, 2,088 distinct works.**
+
+## Cleaning
+
+`corpus/clean_scan_texts.py` applies generic OCR repairs at scale, since the
+anchor texts' hand-tuned cleanup does not generalise to 2,600 volumes:
+
+- long-s as the character `ſ`, substituted directly
+- long-s misread as `f`, repaired only when the token is not a word and the
+  `f`→`s` form is — so "moft" becomes "most" while "Fringilla" is untouched
+- long-s misread as a brace or pipe mid-word
+- hyphenation broken across line ends, rejoined
+- OCR hard-wrapping, unwrapped back into paragraphs
+
+The dictionary used for the `f`→`s` test is the system word list plus word forms
+harvested from the already-cleaned post-1800 anchor texts, because the system
+list holds base forms only and misses most inflections.
+
+Effect is concentrated exactly where it should be. Median dictionary-hit rate:
+
+| Period | Before | After |
+|---|---:|---:|
+| 1750–1799 | 0.845 | **0.917** |
+| 1800–1829 | 0.911 | 0.927 |
+| 1870–1889 | 0.940 | 0.945 |
+| 1910–1929 | 0.944 | 0.950 |
+
+## Sentences and inference
+
+`corpus/build_scan_sentences.py` reuses the anchor pipeline unchanged —
+`chunk_text` and `extract_from_chunk` — so scanned text reaches the model by
+exactly the path the training data did. Output is one CSV per volume, which
+makes the inference run resumable and traceable back to a source book.
+
+A cap of 1,200 rows per volume trims 2.42M rows to **1,709,417**. Sampling rows
+within a book is unbiased for that book's mix, and the resulting sampling error
+is far below the model's own per-book error.
+
+`evaluation/run_scan_inference.py` runs the deployment cascade over those files.
+It differs from the fold script in three ways, all because this is deployment:
+one gate and one stage-2 model trained on all 16 anchor works (`--no-holdout`),
+stage 2 run only on gate survivors, and predictions written to their own files
+so a retrained model cannot destroy the input.
+
+Practical notes for anyone re-running this on a 16GB card:
+
+- Training needs `--batch-size 4 --grad-accum-steps 4` to reproduce the adopted
+  effective batch of 16. There is no LR scheduler and sample weights are
+  uniform, so accumulation is equivalent to one large batch.
+- `models/lora/model.py` pins fp32 explicitly. transformers 5 loads Qwen3 in
+  bf16 by default, which would silently change the numerics of an
+  already-validated config; the fold adapters are fp32.
+- Inference batches by token budget, not row count. The prompt template is a
+  fixed prefix of several hundred tokens and must be counted.
+
+Measured throughput on an A4000: **17.3 rows/s**, about 24 hours for the corpus.
+
+## Results
+
+Figures are pre-rendered in `reports/figures/` and collected in
+`reports/teleological_essentialism_figures.pdf`. Regenerate with:
+
+```bash
+python3 reports/build_work_bucket_counts.py
+python3 reports/make_figures.py
+```
+
+Error bars throughout are a cluster bootstrap over **works** within each period,
+matching the method used in the proportion evaluation. Works, not sentences, are
+the unit of observation.
+
+Headline proportions, all animal sentences:
+
+| Period | Works | DT | NDT | IE |
+|---|---:|---:|---:|---:|
+| 1750–1799 | 326 | 4.2 | 80.8 | 15.2 |
+| 1800–1829 | 125 | 2.2 | 62.1 | 35.7 |
+| 1830–1849 | 158 | 1.6 | 51.3 | 47.1 |
+| 1850–1869 | 169 | 1.6 | 58.9 | 39.4 |
+| 1870–1889 | 349 | 0.6 | 56.0 | 43.4 |
+| 1890–1909 | 499 | 0.4 | 61.9 | 37.7 |
+| 1910–1929 | 343 | 0.3 | 63.8 | 35.9 |
+
+**Divine teleology declines steadily and the decline survives every cut** we
+tried: within each subfield separately, after standardising for subfield
+composition, and restricted to whole-animal sentences. It is the one clear
+trend in the data.
+
+**NDT and IE are largely subfield properties rather than period properties.**
+Ecology sits at 65–81% NDT throughout; palaeontology and embryology at 56–76%
+IE. Standardising the subfield mix flattens the pooled NDT and IE lines to
+roughly 55–63 and 36–44 across the whole period.
+
+Three cuts of the same data are provided because they answer different
+questions:
+
+| File | Contents |
+|---|---|
+| `data/scan/scan_by_work.csv` | one row per work, raw counts |
+| `data/scan/scan_by_period.csv` | aggregated to seven period bins |
+| `data/scan/scan_by_subfield_period.csv` | subfield × period |
+| `data/scan/scan_by_parts.csv` | period × subfield × whole/part |
+| `data/scan/scan_by_work_bucket.csv` | per work, split whole/part — the bootstrap input |
+
+All hold **counts only**. Proportions, rankings and intervals are functions of
+those counts, and a stored derived value is one that can go stale.
+
+---
+
+# Part 4 — How far to trust the scan
+
+## The validation
+
+The proportion evaluation in Part 2 was measured on 16 argumentative treatises.
+The scanning corpus is mostly descriptive natural history, so those numbers do
+not transfer automatically. To check, we sampled **30 sentences per category per
+period bin — 630 rows** — and relabelled them with the same GPT-5.4 `d_v3`
+prompt, which matched the 49-row hand-labelled set on 45 of 49 sentences
+(91.8%; its parent prompt `r6a` averaged 90.6% over five runs).
+
+```bash
+python3 evaluation/validate_scan_with_gpt.py --model openai/gpt-5.4 --batch-size 10
+```
+
+Agreement with the teacher, by the model's own label:
+
+| Model label | n | Agrees | → junk | → other category |
+|---|---:|---:|---:|---:|
+| Divine teleology | 210 | 54.3% | 29.0% | 16.7% |
+| Non-divine teleology | 210 | 54.3% | 37.1% | 8.6% |
+| Internal essence | 210 | 47.1% | 46.2% | 6.7% |
+
+**The accuracy is even across the three categories**, which is the property the
+proportions depend on. A classifier that is equally wrong in every category
+still recovers the right mix; one that is wrong in a lopsided way does not.
+
+Two things worth reading carefully:
+
+- The dominant error is **gate leakage**, not category confusion. Between 29%
+  and 46% of what reaches stage 2 is junk by the teacher's judgement. Confusion
+  *among* the three real categories is minor — NDT→DT is zero.
+- Per-period agreement wobbles between 27% and 67%, but with 30 rows per cell
+  the 95% sampling range is roughly ±18 points, so nearly all of that scatter is
+  noise. Divine teleology in the last two bins is the one value that sits near
+  the edge, and since it is a decline on a base already below 1%, it moves
+  nothing material.
+
+## The open question
+
+Everything above measures agreement with the teacher, not with truth. The
+teacher was checked against 49 hand-labelled sentences from the anchor corpus; these sentences are
+well outside that distribution. **Whether the teacher is still right here has
+not been checked, and that check is the precondition for trusting the trends.**
+
+`data/scan/validation_scored.csv` is built for exactly that review: 630 rows,
+each with the sentence, our model's label, the teacher's label, and the
+teacher's stated reasoning. Reading it is the next step for anyone using these
+results.
+
+Inspection of the sampled sentences shows the failure modes are behavioural
+description ("they roost in the reeds"), practical husbandry ("cattle must be
+young"), and human-use utility ("useful as domestic animals") being read as
+functional explanation. Excluding applied and agricultural works entirely moves
+the 1910–1929 NDT figure by only 3.9 points, so it is not the main cause.
 
 ## Status
 
-The model and its evaluation are complete. The known next lever is **stage 2**,
-not the gate — the gate has been tuned to a plateau, with the negative results to
-prove it. Method and every locked decision:
-[`docs/PROPORTION_EVAL_PLAN.md`](docs/PROPORTION_EVAL_PLAN.md).
+The scan is complete and its outputs are in the repository. What remains is a
+judgement call, not a computation: verify the teacher's labels on the 630-row
+sample, and decide from there whether the proportions carry the weight the
+argument needs.

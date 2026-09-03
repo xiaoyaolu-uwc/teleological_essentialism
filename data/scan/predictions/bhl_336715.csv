@@ -1,0 +1,4 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+bhl_336715,1,0.02881,junk,,,,
+bhl_336715,2,0.00381,junk,,,,
+bhl_336715,3,0.04137,junk,,,,

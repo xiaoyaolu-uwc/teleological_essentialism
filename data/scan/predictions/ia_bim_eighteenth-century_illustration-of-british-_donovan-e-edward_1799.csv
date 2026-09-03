@@ -1,0 +1,12 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,1,0.00548,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,2,8e-05,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,3,0.0023,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,4,0.00102,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,5,0.00147,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,6,0.00747,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,7,0.00072,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,8,0.00737,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,9,0.01443,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,10,0.00015,junk,,,,
+ia_bim_eighteenth-century_illustration-of-british-_donovan-e-edward_1799,11,0.00095,junk,,,,

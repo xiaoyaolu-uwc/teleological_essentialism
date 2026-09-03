@@ -1,0 +1,11 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,1,0.80037,non_junk,non_divine_teleology,0.01107,0.9627,0.02623
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,2,0.00061,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,3,0.12871,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,4,0.00861,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,5,0.00356,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,6,0.6236,non_junk,non_divine_teleology,0.01602,0.8268,0.15718
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,7,0.45551,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,8,0.15353,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,9,0.02486,junk,,,,
+ia_bim_eighteenth-century_a-tenth-letter-to-sir-jo_anderson-james-md_1787,10,0.00526,junk,,,,

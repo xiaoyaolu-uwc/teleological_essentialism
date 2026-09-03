@@ -1,0 +1,11 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,1,0.58122,non_junk,non_divine_teleology,0.10739,0.88651,0.00609
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,2,0.02012,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,3,0.00573,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,4,0.00261,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,5,0.02928,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,6,0.01927,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,7,0.00287,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,8,0.00169,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,9,0.09402,junk,,,,
+ia_bim_eighteenth-century_the-hare-or-hunting-in_1799_0,10,0.00037,junk,,,,

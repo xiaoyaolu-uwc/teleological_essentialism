@@ -1,0 +1,8 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,1,0.00909,junk,,,,
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,2,0.00631,junk,,,,
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,3,0.26216,junk,,,,
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,4,0.01213,junk,,,,
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,5,0.99296,non_junk,non_divine_teleology,0.01627,0.93436,0.04936
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,6,0.78775,non_junk,non_divine_teleology,0.04066,0.93234,0.02699
+ia_bim_eighteenth-century_a-seventh-eighth-and-ni_anderson-james-md_1787,7,0.24875,junk,,,,

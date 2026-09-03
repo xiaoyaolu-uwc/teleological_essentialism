@@ -1,0 +1,9 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,1,0.00786,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,2,0.00326,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,3,0.00017,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,4,0.00252,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,5,0.00385,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,6,0.01355,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,7,0.00797,junk,,,,
+ia_bim_eighteenth-century_heads-of-a-course-of-lec_moyes-henry_1780,8,0.00382,junk,,,,

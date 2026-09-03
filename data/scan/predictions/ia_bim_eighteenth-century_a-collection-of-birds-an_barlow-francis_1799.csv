@@ -1,0 +1,5 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_a-collection-of-birds-an_barlow-francis_1799,1,0.01032,junk,,,,
+ia_bim_eighteenth-century_a-collection-of-birds-an_barlow-francis_1799,2,0.0077,junk,,,,
+ia_bim_eighteenth-century_a-collection-of-birds-an_barlow-francis_1799,3,0.01513,junk,,,,
+ia_bim_eighteenth-century_a-collection-of-birds-an_barlow-francis_1799,4,0.00346,junk,,,,

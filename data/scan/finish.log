@@ -1,0 +1,26 @@
+=== waiting for scan: Wed Aug 26 16:42:19 PDT 2026 ===
+=== scan finished: Thu Aug 27 19:48:54 PDT 2026 ===
+Welcome to vast.ai. If authentication fails, try again after a few seconds, and double check your ssh key.
+Have fun!
+AI agents: READ /etc/vast-agents-guide.md (also linked as ./AGENTS.md) before acting on or describing this instance: it is the operating guide. ('vast-capabilities' shows live state only, not the guide.)
+[2530/2534] 1,684,431 rows, 17.3 rows/s
+[2534/2534] 1,685,318 rows, 17.3 rows/s
+done
+=== pulling predictions ===
+Welcome to vast.ai. If authentication fails, try again after a few seconds, and double check your ssh key.
+Have fun!
+AI agents: READ /etc/vast-agents-guide.md (also linked as ./AGENTS.md) before acting on or describing this instance: it is the operating guide. ('vast-capabilities' shows live state only, not the guide.)
+    2575
+=== building master sheet ===
+2088 works -> /Users/marcus/Desktop/Everything/Projects/teleological_essentialism/data/scan/scan_by_work.csv
+7 periods -> /Users/marcus/Desktop/Everything/Projects/teleological_essentialism/data/scan/scan_by_period.csv
+
+period        works  used  expl rows   share DT/NDT/IE
+1750_1799       377   161     17,816   4.0/80.8/15.2
+1800_1829       128   100     19,681   2.2/62.1/35.7
+1830_1849       163   124     28,211   1.6/51.3/47.1
+1850_1869       178   124     26,448   1.6/58.9/39.4
+1870_1889       363   244     48,600   0.6/56.0/43.4
+1890_1909       524   375     74,407   0.4/61.9/37.7
+1910_1929       355   239     43,561   0.3/63.8/35.9
+=== done: Thu Aug 27 19:49:08 PDT 2026 ===

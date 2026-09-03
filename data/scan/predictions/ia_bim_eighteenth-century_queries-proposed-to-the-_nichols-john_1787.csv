@@ -1,0 +1,11 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,1,0.00082,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,2,0.00016,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,3,0.00171,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,4,0.00232,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,5,0.00098,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,6,0.00173,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,7,0.00319,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,8,0.00522,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,9,0.00433,junk,,,,
+ia_bim_eighteenth-century_queries-proposed-to-the-_nichols-john_1787,10,0.00433,junk,,,,

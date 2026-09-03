@@ -1,0 +1,6 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_paper-doi-10_1098_rstl_1772_0024,1,0.00492,junk,,,,
+ia_paper-doi-10_1098_rstl_1772_0024,2,0.01374,junk,,,,
+ia_paper-doi-10_1098_rstl_1772_0024,3,0.1387,junk,,,,
+ia_paper-doi-10_1098_rstl_1772_0024,4,0.00173,junk,,,,
+ia_paper-doi-10_1098_rstl_1772_0024,5,0.09051,junk,,,,

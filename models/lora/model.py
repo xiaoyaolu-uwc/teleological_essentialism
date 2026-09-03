@@ -22,6 +22,7 @@ Decoder models need two adjustments encoder models (BERT) don't:
     the first pad_token_id in input_ids -- that only gives the right answer
     if padding comes after the real content, i.e. right-padding.
 """
+import torch
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
@@ -50,8 +51,12 @@ def build_model_and_tokenizer(
     # boilerplate first, never the content being classified.
     tokenizer.truncation_side = "left"
 
+    # Pinned explicitly: the fold models were trained under transformers 4.x,
+    # which loaded fp32 regardless of the checkpoint's own dtype. transformers 5
+    # honours the checkpoint (bf16 for Qwen3), which would silently change the
+    # numerics of an already-validated config.
     base_model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels,
+        model_name, num_labels=num_labels, dtype=torch.float32,
     )
     base_model.config.pad_token_id = tokenizer.pad_token_id
 
@@ -108,8 +113,12 @@ def load_trained_model(model_name, ckpt_dir, num_labels, device):
     tokenizer = AutoTokenizer.from_pretrained(ckpt_dir)
     tokenizer.padding_side = "right"
     tokenizer.truncation_side = "left"
+    # Pinned explicitly: the fold models were trained under transformers 4.x,
+    # which loaded fp32 regardless of the checkpoint's own dtype. transformers 5
+    # honours the checkpoint (bf16 for Qwen3), which would silently change the
+    # numerics of an already-validated config.
     base_model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels,
+        model_name, num_labels=num_labels, dtype=torch.float32,
     )
     base_model.config.pad_token_id = tokenizer.pad_token_id
     model = PeftModel.from_pretrained(base_model, ckpt_dir)

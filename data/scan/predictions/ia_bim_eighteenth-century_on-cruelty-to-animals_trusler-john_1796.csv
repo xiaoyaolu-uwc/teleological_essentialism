@@ -1,0 +1,11 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,1,0.15842,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,2,0.09448,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,3,0.00471,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,4,0.01238,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,5,0.00442,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,6,0.01168,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,7,0.05887,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,8,0.07111,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,9,0.00044,junk,,,,
+ia_bim_eighteenth-century_on-cruelty-to-animals_trusler-john_1796,10,0.17812,junk,,,,

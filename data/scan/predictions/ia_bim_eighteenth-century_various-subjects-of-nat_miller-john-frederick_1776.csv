@@ -1,0 +1,4 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_various-subjects-of-nat_miller-john-frederick_1776,1,0.00752,junk,,,,
+ia_bim_eighteenth-century_various-subjects-of-nat_miller-john-frederick_1776,2,0.00232,junk,,,,
+ia_bim_eighteenth-century_various-subjects-of-nat_miller-john-frederick_1776,3,0.00213,junk,,,,

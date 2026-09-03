@@ -1,0 +1,13 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_bim_eighteenth-century_proposals-for-publishing_1790,1,0.00066,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,2,0.00191,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,3,0.01679,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,4,0.00516,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,5,0.00137,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,6,0.00265,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,7,0.00657,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,8,0.02625,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,9,0.00297,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,10,0.00031,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,11,0.00082,junk,,,,
+ia_bim_eighteenth-century_proposals-for-publishing_1790,12,0.00376,junk,,,,

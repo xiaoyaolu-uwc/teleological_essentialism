@@ -52,3 +52,17 @@ data/texts/download.log
 # per-run resume manifest; rewritten every few seconds while a download runs.
 # Commit a frozen copy once the run finishes if you want failure provenance.
 data/texts/scan_download_status.csv
+
+# email drafts: personal correspondence, not project source
+*_email.md
+handoff_email.md
+archive/relabel_report/email_draft.md
+
+# scanning corpus intermediates. Regenerable from the versioned pipeline
+# (scan_pool.csv -> download_texts.py -> clean_scan_texts.py ->
+# build_scan_sentences.py), so the selection is committed and the bulk is not.
+data/texts/scan_clean/
+data/scan/sentences/
+data/texts/local_pipeline.log
+data/texts/push.log
+data/scan/validation_run.log

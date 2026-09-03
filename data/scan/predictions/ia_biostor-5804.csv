@@ -1,0 +1,13 @@
+uid,sent_id,gate_prob_nonjunk,gate_pred,s2_pred,s2_p_divine_teleology,s2_p_non_divine_teleology,s2_p_internal_essence
+ia_biostor-5804,1,0.0,junk,,,,
+ia_biostor-5804,2,0.00022,junk,,,,
+ia_biostor-5804,3,4e-05,junk,,,,
+ia_biostor-5804,4,0.00814,junk,,,,
+ia_biostor-5804,5,0.00019,junk,,,,
+ia_biostor-5804,6,0.02893,junk,,,,
+ia_biostor-5804,7,0.17861,junk,,,,
+ia_biostor-5804,8,0.07064,junk,,,,
+ia_biostor-5804,9,0.02415,junk,,,,
+ia_biostor-5804,10,0.00058,junk,,,,
+ia_biostor-5804,11,0.00054,junk,,,,
+ia_biostor-5804,12,0.28616,junk,,,,
